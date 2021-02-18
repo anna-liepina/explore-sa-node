@@ -62,7 +62,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 ### how to setup a database
 
-* database configuration is located in the file __config/config.js__
+* database configuration is located in the file __src/orm-config.js__
 * to get database schema up to date: `$ npm run sql db:migrate`, you can also create database via ORM `npm run sql db:create`
 * to seed database with 'test' data: `$ npm run sql db:seed:all`
 
@@ -87,8 +87,6 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 * *feature branches* -> get merged into master branch, when they ready and mandatory checks passed
 * *CI execute tests in isolated enviroment*
 
-postgresql
-postgresql-13-postgis-3
 
 ### used environment variables
 
