@@ -46,6 +46,14 @@
     "test": "node -r dotenv/config node_modules/.bin/jest"
   },
   "jest": {
+    "transform": {
+      "^.+\\.js$": "babel-jest",
+      "^.+\\.mjs$": "babel-jest",
+    },
+    "moduleFileExtensions": [
+      "js",
+      "mjs"
+    ],
     "collectCoverageFrom": [
       "src/*/**.js",
       "!src/**?(/*)index.js?(x)"
