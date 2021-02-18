@@ -51,7 +51,7 @@
       "!src/**?(/*)index.js?(x)"
     ],
     "setupFilesAfterEnv": [
-      "<rootDir>src/jest-provision.js"
+      "<rootDir>/src/jest-provision.js"
     ]
   }
 }
