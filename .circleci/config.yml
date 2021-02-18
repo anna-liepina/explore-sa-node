@@ -3,7 +3,7 @@ version: 2
 jobs:
   jest:
     docker:
-      - image: cimg/node:latest
+      - image: cimg/node:15.8.0
     steps:
       - checkout
       - restore_cache:
