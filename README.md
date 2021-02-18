@@ -22,8 +22,8 @@ front-end can be found [here](https://github.com/anna-liepina/react-explorer)
 ### software requirements
 
 if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ and __[docker-compose](https://docs.docker.com/compose/install/)__ are required, and local __[node.js](https://nodejs.org/)__ with __[npm](https://www.npmjs.com/)__ are optional
-* [node.js](https://nodejs.org/) v10+
-* [npm](https://www.npmjs.com/) v6+ or [yarn](https://yarnpkg.com/)
+* [node.js](https://nodejs.org/) v14+
+* [npm](https://www.npmjs.com/) v5+ or [yarn](https://yarnpkg.com/)
 * __optional__ [makefile](https://en.wikipedia.org/wiki/Makefile) comes out of the box in *unix* enviroments
 * __optional__ [docker](https://www.docker.com/) v18.09+
 * __optional__ [sqlite3](https://www.sqlite.org/index.html) v3+ *for 'integration' tests only*
@@ -96,7 +96,7 @@ postgresql-13-postgis-3
 |---            |---            |---        | ---
 | PORT          | 8081          | number    | port on which application will be made available
 | DB_HOSTNAME   | 127.0.0.1     | string    | host on which database can be reached
-| DB_anna-liepina   | root          | string    | database user
+| DB_USERNAME   | root          | string    | database user
 | DB_PASSWORD   | password      | string    | database user's password
 | DB_PORT       | 3306          | number    | port on which database can be reached
 | DB_NAME       | explore       | string    | database [schema] name
@@ -108,8 +108,8 @@ code, migrations, and fixtures are written in a way, that is supports 3 differen
 
 | database      | version   | adapter                                           | main purpose
 |---            |---        | ---                                               | ---
-| MySQL         | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | local development
-| PostgreSQL*    | 11        | [pg](https://www.npmjs.com/package/pg)            | 'heroku' deployment
-| SQLite*        | 4         | [sqlite3](https://www.npmjs.com/package/sqlite3)  | QA Automation & CI pipelines
+| MySQL*        | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | local development
+| PostgreSQL**  | 11        | [pg](https://www.npmjs.com/package/pg)            | 'heroku' deployment
+| SQLite**      | 4         | [sqlite3](https://www.npmjs.com/package/sqlite3)  | QA Automation & CI pipelines
 * if you use MySQL 5.7+ you need make sure it can work with (mysql native password)[https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661].
-* PostrgeSQL and SQLite is partially supported
+** PostrgeSQL and SQLite is partially supported
