@@ -1,6 +1,5 @@
 {
   "name": "node-data-explorer-sa",
-  "type": "module",
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
