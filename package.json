@@ -30,7 +30,7 @@
     "jest": "^26.6.3",
     "nodemon": "^1.19.1",
     "sequelize-cli": "^6.2.0",
-    "sqlite3": "^4.0.9"
+    "sqlite3": "^5.0.0"
   },
   "main": "src/app.js",
   "scripts": {
