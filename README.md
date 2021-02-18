@@ -17,7 +17,7 @@
 
 # 'Explorer' GraphQL back-end
 
-front-end can be found [here](https://github.com/anna-liepina/react-explorer)
+front-end can be found [here](https://github.com/anna-liepina/explore-cwa-react)
 
 ### software requirements
 
