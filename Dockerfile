@@ -1,8 +1,8 @@
-FROM circleci/node:lts-jessie
+FROM alpine
 
-# WORKDIR /www
+WORKDIR /www
 
-# RUN apk add --no-cache nodejs nodejs-npm
+RUN apk add --no-cache nodejs nodejs-npm
 
 COPY package.json package-lock.json ./
 
