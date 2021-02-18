@@ -1,12 +1,12 @@
-[ci.tests-master-badge]: https://circleci.com/gh/anna-liepina/explore-sa/tree/master.svg?style=svg
-[ci.tests-master]: https://circleci.com/gh/anna-liepina/explore-sa/tree/master
-[ci.coverage-master-badge]: https://codecov.io/gh/anna-liepina/explore-sa/branch/master/graph/badge.svg
-[ci.coverage-master]: https://codecov.io/gh/anna-liepina/explore-sa/branch/master
+[ci.tests-master-badge]: https://circleci.com/gh/anna-liepina/explore-sa-node/tree/master.svg?style=svg
+[ci.tests-master]: https://circleci.com/gh/anna-liepina/explore-sa-node/tree/master
+[ci.coverage-master-badge]: https://codecov.io/gh/anna-liepina/explore-sa-node/branch/master/graph/badge.svg
+[ci.coverage-master]: https://codecov.io/gh/anna-liepina/explore-sa-node/branch/master
 
-[ci.tests-heroku-badge]: https://circleci.com/gh/anna-liepina/explore-sa/tree/heroku.svg?style=svg
-[ci.tests-heroku]: https://circleci.com/gh/anna-liepina/explore-sa/tree/heroku
-[ci.coverage-heroku-badge]: https://codecov.io/gh/anna-liepina/explore-sa/branch/heroku/graph/badge.svg
-[ci.coverage-heroku]: https://codecov.io/gh/anna-liepina/explore-sa/branch/heroku
+[ci.tests-heroku-badge]: https://circleci.com/gh/anna-liepina/explore-sa-node/tree/heroku.svg?style=svg
+[ci.tests-heroku]: https://circleci.com/gh/anna-liepina/explore-sa-node/tree/heroku
+[ci.coverage-heroku-badge]: https://codecov.io/gh/anna-liepina/explore-sa-node/branch/heroku/graph/badge.svg
+[ci.coverage-heroku]: https://codecov.io/gh/anna-liepina/explore-sa-node/branch/heroku
 
 |               | master                                                        | heroku
 |---            |---                                                            | ---
