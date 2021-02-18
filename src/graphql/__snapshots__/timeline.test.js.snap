@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GraphQL: Timeline mutation xxx 1`] = `undefined`;
+
+exports[`GraphQL: Timeline query xxx 1`] = `undefined`;
