@@ -1,4 +1,4 @@
-describe('GraphQL: Property', () => {
+describe.skip('GraphQL: Property', () => {
     describe('query', () => {
         it(`xxx`, async () => {
             const { data } = await query({
@@ -21,7 +21,6 @@ describe('GraphQL: Property', () => {
             });
 
             expect(data).toMatchSnapshot();
-            expect(errors).toHaveLength(1);
         });
     });
 });
