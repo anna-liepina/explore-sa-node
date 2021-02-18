@@ -1,12 +1,12 @@
-[ci.tests-master-badge]: https://circleci.com/gh/USERNAME/PROJECTNAME/tree/master.svg?style=svg
-[ci.tests-master]: https://circleci.com/gh/USERNAME/PROJECTNAME/tree/master
-[ci.coverage-master-badge]: https://codecov.io/gh/USERNAME/PROJECTNAME/branch/master/graph/badge.svg
-[ci.coverage-master]: https://codecov.io/gh/USERNAME/PROJECTNAME/branch/master
+[ci.tests-master-badge]: https://circleci.com/gh/anna-liepina/explore-sa/tree/master.svg?style=svg
+[ci.tests-master]: https://circleci.com/gh/anna-liepina/explore-sa/tree/master
+[ci.coverage-master-badge]: https://codecov.io/gh/anna-liepina/explore-sa/branch/master/graph/badge.svg
+[ci.coverage-master]: https://codecov.io/gh/anna-liepina/explore-sa/branch/master
 
-[ci.tests-heroku-badge]: https://circleci.com/gh/USERNAME/PROJECTNAME/tree/heroku.svg?style=svg
-[ci.tests-heroku]: https://circleci.com/gh/USERNAME/PROJECTNAME/tree/heroku
-[ci.coverage-heroku-badge]: https://codecov.io/gh/USERNAME/PROJECTNAME/branch/heroku/graph/badge.svg
-[ci.coverage-heroku]: https://codecov.io/gh/USERNAME/PROJECTNAME/branch/heroku
+[ci.tests-heroku-badge]: https://circleci.com/gh/anna-liepina/explore-sa/tree/heroku.svg?style=svg
+[ci.tests-heroku]: https://circleci.com/gh/anna-liepina/explore-sa/tree/heroku
+[ci.coverage-heroku-badge]: https://codecov.io/gh/anna-liepina/explore-sa/branch/heroku/graph/badge.svg
+[ci.coverage-heroku]: https://codecov.io/gh/anna-liepina/explore-sa/branch/heroku
 
 |               | master                                                        | heroku
 |---            |---                                                            | ---
@@ -17,7 +17,7 @@
 
 # 'Explorer' GraphQL back-end
 
-front-end can be found [here](https://github.com/USERNAME/react-explorer)
+front-end can be found [here](https://github.com/anna-liepina/react-explorer)
 
 ### software requirements
 
@@ -96,7 +96,7 @@ postgresql-13-postgis-3
 |---            |---            |---        | ---
 | PORT          | 8081          | number    | port on which application will be made available
 | DB_HOSTNAME   | 127.0.0.1     | string    | host on which database can be reached
-| DB_USERNAME   | root          | string    | database user
+| DB_anna-liepina   | root          | string    | database user
 | DB_PASSWORD   | password      | string    | database user's password
 | DB_PORT       | 3306          | number    | port on which database can be reached
 | DB_NAME       | explore       | string    | database [schema] name

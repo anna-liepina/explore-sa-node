@@ -1,0 +1,58 @@
+{
+  "name": "node-data-explorer-sa",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {
+    "apollo-server-express": "^2.19.2",
+    "cors": "^2.8.5",
+    "csv-parse": "^4.14.0",
+    "dataloader": "^2.0.0",
+    "dotenv": "^8.2.0",
+    "graphql": "^15.2.0",
+    "lodash": "^4.17.0",
+    "mysql2": "^2.2.0",
+    "p-queue": "^6.6.2",
+    "pg": "^8.5.0",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^6.4.0"
+  },
+  "optionalDependencies": {
+    "sqlite3": "^4.0.9"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.0",
+    "@babel/core": "^7.12.0",
+    "@babel/node": "^7.12.0",
+    "@babel/preset-env": "^7.12.0",
+    "apollo-server-testing": "^2.6.7",
+    "jest": "^24.8.0",
+    "nodemon": "^1.19.1",
+    "sequelize-cli": "^6.2.0"
+  },
+  "main": "src/app.js",
+  "scripts": {
+    "sql": "node -r dotenv/config node_modules/.bin/babel-node ./node_modules/.bin/sequelize --config src/orm-config.js",
+    "parse": "node -r dotenv/config node_modules/.bin/babel-node ./src/parse:properties",
+    "parse:postcodes": "node -r dotenv/config node_modules/.bin/babel-node ./src/parse:postcodes",
+    "parse:postcodes:geo": "node -r dotenv/config node_modules/.bin/babel-node ./src/parse:postcodes:geo",
+    "parse:area": "node -r dotenv/config node_modules/.bin/babel-node ./src/parse:area",
+    "parse:timeline": "node -r dotenv/config node_modules/.bin/babel-node ./src/parse:timeline",
+    "build": "babel --copy-files --out-dir ./build --verbose ./src",
+    "start": "node -r dotenv/config node_modules/.bin/nodemon ./src/app.js",
+    "start:debug": "npm run start -- --inspect=0.0.0.0",
+    "test": "node -r dotenv/config node_modules/.bin/jest"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/*/**.js",
+      "!src/**?(/*)index.js?(x)"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>src/jest-provision.js"
+    ]
+  }
+}
