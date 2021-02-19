@@ -176,7 +176,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
             iter++;
 
             performance.mark(`iter-${iter}`);
-            performance.measure(`diff-${i - 1}->${i}`, `iter-${iter - 1}`, `iter-${iter}`);
+            performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
             if (queue.size > queue.concurrency) {
                 console.log(`
@@ -202,10 +202,12 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
     if (!dryRun) {
         await queue.onEmpty();
+
         console.log(`
 ------------------------------------
 >>> restoring database indexes ...
 ------------------------------------`);
+
         await executeMigrations('up');
     }
 

@@ -18,6 +18,7 @@
 # 'Explorer' GraphQL back-end
 
 front-end can be found [here](https://github.com/anna-liepina/explore-cwa-react)
+[DEMO](http://ec2-35-179-94-68.eu-west-2.compute.amazonaws.com:8081/graphql)
 
 ### software requirements
 
@@ -87,18 +88,21 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 * *feature branches* -> get merged into master branch, when they ready and mandatory checks passed
 * *CI execute tests in isolated enviroment*
 
-
 ### used environment variables
 
-| variable      | default value | used as   | purpose
-|---            |---            |---        | ---
-| PORT          | 8081          | number    | port on which application will be made available
-| DB_HOSTNAME   | 127.0.0.1     | string    | host on which database can be reached
-| DB_USERNAME   | root          | string    | database user
-| DB_PASSWORD   | password      | string    | database user's password
-| DB_PORT       | 3306          | number    | port on which database can be reached
-| DB_NAME       | explore       | string    | database [schema] name
-| DB_DIALECT    | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
+| variable            | default value | used as   | purpose
+|---                  |---            |---        | ---
+| PORT                | 8081          | number    | port on which application will be made available
+| ***                 | ***           | ***       | if replica's config specified then used only for writes
+| DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
+| DB_USERNAME         | root          | string    | database user
+| DB_PASSWORD         | password      | string    | database user's password
+| DB_PORT             | 3306          | number    | port on which database can be reached
+| DB_NAME             | explore       | string    | database [schema] name
+| DB_DIALECT          | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
+| DB_REPLICA_HOSTNAME | 127.0.0.1     | string    | database replica's host for read-only
+| DB_REPLICA_USERNAME | root          | string    | database replica's user for read-only
+| DB_REPLICA_PASSWORD | password      | string    | database replica's user's password for read-only
 
 ### supported databases
 
@@ -109,5 +113,7 @@ code, migrations, and fixtures are written in a way, that is supports 3 differen
 | MySQL*        | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | local development
 | PostgreSQL**  | 11        | [pg](https://www.npmjs.com/package/pg)            | 'heroku' deployment
 | SQLite**      | 4         | [sqlite3](https://www.npmjs.com/package/sqlite3)  | QA Automation & CI pipelines
-* if you use MySQL 5.7+ you need make sure it can work with (mysql native password)[https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661].
-** PostrgeSQL and SQLite is partially supported
+
+* if you use MySQL 5.7+ you need make sure it can work with [mysql native password](https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661)
+
+* PostrgeSQL and SQLite is partially supported

@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`GraphQL: Transaction mutation xxx 1`] = `undefined`;
-
-exports[`GraphQL: Transaction query xxx 1`] = `undefined`;
