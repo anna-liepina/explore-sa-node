@@ -6,6 +6,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 const os = require('os');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
+const executeMigrations = require('./parse:utils')('parse:timeline', orm);
 
 const { performance, PerformanceObserver } = require('perf_hooks');
 
@@ -74,6 +75,9 @@ dialect: \t${process.env.DB_DIALECT}
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
+    if (!dryRun) {
+        await executeMigrations('down');
+    }
     /** fast but INCLUDE empty cycles ~2,978 */
     // SELECT
     //     SUBSTRING_INDEX(postcode, ' ', 1) AS area,
@@ -103,13 +107,8 @@ dialect: \t${process.env.DB_DIALECT}
     const areas = await orm.Property.findAll({
         attributes: [
             [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('postcode'), ' ', 1), 'area'],
-            [orm.Sequelize.fn('COUNT', orm.Sequelize.col('postcode')), 'unique'],
+            // [orm.Sequelize.fn('COUNT', orm.Sequelize.col('postcode')), 'unique'],
         ],
-        where: {
-            postcode: {
-                [orm.Sequelize.Op.ne]: '',
-            },
-        },
         group: ['area'],
         raw: true,
         logging,
@@ -117,8 +116,9 @@ dialect: \t${process.env.DB_DIALECT}
 
     console.log(`
 ------------------------------------
->>> to process areas: ${areas.length.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
+>>> areas to process: ${areas.length.toLocaleString()}
+memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
+------------------------------------`);
 
     let i = 0;
     let iter = 0;
@@ -151,8 +151,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
             attributes: [
                 'date',
                 'price',
-                [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), '-', 1), 'Property.postcode'],
-                // [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), '-', 1), 'postcode'],
+                [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), '-', 1), 'postcode'],
             ],
             where: {
                 guid: {
@@ -164,17 +163,16 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
         });
 
         iter++;
-        console.log(`
-------------------------------------
->>> area ${row.area}, ${iter.toLocaleString()} of ${areas.length.toLocaleString()}
->>> transactions in batch: ${transactions.length.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}
->>> SQL workers used ${queue.pending} of ${queue.concurrency}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
         const t = {};
+
+        console.log(`
+------------------------------------
+>>> proccess area ${row.area}, (${iter.toLocaleString()} of ${areas.length.toLocaleString()})
+>>> --------------------------------`);
+
         for (const transaction of transactions) {
-            const { 'Property.postcode': postcode, price } = transaction;
+            const { postcode, price } = transaction;
 
             const [year, month,] = transaction.date.split('-');
             const date = `${year}-${month}`;
@@ -195,6 +193,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
         }
 
         const series = [];
+        let j = 0;
         for (const date in t) {
             const o = t[date];
             let tCount = 0;
@@ -209,6 +208,15 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
                 const avg = Math.round(price / count);
 
                 series.push({ date, postcode, count, avg });
+
+                if (series.length === limit) {
+                    j += series.length;
+
+                    queue.add(persist(orm.Timeline, [...series]));
+
+                    console.log(`>>> queue ${series.length.toLocaleString()} records`);
+                    series.length = 0;
+                }
             }
 
             const avg = Math.round(tPrice / tCount);
@@ -216,12 +224,20 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
             series.push({ date, postcode: row.area, count: tCount, avg });
         }
 
+        j += series.length;
+        i += j;
+
         const job = queue.add(persist(orm.Timeline, series));
 
-        i += transactions.length;
+        console.log(`>>> queue ${series.length.toLocaleString()} records
+>>> --------------------------------
+>>> queued in total: ${j.toLocaleString()}
+>>> SQL transactions in queue: ${queue.size.toLocaleString()}
+>>> SQL workers used ${queue.pending} of ${queue.concurrency}
+memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
         performance.mark(`iter-${iter}`);
-        performance.measure(`diff-${i - 1}->${i}`, `iter-${iter - 1}`, `iter-${iter}`);
+        performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
         if (queue.size > queue.concurrency) {
             console.log(`
@@ -236,13 +252,23 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 ------------------------------------
 >>> execute remaining SQL queue ...
 ------------------------------------`);
-    await queue.onEmpty();
+
+    if (!dryRun) {
+        await queue.onEmpty();
+
+        console.log(`
+------------------------------------
+>>> restoring database indexes ...
+------------------------------------`);
+
+        await executeMigrations('up');
+    }
 
     console.log(`
 ------------------------------------
-FINAL BATCH
+    FINAL BATCH
 ------------------------------------
->>> >> processed transactions: ${i.toLocaleString()}
+>>> >> recorded ${i.toLocaleString()}
 >>> >> postcode areas proccessed: ${areas.length.toLocaleString()}
 memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ------------------------------------`);

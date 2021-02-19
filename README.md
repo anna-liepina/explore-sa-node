@@ -18,6 +18,7 @@
 # 'Explorer' GraphQL back-end
 
 front-end can be found [here](https://github.com/anna-liepina/explore-cwa-react)
+[DEMO](http://ec2-35-179-94-68.eu-west-2.compute.amazonaws.com:8081/graphql)
 
 ### software requirements
 

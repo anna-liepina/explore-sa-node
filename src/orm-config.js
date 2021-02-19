@@ -42,6 +42,23 @@ const orm = {
     }
 };
 
+if (process.env.DB_REPLICA_HOSTNAME && process.env.DB_REPLICA_USERNAME && process.env.DB_REPLICA_PASSWORD) {
+    orm.replication = {
+        read: [
+            {
+                host: process.env.DB_REPLICA_HOSTNAME,
+                username: process.env.DB_REPLICA_USERNAME,
+                password: process.env.DB_REPLICA_PASSWORD,
+            },
+        ],
+        write: {
+            host: process.env.DB_HOSTNAME,
+            username: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+        },
+    };
+}
+
 const test = {
     ...orm,
     dialect: 'sqlite',
