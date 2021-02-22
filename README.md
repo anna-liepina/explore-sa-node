@@ -91,15 +91,21 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 ### used environment variables
 
-| variable      | default value | used as   | purpose
-|---            |---            |---        | ---
-| PORT          | 8081          | number    | port on which application will be made available
-| DB_HOSTNAME   | 127.0.0.1     | string    | host on which database can be reached
-| DB_USERNAME   | root          | string    | database user
-| DB_PASSWORD   | password      | string    | database user's password
-| DB_PORT       | 3306          | number    | port on which database can be reached
-| DB_NAME       | explore       | string    | database [schema] name
-| DB_DIALECT    | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
+| variable            | default value | used as   | purpose
+|---                  |---            |---        | ---
+| PORT                | 8081          | number    | port on which application will be made available
+| SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/server.key`
+| SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/server.key`
+| ***                 | ***           | ***       | if replica's config specified then used only for writes
+| DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
+| DB_USERNAME         | root          | string    | database user
+| DB_PASSWORD         | password      | string    | database user's password
+| DB_PORT             | 3306          | number    | port on which database can be reached
+| DB_NAME             | explore       | string    | database [schema] name
+| DB_DIALECT          | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
+| DB_REPLICA_HOSTNAME | 127.0.0.1     | string    | database replica's host for read-only
+| DB_REPLICA_USERNAME | root          | string    | database replica's user for read-only
+| DB_REPLICA_PASSWORD | password      | string    | database replica's user's password for read-only
 
 ### supported databases
 

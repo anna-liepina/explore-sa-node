@@ -32,7 +32,13 @@ const server = new ApolloServer({
     },
 })
 
-const app = express();
+const sslOptions = {};
+if (process.env.SSL_KEY && process.env.SSL_CERT) {
+    sslOptions.key = fs.readFileSync(process.env.SSL_KEY);
+    sslOptions.cert = fs.readFileSync(process.env.SSL_CERT);
+}
+
+const app = express(sslOptions);
 app.use(cors({
     origin: "*",
     methods: "POST",
