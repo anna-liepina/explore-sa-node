@@ -13,12 +13,11 @@
 | __tests__     | [![tests][ci.tests-master-badge]][ci.tests-master]            | [![tests][ci.tests-heroku-badge]][ci.tests-heroku]
 | __coverage__  | [![coverage][ci.coverage-master-badge]][ci.coverage-master]   | [![coverage][ci.coverage-heroku-badge]][ci.coverage-heroku]
 
-##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS! [DEMO](https://sa-explorer.herokuapp.com/)
+##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS!
 
 # 'Explorer' GraphQL back-end
 
-front-end can be found [here](https://github.com/anna-liepina/explore-cwa-react)
-[DEMO](http://ec2-35-179-94-68.eu-west-2.compute.amazonaws.com:8081/graphql)
+live [DEMO](https://ec2-35-179-94-68.eu-west-2.compute.amazonaws.com/graphql), and front-end repository can be found [here](https://github.com/anna-liepina/explore-cwa-react)
 
 ### software requirements
 
