@@ -3,9 +3,14 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
+const fs = require('fs');
 const os = require('os');
+const csv = require('csv-parse');
+const path = require('path');
+const yargs = require('yargs');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
+const executeMigrations = require('./parse:utils')('parse:timeline', orm);
 
 const { performance, PerformanceObserver } = require('perf_hooks');
 
@@ -18,31 +23,60 @@ const perfObserver = new PerformanceObserver(
             });
     }
 )
+const argv = yargs
+    .command('--file', 'absolute path to csv file to parse')
+    .option('limit', {
+        type: 'number',
+        description: 'amount of records in one bulk SQL qeuery',
+        default: 10000,
+    })
+    .option('sql', {
+        type: 'boolean',
+        description: 'print out SQL queries',
+    })
+    .option('dry', {
+        type: 'boolean',
+        description: 'dry run - do not affect a database',
+    })
+    .option('update', {
+        type: 'boolean',
+        description: 'flush update [do not drop/restore indexes, useful with small csv files]',
+    })
+    .help()
+    .argv;
 
 perfObserver.observe({ entryTypes: ['measure'], buffer: true });
 
-const defaultLimit = 10000;
-const limit = parseInt(process.env.LIMIT, 10) || defaultLimit;
-const logging = process.env.LOGGING ? console.log : false;
-const dryRun = !!process.env.DRY;
+const { file, sql: logging, dry: dryRun, limit, update } = argv;
 
 console.log(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
 
-env. variables:
-name\t| default\t| current
-LIMIT\t| ${defaultLimit}\t\t| ${limit}
-LOGGING\t| ${false}\t\t| ${!!logging}
-DRY\t| ${false}\t\t| ${!!dryRun}
+name\t\tdescription
+--file\t\tabsolute path to csv file to parse
+--limit\t\tamount of records in one bulk SQL qeuery
+--sql\t\tprint out SQL queries
+--dry\t\tdry run do not execute SQL
+--update\tflush update [do not drop/restore indexes, useful with small csv files]
+
 --------------------------------------------------
 database connection info:
 host: \t\t${process.env.DB_HOSTNAME}
 port: \t\t${process.env.DB_PORT}
 database: \t${process.env.DB_NAME}
 dialect: \t${process.env.DB_DIALECT}
+
 --------------------------------------------------
+
+file to parse: ${file}
 `);
+
+if (!file) {
+    console.log(`>>> NO FILE TO PARSE`);
+
+    process.exit(0);
+}
 
 (async () => {
     performance.mark('init');
@@ -74,6 +108,9 @@ dialect: \t${process.env.DB_DIALECT}
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
+    if (!dryRun) {
+        await executeMigrations('down');
+    }
     /** fast but INCLUDE empty cycles ~2,978 */
     // SELECT
     //     SUBSTRING_INDEX(postcode, ' ', 1) AS area,
@@ -103,13 +140,8 @@ dialect: \t${process.env.DB_DIALECT}
     const areas = await orm.Property.findAll({
         attributes: [
             [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('postcode'), ' ', 1), 'area'],
-            [orm.Sequelize.fn('COUNT', orm.Sequelize.col('postcode')), 'unique'],
+            // [orm.Sequelize.fn('COUNT', orm.Sequelize.col('postcode')), 'unique'],
         ],
-        where: {
-            postcode: {
-                [orm.Sequelize.Op.ne]: '',
-            },
-        },
         group: ['area'],
         raw: true,
         logging,
@@ -117,8 +149,9 @@ dialect: \t${process.env.DB_DIALECT}
 
     console.log(`
 ------------------------------------
->>> to process areas: ${areas.length.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
+>>> areas to process: ${areas.length.toLocaleString()}
+memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
+------------------------------------`);
 
     let i = 0;
     let iter = 0;
@@ -151,8 +184,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
             attributes: [
                 'date',
                 'price',
-                [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), '-', 1), 'Property.postcode'],
-                // [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), '-', 1), 'postcode'],
+                [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), '-', 1), 'postcode'],
             ],
             where: {
                 guid: {
@@ -164,17 +196,16 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
         });
 
         iter++;
-        console.log(`
-------------------------------------
->>> area ${row.area}, ${iter.toLocaleString()} of ${areas.length.toLocaleString()}
->>> transactions in batch: ${transactions.length.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}
->>> SQL workers used ${queue.pending} of ${queue.concurrency}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
         const t = {};
+
+        console.log(`
+------------------------------------
+>>> proccess area ${row.area}, (${iter.toLocaleString()} of ${areas.length.toLocaleString()})
+>>> --------------------------------`);
+
         for (const transaction of transactions) {
-            const { 'Property.postcode': postcode, price } = transaction;
+            const { postcode, price } = transaction;
 
             const [year, month,] = transaction.date.split('-');
             const date = `${year}-${month}`;
@@ -195,6 +226,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
         }
 
         const series = [];
+        let j = 0;
         for (const date in t) {
             const o = t[date];
             let tCount = 0;
@@ -209,6 +241,15 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
                 const avg = Math.round(price / count);
 
                 series.push({ date, postcode, count, avg });
+
+                if (series.length === limit) {
+                    j += series.length;
+
+                    queue.add(persist(orm.Timeline, [...series]));
+
+                    console.log(`>>> queue ${series.length.toLocaleString()} records`);
+                    series.length = 0;
+                }
             }
 
             const avg = Math.round(tPrice / tCount);
@@ -216,12 +257,20 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
             series.push({ date, postcode: row.area, count: tCount, avg });
         }
 
+        j += series.length;
+        i += j;
+
         const job = queue.add(persist(orm.Timeline, series));
 
-        i += transactions.length;
+        console.log(`>>> queue ${series.length.toLocaleString()} records
+>>> --------------------------------
+>>> queued in total: ${j.toLocaleString()}
+>>> SQL transactions in queue: ${queue.size.toLocaleString()}
+>>> SQL workers used ${queue.pending} of ${queue.concurrency}
+memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
         performance.mark(`iter-${iter}`);
-        performance.measure(`diff-${i - 1}->${i}`, `iter-${iter - 1}`, `iter-${iter}`);
+        performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
         if (queue.size > queue.concurrency) {
             console.log(`
@@ -236,13 +285,23 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 ------------------------------------
 >>> execute remaining SQL queue ...
 ------------------------------------`);
-    await queue.onEmpty();
+
+    if (!dryRun) {
+        await queue.onEmpty();
+
+        console.log(`
+------------------------------------
+>>> restoring database indexes ...
+------------------------------------`);
+
+        await executeMigrations('up');
+    }
 
     console.log(`
 ------------------------------------
-FINAL BATCH
+    FINAL BATCH
 ------------------------------------
->>> >> processed transactions: ${i.toLocaleString()}
+>>> >> recorded ${i.toLocaleString()}
 >>> >> postcode areas proccessed: ${areas.length.toLocaleString()}
 memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ------------------------------------`);

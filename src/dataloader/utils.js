@@ -61,13 +61,3 @@ export const processSQLResult = (keys, key, values, aggregateInArray) => {
 
     return keys.map((v) => acc[v] || null);
 }
-
-/**
- * [
-     {
-         postcode: 'E15 4GH',
-         lat
-         lng..
-     }
- * ]
- */

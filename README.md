@@ -13,11 +13,11 @@
 | __tests__     | [![tests][ci.tests-master-badge]][ci.tests-master]            | [![tests][ci.tests-heroku-badge]][ci.tests-heroku]
 | __coverage__  | [![coverage][ci.coverage-master-badge]][ci.coverage-master]   | [![coverage][ci.coverage-heroku-badge]][ci.coverage-heroku]
 
-##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS! [DEMO](https://sa-explorer.herokuapp.com/)
+##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS!
 
 # 'Explorer' GraphQL back-end
 
-front-end can be found [here](https://github.com/anna-liepina/react-explorer)
+live [DEMO](https://ec2-35-179-94-68.eu-west-2.compute.amazonaws.com/graphql), and front-end repository can be found [here](https://github.com/anna-liepina/explore-cwa-react)
 
 ### software requirements
 
@@ -62,7 +62,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 ### how to setup a database
 
-* database configuration is located in the file __config/config.js__
+* database configuration is located in the file __src/orm-config.js__
 * to get database schema up to date: `$ npm run sql db:migrate`, you can also create database via ORM `npm run sql db:create`
 * to seed database with 'test' data: `$ npm run sql db:seed:all`
 
@@ -82,25 +82,28 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 ### gitflow
 
-* *heroku* -> current __production__, contains *heroku specific changes*, trigger deploy on heroku on *every push*
+* *heroku* -> current __production__, contains *production specific changes*, trigger production deploment on *every push*
 * *master* -> most upto date __production ready__, all pull requests in to this branch got mandatory check 'ci/circleci: jest'
 * *feature branches* -> get merged into master branch, when they ready and mandatory checks passed
 * *CI execute tests in isolated enviroment*
 
-postgresql
-postgresql-13-postgis-3
-
 ### used environment variables
 
-| variable      | default value | used as   | purpose
-|---            |---            |---        | ---
-| PORT          | 8081          | number    | port on which application will be made available
-| DB_HOSTNAME   | 127.0.0.1     | string    | host on which database can be reached
-| DB_USERNAME   | root          | string    | database user
-| DB_PASSWORD   | password      | string    | database user's password
-| DB_PORT       | 3306          | number    | port on which database can be reached
-| DB_NAME       | explore       | string    | database [schema] name
-| DB_DIALECT    | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
+| variable            | default value | used as   | purpose
+|---                  |---            |---        | ---
+| PORT                | 8081          | number    | port on which application will be made available
+| SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/server.key`
+| SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/server.key`
+| ***                 | ***           | ***       | if replica's config specified then used only for writes
+| DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
+| DB_USERNAME         | root          | string    | database user
+| DB_PASSWORD         | password      | string    | database user's password
+| DB_PORT             | 3306          | number    | port on which database can be reached
+| DB_NAME             | explore       | string    | database [schema] name
+| DB_DIALECT          | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
+| DB_REPLICA_HOSTNAME | 127.0.0.1     | string    | database replica's host for read-only
+| DB_REPLICA_USERNAME | root          | string    | database replica's user for read-only
+| DB_REPLICA_PASSWORD | password      | string    | database replica's user's password for read-only
 
 ### supported databases
 
@@ -111,5 +114,7 @@ code, migrations, and fixtures are written in a way, that is supports 3 differen
 | MySQL*        | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | local development
 | PostgreSQL**  | 11        | [pg](https://www.npmjs.com/package/pg)            | 'heroku' deployment
 | SQLite**      | 4         | [sqlite3](https://www.npmjs.com/package/sqlite3)  | QA Automation & CI pipelines
-* if you use MySQL 5.7+ you need make sure it can work with (mysql native password)[https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661].
-** PostrgeSQL and SQLite is partially supported
+
+* if you use MySQL 5.7+ you need make sure it can work with [mysql native password](https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661)
+
+* PostrgeSQL and SQLite is partially supported
