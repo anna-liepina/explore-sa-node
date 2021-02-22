@@ -88,7 +88,6 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 * *feature branches* -> get merged into master branch, when they ready and mandatory checks passed
 * *CI execute tests in isolated enviroment*
 
-
 ### used environment variables
 
 | variable            | default value | used as   | purpose
@@ -116,5 +115,7 @@ code, migrations, and fixtures are written in a way, that is supports 3 differen
 | MySQL*        | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | local development
 | PostgreSQL**  | 11        | [pg](https://www.npmjs.com/package/pg)            | 'heroku' deployment
 | SQLite**      | 4         | [sqlite3](https://www.npmjs.com/package/sqlite3)  | QA Automation & CI pipelines
-* if you use MySQL 5.7+ you need make sure it can work with (mysql native password)[https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661].
-** PostrgeSQL and SQLite is partially supported
+
+* if you use MySQL 5.7+ you need make sure it can work with [mysql native password](https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661)
+
+* PostrgeSQL and SQLite is partially supported
