@@ -3,7 +3,11 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
+const fs = require('fs');
 const os = require('os');
+const csv = require('csv-parse');
+const path = require('path');
+const yargs = require('yargs');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
 const executeMigrations = require('./parse:utils')('parse:timeline', orm);
@@ -19,31 +23,61 @@ const perfObserver = new PerformanceObserver(
             });
     }
 )
+const argv = yargs
+    .command('--file', 'absolute path to csv file to parse')
+    .option('limit', {
+        type: 'number',
+        description: 'amount of records in one bulk SQL qeuery',
+        default: 10000,
+    })
+    .option('sql', {
+        type: 'boolean',
+        description: 'print out SQL queries',
+    })
+    .option('dry', {
+        type: 'boolean',
+        description: 'dry run - do not affect a database',
+    })
+    .option('update', {
+        type: 'boolean',
+        description: 'flush update [do not drop/restore indexes, useful with small csv files]',
+    })
+    .help()
+    .argv;
 
 perfObserver.observe({ entryTypes: ['measure'], buffer: true });
 
-const defaultLimit = 10000;
-const limit = parseInt(process.env.LIMIT, 10) || defaultLimit;
-const logging = process.env.LOGGING ? console.log : false;
-const dryRun = !!process.env.DRY;
+const { file, sql: logging, dry: dryRun, limit, update } = argv;
 
 console.log(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
 
-env. variables:
-name\t| default\t| current
-LIMIT\t| ${defaultLimit}\t\t| ${limit}
-LOGGING\t| ${false}\t\t| ${!!logging}
-DRY\t| ${false}\t\t| ${!!dryRun}
+name\t\tdescription
+--file\t\tabsolute path to csv file to parse
+--limit\t\tamount of records in one bulk SQL qeuery
+--sql\t\tprint out SQL queries
+--dry\t\tdry run do not execute SQL
+--update\tflush update [do not drop/restore indexes, useful with small csv files]
+
 --------------------------------------------------
 database connection info:
 host: \t\t${process.env.DB_HOSTNAME}
 port: \t\t${process.env.DB_PORT}
 database: \t${process.env.DB_NAME}
 dialect: \t${process.env.DB_DIALECT}
+
 --------------------------------------------------
+
+file to parse: ${file}
 `);
+
+if (!file) {
+    console.log(`>>> NO FILE TO PARSE`);
+
+    process.exit(0);
+}
+
 
 (async () => {
     performance.mark('init');
