@@ -78,7 +78,6 @@ if (!file) {
     process.exit(0);
 }
 
-
 (async () => {
     performance.mark('init');
 
