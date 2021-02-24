@@ -9,5 +9,10 @@
                 }
             }
         ]
+    ],
+    "ignore": [
+        ".git/",
+        "node_modules/",
+        "**/*.csv"
     ]
 }

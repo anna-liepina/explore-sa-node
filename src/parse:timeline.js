@@ -3,10 +3,7 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
-const fs = require('fs');
 const os = require('os');
-const csv = require('csv-parse');
-const path = require('path');
 const yargs = require('yargs');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');

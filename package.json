@@ -16,9 +16,12 @@
     "lodash": "^4.17.0",
     "mysql2": "^2.2.0",
     "p-queue": "^6.6.2",
+    "sequelize": "^6.4.0",
+    "yargs": "^16.2.0"
+  },
+  "optionalDependencies": {
     "pg": "^8.5.0",
-    "pg-hstore": "^2.3.3",
-    "sequelize": "^6.4.0"
+    "pg-hstore": "^2.3.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.0",
@@ -40,8 +43,9 @@
     "parse:postcodes:geo": "node -r dotenv/config node_modules/.bin/babel-node ./src/parse:postcodes:geo",
     "parse:area": "node -r dotenv/config node_modules/.bin/babel-node ./src/parse:area",
     "parse:timeline": "node -r dotenv/config node_modules/.bin/babel-node ./src/parse:timeline",
-    "build": "babel --copy-files --out-dir ./build --verbose ./src",
+    "build": "babel . --out-dir ./build --source-maps --copy-files --delete-dir-on-start --verbose",
     "start": "node -r dotenv/config node_modules/.bin/nodemon ./src/app.js",
+    "start:serve": "node -r dotenv/config ./src/app.js",
     "start:debug": "npm run start -- --inspect=0.0.0.0",
     "test": "node -r dotenv/config node_modules/.bin/jest"
   },
