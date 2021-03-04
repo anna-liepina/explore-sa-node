@@ -17,7 +17,7 @@ describe('GraphQL: Timeline', () => {
             expect(data).toMatchSnapshot();
         });
 
-        it(`without criteria, 2nd page`, async () => {
+        it(`without criteria: 2nd page`, async () => {
             const { data: { timelineSearch: data } } = await query({
                 query: `
                 {

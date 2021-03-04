@@ -8,7 +8,7 @@ Object {
 }
 `;
 
-exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] search in data range, first page, 3 per page 1`] = `
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date range 1`] = `
 Array [
   Object {
     "date": "2019-04-26",
@@ -28,7 +28,7 @@ Array [
 ]
 `;
 
-exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] search in data range, seconds page, 3 per page 1`] = `
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date range: 2nd page 1`] = `
 Array [
   Object {
     "date": "2017-11-10",
@@ -48,7 +48,7 @@ Array [
 ]
 `;
 
-exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] search without date range 1`] = `
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] without criteria 1`] = `
 Array [
   Object {
     "date": "2019-04-26",

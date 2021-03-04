@@ -17,7 +17,7 @@ describe('GraphQL: Transaction', () => {
     });
 
     describe('transactionSearch [presets: perPage 3]', () => {
-        it(`search without date range`, async () => {
+        it(`without criteria`, async () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
                 {
@@ -32,7 +32,7 @@ describe('GraphQL: Transaction', () => {
             expect(data).toMatchSnapshot();
         });
 
-        it(`search in data range, first page, 3 per page`, async () => {
+        it(`within date range`, async () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
                 {
@@ -47,7 +47,7 @@ describe('GraphQL: Transaction', () => {
             expect(data).toMatchSnapshot();
         });
 
-        it(`search in data range, seconds page, 3 per page`, async () => {
+        it(`within date range: 2nd page`, async () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
                 {

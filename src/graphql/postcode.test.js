@@ -1,10 +1,10 @@
 describe('GraphQL: Postcode', () => {
-    describe('query', () => {
-        it(`fetching postcodes by exact postcodes`, async () => {
+    describe('postcodeSearch [presets: perPage 3]', () => {
+        it(`by exact postcode`, async () => {
             const { data: { postcodeSearch: data } } = await query({
                 query: `
                 {
-                    postcodeSearch(pattern: "E20 1AA") {
+                    postcodeSearch(pattern: "E20 1AA", perPage: 3) {
                         postcode
                         lat
                         lng
@@ -17,11 +17,27 @@ describe('GraphQL: Postcode', () => {
             expect(data).toMatchSnapshot();
         });
 
-        it(`fetching postcodes by wildcard`, async () => {
+        it(`by wildcard`, async () => {
             const { data: { postcodeSearch: data } } = await query({
                 query: `
                 {
-                    postcodeSearch(pattern: "E20") {
+                    postcodeSearch(pattern: "E20", perPage: 3) {
+                        postcode
+                        lat
+                        lng
+                        url
+                    }
+                }`
+            });
+
+            expect(data).toMatchSnapshot();
+        });
+
+        it(`by wildcard: 1st page`, async () => {
+            const { data: { postcodeSearch: data } } = await query({
+                query: `
+                {
+                    postcodeSearch(pattern: "E20", perPage: 3) {
                         postcode
                         lat
                         lng
