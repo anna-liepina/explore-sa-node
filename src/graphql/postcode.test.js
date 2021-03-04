@@ -1,22 +1,32 @@
-describe.skip('GraphQL: Postcode', () => {
+describe('GraphQL: Postcode', () => {
     describe('query', () => {
-        it(`xxx`, async () => {
-            const { data } = await query({
+        it(`fetching postcodes by exact postcodes`, async () => {
+            const { data: { postcodeSearch: data } } = await query({
                 query: `
                 {
+                    postcodeSearch(pattern: "E20 1AA") {
+                        postcode
+                        lat
+                        lng
+                        url
+                    }
                 }`
             });
 
+            expect(data).toHaveLength(1);
             expect(data).toMatchSnapshot();
         });
 
-    });
-
-    describe('mutation', () => {
-        it(`xxx`, async () => {
-            const { data, errors } = await query({
+        it(`fetching postcodes by wildcard`, async () => {
+            const { data: { postcodeSearch: data } } = await query({
                 query: `
-                mutation {
+                {
+                    postcodeSearch(pattern: "E20") {
+                        postcode
+                        lat
+                        lng
+                        url
+                    }
                 }`
             });
 

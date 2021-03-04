@@ -31,19 +31,19 @@ export default {
                 if (from) {
                     where.date = {
                         [orm.Sequelize.Op.gte]: from,
-                    }
-
+                    };
                 }
+
                 if (to) {
                     where.date = {
                         [orm.Sequelize.Op.lte]: to,
-                    }
+                    };
                 }
 
                 if (from || to) {
                     where.date = {
                         [orm.Sequelize.Op.between]: [from, to],
-                    }
+                    };
                 }
 
                 return orm.Transaction.findAll({

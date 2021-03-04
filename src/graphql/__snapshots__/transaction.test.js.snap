@@ -1,107 +1,69 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GraphQL: Transaction query paginated queries search in data range, first page, 5 per page 1`] = `
+exports[`GraphQL: Transaction transaction should fetch transaction by ID 1`] = `
 Object {
-  "transactionSearch": Array [
-    Object {
-      "date": "2019-04-26",
-      "id": "1",
-      "price": 375000,
-    },
-    Object {
-      "date": "2019-04-26",
-      "id": "2",
-      "price": 545000,
-    },
-    Object {
-      "date": "2019-03-25",
-      "id": "3",
-      "price": 341250,
-    },
-    Object {
-      "date": "2017-11-10",
-      "id": "4",
-      "price": 38000000,
-    },
-    Object {
-      "date": "2017-11-28",
-      "id": "5",
-      "price": 326600,
-    },
-  ],
+  "date": "2019-04-26",
+  "id": "1",
+  "price": 375000,
 }
 `;
 
-exports[`GraphQL: Transaction query paginated queries search in data range, seconds page, 5 per page 1`] = `
-Object {
-  "transactionSearch": Array [
-    Object {
-      "date": "2018-05-09",
-      "id": "6",
-      "price": 246000,
-    },
-    Object {
-      "date": "2017-09-01",
-      "id": "7",
-      "price": 285285,
-    },
-    Object {
-      "date": "2017-07-28",
-      "id": "8",
-      "price": 322240,
-    },
-    Object {
-      "date": "2018-01-19",
-      "id": "9",
-      "price": 295260,
-    },
-    Object {
-      "date": "2018-07-06",
-      "id": "10",
-      "price": 246000,
-    },
-  ],
-}
-`;
-
-exports[`GraphQL: Transaction query paginated queries search without date range 1`] = `
-Object {
-  "transactionSearch": Array [
-    Object {
-      "date": "2019-04-26",
-      "id": "1",
-      "price": 375000,
-    },
-    Object {
-      "date": "2019-04-26",
-      "id": "2",
-      "price": 545000,
-    },
-    Object {
-      "date": "2019-03-25",
-      "id": "3",
-      "price": 341250,
-    },
-    Object {
-      "date": "2017-11-10",
-      "id": "4",
-      "price": 38000000,
-    },
-    Object {
-      "date": "2017-11-28",
-      "id": "5",
-      "price": 326600,
-    },
-  ],
-}
-`;
-
-exports[`GraphQL: Transaction query should fetch transaction by ID 1`] = `
-Object {
-  "transaction": Object {
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] search in data range, first page, 3 per page 1`] = `
+Array [
+  Object {
     "date": "2019-04-26",
     "id": "1",
     "price": 375000,
   },
-}
+  Object {
+    "date": "2019-04-26",
+    "id": "2",
+    "price": 545000,
+  },
+  Object {
+    "date": "2019-03-25",
+    "id": "3",
+    "price": 341250,
+  },
+]
+`;
+
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] search in data range, seconds page, 3 per page 1`] = `
+Array [
+  Object {
+    "date": "2017-11-10",
+    "id": "4",
+    "price": 38000000,
+  },
+  Object {
+    "date": "2017-11-28",
+    "id": "5",
+    "price": 326600,
+  },
+  Object {
+    "date": "2018-05-09",
+    "id": "6",
+    "price": 246000,
+  },
+]
+`;
+
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] search without date range 1`] = `
+Array [
+  Object {
+    "date": "2019-04-26",
+    "id": "1",
+    "price": 375000,
+  },
+  Object {
+    "date": "2019-04-26",
+    "id": "2",
+    "price": 545000,
+  },
+  Object {
+    "date": "2019-03-25",
+    "id": "3",
+    "price": 341250,
+  },
+]
 `;

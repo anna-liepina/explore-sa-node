@@ -1,7 +1,7 @@
 describe('GraphQL: Timeline', () => {
     describe('timelineSearch [presets: perPage 3]', () => {
         it(`without criteria`, async () => {
-            const { data } = await query({
+            const { data: { timelineSearch: data } } = await query({
                 query: `
                 {
                     timelineSearch(perPage: 3) {
@@ -16,8 +16,9 @@ describe('GraphQL: Timeline', () => {
 
             expect(data).toMatchSnapshot();
         });
+
         it(`without criteria, 2nd page`, async () => {
-            const { data } = await query({
+            const { data: { timelineSearch: data } } = await query({
                 query: `
                 {
                     timelineSearch(page: 2, perPage: 3) {
@@ -34,7 +35,7 @@ describe('GraphQL: Timeline', () => {
         });
 
         it(`in date range [::from, ::to]`, async () => {
-            const { data } = await query({
+            const { data: { timelineSearch: data } } = await query({
                 query: `
                 {
                     timelineSearch(from: "2010-01-01", to: "2021-01-01", perPage: 3) {
@@ -50,7 +51,7 @@ describe('GraphQL: Timeline', () => {
         });
 
         it(`by postcode wildcard [::pattern]`, async () => {
-            const { data } = await query({
+            const { data: { timelineSearch: data } } = await query({
                 query: `
                 {
                     timelineSearch(pattern: "E20 1A", perPage: 3) {
@@ -66,7 +67,7 @@ describe('GraphQL: Timeline', () => {
         });
 
         it(`by exact postcodes [::postcodes]`, async () => {
-            const { data } = await query({
+            const { data: { timelineSearch: data } } = await query({
                 query: `
                 {
                     timelineSearch(postcodes: ["E20"], perPage: 3) {
