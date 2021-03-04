@@ -51,11 +51,9 @@ export default {
                     {}
                 );
             },
-            updatePostcode: (entity, { postcode, input }, { orm }, info) => {
-                const { id, ...values } = input;
-
+            updatePostcode: (entity, { postcode, input: coodinates }, { orm }, info) => {
                 return orm.Status.update(
-                    { ...values },
+                    coodinates,
                     {
                         where: {
                             postcode,
