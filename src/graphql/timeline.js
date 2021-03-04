@@ -1,7 +1,6 @@
 export default {
     typeDefs: `
         extend type Query {
-            timeline(postcode: String!): [Timeline]
             timelineSearch(
                 pattern: String
                 postcodes: [String]
@@ -21,12 +20,6 @@ export default {
     `,
     resolvers: {
         Query: {
-            timeline: (entity, args, { orm }, info) => {
-                return orm.Timeline.findAll({
-                    where: args,
-                    raw: true,
-                });
-            },
             timelineSearch: (entity, { postcodes, pattern, from, to, perPage: limit, page }, { orm }, info) => {
                 const offset = (page - 1) * limit;
 
