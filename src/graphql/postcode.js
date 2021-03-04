@@ -4,22 +4,6 @@ export default {
             postcodeSearch(pattern: String!, perPage: Int = 25, page: Int = 1): [Postcode]
         }
 
-        extend type Mutation {
-            addPostcode(input: AddPostcodeInput!): Postcode
-            updatePostcode(postcode: String!, input: UpdatePostcodeInput!): Postcode
-        }
-
-        input AddPostcodeInput {
-            postcode: String!
-            lat: Float
-            lng: Float
-        }
-
-        input UpdatePostcodeInput {
-            lat: Float
-            lng: Float
-        }
-
         type Postcode {
             postcode: String
             lat: Float
@@ -42,24 +26,6 @@ export default {
                     limit,
                     raw: true,
                 });
-            },
-        },
-        Mutation: {
-            addPostcode: (entity, { input }, { orm }, info) => {
-                return orm.Postcode.create(
-                    { ...input },
-                    {}
-                );
-            },
-            updatePostcode: (entity, { postcode, input: coodinates }, { orm }, info) => {
-                return orm.Status.update(
-                    coodinates,
-                    {
-                        where: {
-                            postcode,
-                        }
-                    }
-                );
             },
         },
         Postcode: {
