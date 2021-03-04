@@ -1,7 +1,6 @@
 export default {
     typeDefs: `
         extend type Query {
-            postcode(postcode: String!): Postcode
             postcodeSearch(pattern: String!, perPage: Int = 25, page: Int = 1): [Postcode]
         }
 
@@ -30,12 +29,6 @@ export default {
     `,
     resolvers: {
         Query: {
-            postcode: (entity, args, { orm }, info) => {
-                return orm.Postcode.findOne({
-                    where: args,
-                    raw: true,
-                });
-            },
             postcodeSearch: (entity, { pattern, perPage: limit, page }, { orm }, info) => {
                 const offset = (page - 1) * limit;
 
