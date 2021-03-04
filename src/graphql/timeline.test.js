@@ -1,22 +1,80 @@
-describe.skip('GraphQL: Timeline', () => {
-    describe('query', () => {
-        it(`xxx`, async () => {
+describe('GraphQL: Timeline', () => {
+    describe('timelineSearch [presets: perPage 3]', () => {
+        it(`without criteria`, async () => {
             const { data } = await query({
                 query: `
                 {
+                    timelineSearch(perPage: 3) {
+                        date
+                        avg
+                        count
+                        postcode
+                    }
+
+                }`
+            });
+
+            expect(data).toMatchSnapshot();
+        });
+        it(`without criteria, 2nd page`, async () => {
+            const { data } = await query({
+                query: `
+                {
+                    timelineSearch(page: 2, perPage: 3) {
+                        date
+                        avg
+                        count
+                        postcode
+                    }
+
                 }`
             });
 
             expect(data).toMatchSnapshot();
         });
 
-    });
-
-    describe('mutation', () => {
-        it(`xxx`, async () => {
-            const { data, errors } = await query({
+        it(`in date range [::from, ::to]`, async () => {
+            const { data } = await query({
                 query: `
-                mutation {
+                {
+                    timelineSearch(from: "2010-01-01", to: "2021-01-01", perPage: 3) {
+                        date
+                        avg
+                        count
+                        postcode
+                    }
+                }`
+            });
+
+            expect(data).toMatchSnapshot();
+        });
+
+        it(`by postcode wildcard [::pattern]`, async () => {
+            const { data } = await query({
+                query: `
+                {
+                    timelineSearch(pattern: "E20 1A", perPage: 3) {
+                        date
+                        avg
+                        count
+                        postcode
+                    }
+                }`
+            });
+
+            expect(data).toMatchSnapshot();
+        });
+
+        it(`by exact postcodes [::postcodes]`, async () => {
+            const { data } = await query({
+                query: `
+                {
+                    timelineSearch(postcodes: ["E20"], perPage: 3) {
+                        date
+                        avg
+                        count
+                        postcode
+                    }
                 }`
             });
 
