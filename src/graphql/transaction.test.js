@@ -1,7 +1,7 @@
 describe('GraphQL: Transaction', () => {
-    describe('query', () => {
+    describe('transaction', () => {
         it(`should fetch transaction by ID`, async () => {
-            const { data } = await query({
+            const { data: { transaction: data } } = await query({
                 query: `
                 {
                     transaction(id: 1) {
@@ -14,52 +14,52 @@ describe('GraphQL: Transaction', () => {
 
             expect(data).toMatchSnapshot();
         });
+    });
 
-        describe('paginated queries', () => {
-            it(`search without date range`, async () => {
-                const { data } = await query({
-                    query: `
-                    {
-                        transactionSearch(perPage: 5) {
-                            id
-                            price
-                            date
-                        }
-                    }`
-                });
-
-                expect(data).toMatchSnapshot();
+    describe('transactionSearch [presets: perPage 3]', () => {
+        it(`without criteria`, async () => {
+            const { data: { transactionSearch: data } } = await query({
+                query: `
+                {
+                    transactionSearch(perPage: 3) {
+                        id
+                        price
+                        date
+                    }
+                }`
             });
 
-            it(`search in data range, first page, 5 per page`, async () => {
-                const { data } = await query({
-                    query: `
-                    {
-                        transactionSearch(from: "2010-01-01", to: "2021-01-01", perPage: 5) {
-                            id
-                            price
-                            date
-                        }
-                    }`
-                });
+            expect(data).toMatchSnapshot();
+        });
 
-                expect(data).toMatchSnapshot();
+        it(`within date range`, async () => {
+            const { data: { transactionSearch: data } } = await query({
+                query: `
+                {
+                    transactionSearch(from: "2010-01-01", to: "2021-01-01", perPage: 3) {
+                        id
+                        price
+                        date
+                    }
+                }`
             });
 
-            it(`search in data range, seconds page, 5 per page`, async () => {
-                const { data } = await query({
-                    query: `
-                    {
-                        transactionSearch(from: "2010-01-01", to: "2021-01-01", page: 2, perPage: 5) {
-                            id
-                            price
-                            date
-                        }
-                    }`
-                });
+            expect(data).toMatchSnapshot();
+        });
 
-                expect(data).toMatchSnapshot();
+        it(`within date range: 2nd page`, async () => {
+            const { data: { transactionSearch: data } } = await query({
+                query: `
+                {
+                    transactionSearch(from: "2010-01-01", to: "2021-01-01", page: 2, perPage: 3) {
+                        id
+                        price
+                        date
+                    }
+                }`
             });
+
+            expect(data).toMatchSnapshot();
         });
     });
 });

@@ -1,126 +1,116 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] by exact postcodes [::postcodes] 1`] = `
-Object {
-  "timelineSearch": Array [
-    Object {
-      "avg": 229400,
-      "count": 1,
-      "date": "2007-08-01",
-      "postcode": "E20",
-    },
-    Object {
-      "avg": 100000,
-      "count": 1,
-      "date": "2013-10-01",
-      "postcode": "E20",
-    },
-    Object {
-      "avg": 127500,
-      "count": 2,
-      "date": "2013-12-01",
-      "postcode": "E20",
-    },
-  ],
-}
+Array [
+  Object {
+    "avg": 229400,
+    "count": 1,
+    "date": "2007-08-01",
+    "postcode": "E20",
+  },
+  Object {
+    "avg": 100000,
+    "count": 1,
+    "date": "2013-10-01",
+    "postcode": "E20",
+  },
+  Object {
+    "avg": 127500,
+    "count": 2,
+    "date": "2013-12-01",
+    "postcode": "E20",
+  },
+]
 `;
 
 exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] by postcode wildcard [::pattern] 1`] = `
-Object {
-  "timelineSearch": Array [
-    Object {
-      "avg": 108175,
-      "count": 1,
-      "date": "2016-12-01",
-      "postcode": "E20 1AS",
-    },
-    Object {
-      "avg": 108175,
-      "count": 1,
-      "date": "2016-12-01",
-      "postcode": "E20 1AS",
-    },
-    Object {
-      "avg": 322240,
-      "count": 1,
-      "date": "2017-07-01",
-      "postcode": "E20 1AR",
-    },
-  ],
-}
+Array [
+  Object {
+    "avg": 108175,
+    "count": 1,
+    "date": "2016-12-01",
+    "postcode": "E20 1AS",
+  },
+  Object {
+    "avg": 108175,
+    "count": 1,
+    "date": "2016-12-01",
+    "postcode": "E20 1AS",
+  },
+  Object {
+    "avg": 322240,
+    "count": 1,
+    "date": "2017-07-01",
+    "postcode": "E20 1AR",
+  },
+]
 `;
 
 exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] in date range [::from, ::to] 1`] = `
-Object {
-  "timelineSearch": Array [
-    Object {
-      "avg": 100000,
-      "count": 1,
-      "date": "2013-10-01",
-      "postcode": "E20",
-    },
-    Object {
-      "avg": 100000,
-      "count": 1,
-      "date": "2013-10-01",
-      "postcode": "E20 1EN",
-    },
-    Object {
-      "avg": 100000,
-      "count": 1,
-      "date": "2013-10-01",
-      "postcode": "E20 1EN",
-    },
-  ],
-}
+Array [
+  Object {
+    "avg": 100000,
+    "count": 1,
+    "date": "2013-10-01",
+    "postcode": "E20",
+  },
+  Object {
+    "avg": 100000,
+    "count": 1,
+    "date": "2013-10-01",
+    "postcode": "E20 1EN",
+  },
+  Object {
+    "avg": 100000,
+    "count": 1,
+    "date": "2013-10-01",
+    "postcode": "E20 1EN",
+  },
+]
 `;
 
 exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] without criteria 1`] = `
-Object {
-  "timelineSearch": Array [
-    Object {
-      "avg": 229400,
-      "count": 1,
-      "date": "2007-08-01",
-      "postcode": "E20",
-    },
-    Object {
-      "avg": 229400,
-      "count": 1,
-      "date": "2007-08-01",
-      "postcode": "E20 1BU",
-    },
-    Object {
-      "avg": 229400,
-      "count": 1,
-      "date": "2007-08-01",
-      "postcode": "E20 1BU",
-    },
-  ],
-}
+Array [
+  Object {
+    "avg": 229400,
+    "count": 1,
+    "date": "2007-08-01",
+    "postcode": "E20",
+  },
+  Object {
+    "avg": 229400,
+    "count": 1,
+    "date": "2007-08-01",
+    "postcode": "E20 1BU",
+  },
+  Object {
+    "avg": 229400,
+    "count": 1,
+    "date": "2007-08-01",
+    "postcode": "E20 1BU",
+  },
+]
 `;
 
-exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] without criteria, 2nd page 1`] = `
-Object {
-  "timelineSearch": Array [
-    Object {
-      "avg": 100000,
-      "count": 1,
-      "date": "2013-10-01",
-      "postcode": "E20",
-    },
-    Object {
-      "avg": 100000,
-      "count": 1,
-      "date": "2013-10-01",
-      "postcode": "E20 1EN",
-    },
-    Object {
-      "avg": 100000,
-      "count": 1,
-      "date": "2013-10-01",
-      "postcode": "E20 1EN",
-    },
-  ],
-}
+exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] without criteria: 2nd page 1`] = `
+Array [
+  Object {
+    "avg": 100000,
+    "count": 1,
+    "date": "2013-10-01",
+    "postcode": "E20",
+  },
+  Object {
+    "avg": 100000,
+    "count": 1,
+    "date": "2013-10-01",
+    "postcode": "E20 1EN",
+  },
+  Object {
+    "avg": 100000,
+    "count": 1,
+    "date": "2013-10-01",
+    "postcode": "E20 1EN",
+  },
+]
 `;

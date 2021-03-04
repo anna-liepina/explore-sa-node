@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GraphQL: Postcode postcodeSearch [presets: perPage 3] by exact postcode 1`] = `
+Array [
+  Object {
+    "lat": 51.547915089,
+    "lng": -0.00743124,
+    "postcode": "E20 1AA",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.547915089,-0.00743124",
+  },
+]
+`;
+
+exports[`GraphQL: Postcode postcodeSearch [presets: perPage 3] by wildcard 1`] = `
+Array [
+  Object {
+    "lat": 51.547915089,
+    "lng": -0.00743124,
+    "postcode": "E20 1AA",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.547915089,-0.00743124",
+  },
+  Object {
+    "lat": 51.548136,
+    "lng": -0.007724,
+    "postcode": "E20 1AB",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.548136,-0.007724",
+  },
+  Object {
+    "lat": 51.54796467,
+    "lng": -0.007587,
+    "postcode": "E20 1AD",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.54796467,-0.007587",
+  },
+]
+`;
+
+exports[`GraphQL: Postcode postcodeSearch [presets: perPage 3] by wildcard: 1st page 1`] = `
+Array [
+  Object {
+    "lat": 51.547915089,
+    "lng": -0.00743124,
+    "postcode": "E20 1AA",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.547915089,-0.00743124",
+  },
+  Object {
+    "lat": 51.548136,
+    "lng": -0.007724,
+    "postcode": "E20 1AB",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.548136,-0.007724",
+  },
+  Object {
+    "lat": 51.54796467,
+    "lng": -0.007587,
+    "postcode": "E20 1AD",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.54796467,-0.007587",
+  },
+]
+`;
