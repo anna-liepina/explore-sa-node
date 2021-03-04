@@ -9,7 +9,6 @@ import transaction from './graphql/transaction';
 
 export const typeDefs = gql`
     type Query
-    type Mutation
 
     ${area.typeDefs}
     ${postcode.typeDefs}
