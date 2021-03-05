@@ -33,11 +33,11 @@ describe('GraphQL: Postcode', () => {
             expect(data).toMatchSnapshot();
         });
 
-        it(`by wildcard: 1st page`, async () => {
+        it(`by wildcard: 2nd page`, async () => {
             const { data: { postcodeSearch: data } } = await query({
                 query: `
                 {
-                    postcodeSearch(pattern: "E20", perPage: 3) {
+                    postcodeSearch(pattern: "E20", perPage: 3, page: 2) {
                         postcode
                         lat
                         lng

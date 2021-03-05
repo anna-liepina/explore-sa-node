@@ -21,7 +21,7 @@ describe('GraphQL: Timeline', () => {
             const { data: { timelineSearch: data } } = await query({
                 query: `
                 {
-                    timelineSearch(page: 2, perPage: 3) {
+                    timelineSearch(perPage: 3, page: 2) {
                         date
                         avg
                         count
