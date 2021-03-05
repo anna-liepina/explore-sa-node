@@ -15,7 +15,16 @@
 
 ##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS!
 
-# 'Explorer' GraphQL back-end
+# 'Data Explorer' GraphQL back-end
+
+the aim of the project is to parse UK goverment data on the property sales, and some geo data to link postcodes by latitude and longtitude.
+This project is done to demonstrate my knowledege, which I learned recently as I try to get into software development industry, I had mentor to help me out
+
+the aim is to build scallable graphql backend, which can quickly return requested results
+to demonstrate complex cases of GraphQL use, such as N+1 problem, scalling where more than one database required [write/read nodes]
+complex automated QA, anonimised data seeding for QA purposes, flexibility on javascript, some limits of Javascript, where for example by default object in V8 object can  have ~8.4mil of fields, but Map can handle way more. Queue system for data processing
+
+
 
 live [DEMO](https://ec2-35-179-94-68.eu-west-2.compute.amazonaws.com/graphql), and front-end repository can be found [here](https://github.com/anna-liepina/explore-cwa-react)
 
