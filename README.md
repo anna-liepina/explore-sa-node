@@ -116,12 +116,13 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 
 ### data processors
- NPM command            | corresponding JS file
- `parse`                | `src/parse:properties`
- `parse:postcodes`      | `src/parse:postcodes`
- `parse:postcodes:geo`  | `src/parse:postcodes:geo`
- `parse:area`           | `src/parse:area`
- `parse:timeline`       | `src/parse:timeline`
+| NPM command            | corresponding JS file
+|---                     | 
+| `parse`                | `src/parse:properties`
+| `parse:postcodes`      | `src/parse:postcodes`
+| `parse:postcodes:geo`  | `src/parse:postcodes:geo`
+| `parse:area`           | `src/parse:area`
+| `parse:timeline`       | `src/parse:timeline`
 
 example: `npm run parse`
 ### supported databases
