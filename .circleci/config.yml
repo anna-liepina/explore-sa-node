@@ -4,6 +4,12 @@ jobs:
   jest:
     docker:
       - image: cimg/node:14.15.5
+      - image: circleci/mysql:lastest
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: explore_test
+          MYSQL_USER: root
+          MYSQL_PASSWORD: password
     steps:
       - checkout
       - restore_cache:
