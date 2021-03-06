@@ -6,10 +6,9 @@ jobs:
       - image: cimg/node:14.15.5
       - image: circleci/mysql:8.0.4
         environment:
-          - MYSQL_ROOT_PASSWORD: password
-          - MYSQL_DATABASE: explore_test
-          - MYSQL_HOST: 127.0.0.1
-          - MYSQL_ROOT_HOST: %  
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: explore_test
+          MYSQL_PASSWORD: password
     steps:
       - checkout
       - restore_cache:
