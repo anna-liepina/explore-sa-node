@@ -3,26 +3,26 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const conf = require('./orm-config');
 
-// /******************************************* */
-// /** to tackle sequelize issue for MySQL 5.7+ */
-// /******************************************* */
-// const wkx = require('wkx');
+/******************************************* */
+/** to tackle sequelize issue for MySQL 5.7+ */
+/******************************************* */
+const wkx = require('wkx');
 
-// if ('mysql' === conf[process.env.NODE_ENV].dialect) {
-//     Sequelize.GEOMETRY.prototype._stringify = function _stringify(value, options) {
-//         return `ST_GeomFromText(${options.escape(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
-//     }
-//     Sequelize.GEOMETRY.prototype._bindParam = function _bindParam(value, options) {
-//         return `ST_GeomFromText(${options.bindParam(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
-//     }
-//     Sequelize.GEOGRAPHY.prototype._stringify = function _stringify(value, options) {
-//         return `ST_GeomFromText(${options.escape(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
-//     }
-//     Sequelize.GEOGRAPHY.prototype._bindParam = function _bindParam(value, options) {
-//         return `ST_GeomFromText(${options.bindParam(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
-//     }
-// }
-// /******************************************* */
+if ('mysql' === conf[process.env.NODE_ENV].dialect) {
+    Sequelize.GEOMETRY.prototype._stringify = function _stringify(value, options) {
+        return `ST_GeomFromText(${options.escape(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
+    }
+    Sequelize.GEOMETRY.prototype._bindParam = function _bindParam(value, options) {
+        return `ST_GeomFromText(${options.bindParam(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
+    }
+    Sequelize.GEOGRAPHY.prototype._stringify = function _stringify(value, options) {
+        return `ST_GeomFromText(${options.escape(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
+    }
+    Sequelize.GEOGRAPHY.prototype._bindParam = function _bindParam(value, options) {
+        return `ST_GeomFromText(${options.bindParam(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
+    }
+}
+/******************************************* */
 
 const c = conf[process.env.NODE_ENV];
 

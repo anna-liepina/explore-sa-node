@@ -3,9 +3,6 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
-const fs = require('fs');
-const csv = require('csv-parse');
-const path = require('path');
 const os = require('os');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
@@ -24,12 +21,26 @@ const perfObserver = new PerformanceObserver(
 
 perfObserver.observe({ entryTypes: ['measure'], buffer: true });
 
-const cwd = path.join(__dirname, '..');
-const defaultLimit = 10000;
-const limit = parseInt(process.env.LIMIT, 10) || defaultLimit;
-const file = `${cwd}/${process.env.FILE || 'var/csv.csv'}`;
-const logging = process.env.LOGGING ? console.log : false;
-const dryRun = !!process.env.DRY;
+const argv = yargs
+    .option('limit', {
+        type: 'number',
+        description: 'amount of records in one bulk SQL qeuery',
+        default: 10000,
+    })
+    .option('sql', {
+        type: 'boolean',
+        description: 'print out SQL queries',
+    })
+    .option('dry', {
+        type: 'boolean',
+        description: 'dry run - do not affect a database',
+    })
+    .help()
+    .argv;
+
+perfObserver.observe({ entryTypes: ['measure'], buffer: true });
+
+const { sql: logging, dry: dryRun, limit } = argv;
 
 console.log(`
 --------------------------------------------------
