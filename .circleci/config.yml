@@ -4,10 +4,16 @@ jobs:
   jest:
     docker:
       - image: cimg/node:14.15.5
-      - image: circleci/mysql:8.0.4
+#       - image: circleci/mysql:8.0.4
+#         environment:
+#           MYSQL_ROOT_PASSWORD: password
+#           MYSQL_DATABASE: explore_test
+      - image: circleci/mysql:latest
+        # just add this:
+        command: [--default-authentication-plugin=mysql_native_password]
         environment:
-          MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: explore_test
+
     steps:
       - checkout
       - restore_cache:
