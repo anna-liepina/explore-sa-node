@@ -68,7 +68,7 @@ describe('GraphQL: Property', () => {
         });
     });
 
-    describe.skip('propertySearchWithInRange [presets: perPage 3]', () => {
+    describe('propertySearchWithInRange [presets: perPage 3]', () => {
         it(`by coordinates, in kilometers`, async () => {
             const { data: { propertySearchWithInRange: data } } = await query({
                 query: `
