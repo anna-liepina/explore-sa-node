@@ -52,13 +52,13 @@ Array [
     "avg": 100000,
     "count": 1,
     "date": "2013-10-01",
-    "postcode": "E20",
+    "postcode": "E20 1EN",
   },
   Object {
     "avg": 100000,
     "count": 1,
     "date": "2013-10-01",
-    "postcode": "E20 1EN",
+    "postcode": "E20",
   },
   Object {
     "avg": 100000,
@@ -75,13 +75,13 @@ Array [
     "avg": 229400,
     "count": 1,
     "date": "2007-08-01",
-    "postcode": "E20",
+    "postcode": "E20 1BU",
   },
   Object {
     "avg": 229400,
     "count": 1,
     "date": "2007-08-01",
-    "postcode": "E20 1BU",
+    "postcode": "E20",
   },
   Object {
     "avg": 229400,
@@ -98,13 +98,13 @@ Array [
     "avg": 100000,
     "count": 1,
     "date": "2013-10-01",
-    "postcode": "E20",
+    "postcode": "E20 1EN",
   },
   Object {
     "avg": 100000,
     "count": 1,
     "date": "2013-10-01",
-    "postcode": "E20 1EN",
+    "postcode": "E20",
   },
   Object {
     "avg": 100000,

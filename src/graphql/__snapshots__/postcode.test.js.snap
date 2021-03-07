@@ -6,7 +6,7 @@ Array [
     "lat": 51.547915089,
     "lng": -0.00743124,
     "postcode": "E20 1AA",
-    "url": "https://www.google.com/maps/search/?api=1&query=51.547915089,-0.00743124",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.547915089,-0.007431240",
   },
 ]
 `;
@@ -17,19 +17,19 @@ Array [
     "lat": 51.547915089,
     "lng": -0.00743124,
     "postcode": "E20 1AA",
-    "url": "https://www.google.com/maps/search/?api=1&query=51.547915089,-0.00743124",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.547915089,-0.007431240",
   },
   Object {
     "lat": 51.548136,
     "lng": -0.007724,
     "postcode": "E20 1AB",
-    "url": "https://www.google.com/maps/search/?api=1&query=51.548136,-0.007724",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.548136000,-0.007724000",
   },
   Object {
     "lat": 51.54796467,
     "lng": -0.007587,
     "postcode": "E20 1AD",
-    "url": "https://www.google.com/maps/search/?api=1&query=51.54796467,-0.007587",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.547964670,-0.007587000",
   },
 ]
 `;
@@ -40,7 +40,7 @@ Array [
     "lat": 51.546844,
     "lng": -0.006872,
     "postcode": "E20 1AE",
-    "url": "https://www.google.com/maps/search/?api=1&query=51.546844,-0.006872",
+    "url": "https://www.google.com/maps/search/?api=1&query=51.546844000,-0.006872000",
   },
   Object {
     "lat": 51.547427816,
