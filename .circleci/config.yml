@@ -33,6 +33,10 @@ jobs:
             done
             echo Failed waiting for MySQL && exit 1
       - run:
+        name: Install MySQL CLI; Import dummy data; run an example query
+        command: |
+        sudo apt-get install mysql-client
+      - run:
           name: execute 'jest' tests with coverage
           command: npm test -- --coverage
       - run:
