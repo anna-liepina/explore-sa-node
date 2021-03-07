@@ -5,9 +5,10 @@ jobs:
     docker:
       - image: cimg/node:14.15.5
       - image: circleci/mysql:8.0.4
-          environment:
-            MYSQL_ROOT_PASSWORD: password
-            MYSQL_DATABASE: explore_test
+        command: [–default-authentication-plugin=mysql_native_password]
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: explore_test
     steps:
       - checkout
       - restore_cache:
@@ -30,9 +31,6 @@ jobs:
               sleep 1
             done
             echo Failed waiting for MySQL && exit 1
-      - run:
-          name: Install MySQL CLI; Import dummy data; run an example query
-          command: sudo apt-get install mysql-client
       - run:
           name: execute 'jest' tests with coverage
           command: npm test -- --coverage
