@@ -20,6 +20,7 @@
     "yargs": "^16.2.0"
   },
   "optionalDependencies": {
+    "sqlite3": "^5.0.0",
     "pg": "^8.5.0",
     "pg-hstore": "^2.3.3"
   },
@@ -32,8 +33,7 @@
     "babel-jest": "^26.6.3",
     "jest": "^26.6.3",
     "nodemon": "^2.0.0",
-    "sequelize-cli": "^6.2.0",
-    "sqlite3": "^5.0.0"
+    "sequelize-cli": "^6.2.0"
   },
   "main": "src/app.js",
   "scripts": {
@@ -62,6 +62,7 @@
       "src/*/**.js",
       "!src/**?(/*)index.js?(x)"
     ],
+    "globalSetup": "<rootDir>/src/jest-database-provision.js",
     "setupFilesAfterEnv": [
       "<rootDir>/src/jest-provision.js"
     ]

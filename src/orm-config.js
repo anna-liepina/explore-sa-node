@@ -61,9 +61,10 @@ if (process.env.DB_REPLICA_HOSTNAME && process.env.DB_REPLICA_USERNAME && proces
 
 const test = {
     ...orm,
-    dialect: 'sqlite',
     logging: false,
-    storage: `${__dirname}/../var/database-${process.pid}.sqlite`,
+    database: `${orm.database}_test`,
+    // dialect: 'sqlite',
+    // storage: `${__dirname}/../var/database-${process.pid}.sqlite`,
 };
 
 module.exports = {
