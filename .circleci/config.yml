@@ -13,6 +13,7 @@ jobs:
         command: [--default-authentication-plugin=mysql_native_password]
         environment:
           MYSQL_DATABASE: explore_test
+          MYSQL_ROOT_PASSWORD: password
 
     steps:
       - checkout
