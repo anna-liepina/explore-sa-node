@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GraphQL: Area areaSearch [presets: perPage 3] by wildcard 1`] = `
+Array [
+  Object {
+    "area": "E20",
+    "city": "LONDON",
+  },
+]
+`;
+
+exports[`GraphQL: Area areaSearch [presets: perPage 3] without criteria 1`] = `
+Array [
+  Object {
+    "area": "E20",
+    "city": "LONDON",
+  },
+]
+`;
+
+exports[`GraphQL: Area areaSearch [presets: perPage 3] without criteria: 2nd page 1`] = `Array []`;

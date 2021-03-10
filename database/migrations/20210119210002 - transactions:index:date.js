@@ -5,10 +5,10 @@ module.exports = {
     'parse:properties': true,
 
     up: (queryInterface, Sequelize) => {
-        return queryInterface.addIndex('transactions', ['guid']);
+        return queryInterface.addIndex('transactions', ['date']);
     },
 
     down: (queryInterface, Sequelize) => {
-        return queryInterface.removeIndex('transactions', ['guid']);
+        return queryInterface.removeIndex('transactions', ['date']);
     }
 };

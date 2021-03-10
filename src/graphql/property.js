@@ -18,8 +18,8 @@ export default {
         }
 
         enum GeoUnit {
-            km  # 6371
-            ml  # 3961
+            km
+            ml
         }
 
         type Property {
@@ -36,13 +36,9 @@ export default {
         # the PAON (above) will identify the building and a SAON will be specified that identifies the separate unit/flat.
             saon: String
             street: String
-           # locality: String
             city: String
-           # district: String
-           # county: String
 
             transactions: [Transaction]
-
         # distance fields, used only in propertySearchWithInRange
             distance: Float
             distanceUnit: String
