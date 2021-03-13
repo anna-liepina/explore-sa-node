@@ -3,7 +3,6 @@
 exports[`GraphQL: Property property by exact ID 1`] = `
 Object {
   "distance": null,
-  "distanceUnit": null,
   "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
   "postcode": Object {
     "postcode": "E20 1AB",
@@ -106,8 +105,164 @@ Array [
 ]
 `;
 
-exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in kilometers 1`] = `undefined`;
+exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in kilometers 1`] = `
+Array [
+  Object {
+    "distance": 0.03183094324908036,
+    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "postcode": Object {
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
+    },
+    "saon": "cd435dfdc23e7d95665b678f176329c14ac2af4a",
+    "street": "PRIZE WALK",
+    "transactions": Array [
+      Object {
+        "date": "2019-04-26",
+      },
+    ],
+  },
+  Object {
+    "distance": 0.03183094324908036,
+    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "postcode": Object {
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
+    },
+    "saon": "1b762366cdf7cc97e2764e932f60c0edc61b5e86",
+    "street": "PRIZE WALK",
+    "transactions": Array [
+      Object {
+        "date": "2019-04-26",
+      },
+    ],
+  },
+  Object {
+    "distance": 0.03183094324908036,
+    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "postcode": Object {
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
+    },
+    "saon": "fe78fa628e2a410375cb37144fbdff5a766fcee3",
+    "street": "PRIZE WALK",
+    "transactions": Array [
+      Object {
+        "date": "2019-03-25",
+      },
+    ],
+  },
+]
+`;
 
-exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in miles 1`] = `undefined`;
+exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in miles 1`] = `
+Array [
+  Object {
+    "distance": 0.019790043354199857,
+    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "postcode": Object {
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
+    },
+    "saon": "cd435dfdc23e7d95665b678f176329c14ac2af4a",
+    "street": "PRIZE WALK",
+    "transactions": Array [
+      Object {
+        "date": "2019-04-26",
+      },
+    ],
+  },
+  Object {
+    "distance": 0.019790043354199857,
+    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "postcode": Object {
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
+    },
+    "saon": "1b762366cdf7cc97e2764e932f60c0edc61b5e86",
+    "street": "PRIZE WALK",
+    "transactions": Array [
+      Object {
+        "date": "2019-04-26",
+      },
+    ],
+  },
+  Object {
+    "distance": 0.019790043354199857,
+    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "postcode": Object {
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
+    },
+    "saon": "fe78fa628e2a410375cb37144fbdff5a766fcee3",
+    "street": "PRIZE WALK",
+    "transactions": Array [
+      Object {
+        "date": "2019-03-25",
+      },
+    ],
+  },
+]
+`;
 
-exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in miles: 2nd page 1`] = `undefined`;
+exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in miles: 2nd page 1`] = `
+Array [
+  Object {
+    "distance": 0.03229480901237426,
+    "paon": "ea0a2532c26bff35b2ea9816cf08e6f5c8482e3a",
+    "postcode": Object {
+      "lat": 51.547526,
+      "lng": -0.00784696,
+      "postcode": "E20 1GT",
+    },
+    "saon": "7e6b50665189315623cb41af85067fe07bcc0b45",
+    "street": "LIBERTY BRIDGE ROAD",
+    "transactions": Array [
+      Object {
+        "date": "2018-08-31",
+      },
+    ],
+  },
+  Object {
+    "distance": 0.038058671020356094,
+    "paon": "450ddec8dd206c2e2ab1aeeaa90e85e51753b8b7",
+    "postcode": Object {
+      "lat": 51.547465,
+      "lng": -0.007941,
+      "postcode": "E20 1DB",
+    },
+    "saon": "NULL",
+    "street": "CELEBRATION AVENUE",
+    "transactions": Array [
+      Object {
+        "date": "2019-06-11",
+      },
+      Object {
+        "date": "2019-06-11",
+      },
+    ],
+  },
+  Object {
+    "distance": 0.04123474779321359,
+    "paon": "f7825d2dc362be4d0801402db55c771744811b70",
+    "postcode": Object {
+      "lat": 51.547684,
+      "lng": -0.006547,
+      "postcode": "E20 1AR",
+    },
+    "saon": "06b0c0225085b8530aac9de7eac4cf47cc4eb8bd",
+    "street": "LIBERTY BRIDGE ROAD",
+    "transactions": Array [
+      Object {
+        "date": "2017-09-01",
+      },
+    ],
+  },
+]
+`;
