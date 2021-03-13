@@ -71,9 +71,11 @@ export default {
             },
             propertySearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }, info) => {
                 const offset = (page - 1) * limit;
+                /** 1ml = 1.60934km */
                 const coefficient = 'ml' === rangeUnit ? 1.60934 : 1;
-                const adjust = (range / 111) * coefficient;
-                const radius = range * 1000 * coefficient;
+                const distance = range * 1000 * coefficient;
+                /** 1 lat/lng is ~111km */
+                const adjust = range / 111 * coefficient;
                 const { lat, lng } = pos;
 
                 return orm.Property.findAll({
@@ -103,7 +105,7 @@ export default {
                     ],
                     having: {
                         'Postcode.distance': {
-                            [orm.Sequelize.Op.lte]: radius,
+                            [orm.Sequelize.Op.lte]: distance,
                         },
                     },
                     order: [
