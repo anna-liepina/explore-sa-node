@@ -12,7 +12,6 @@ describe('GraphQL: Property', () => {
                             postcode
                         }
                         distance
-                        distanceUnit
                         transactions {
                             date
                         }
@@ -90,7 +89,6 @@ describe('GraphQL: Property', () => {
                             lng
                         }
                         distance
-                        distanceUnit
                         transactions {
                             date
                         }
@@ -123,7 +121,6 @@ describe('GraphQL: Property', () => {
                             lng
                         }
                         distance
-                        distanceUnit
                         transactions {
                             date
                         }
@@ -157,7 +154,6 @@ describe('GraphQL: Property', () => {
                             lng
                         }
                         distance
-                        distanceUnit
                         transactions {
                             date
                         }
