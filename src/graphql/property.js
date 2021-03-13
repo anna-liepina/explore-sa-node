@@ -90,20 +90,11 @@ export default {
                             required: true,
                             attributes: [
                                 [
-                                    // orm.Sequelize.fn(
-                                    //     'ST_Distance_Sphere',
-                                    //     orm.Sequelize.fn('POINT', lat, lng),
-                                    //     orm.Sequelize.fn('POINT', orm.Sequelize.col('Postcode.lat'), orm.Sequelize.col('Postcode.lng')),
-                                    // ),
-                                    orm.Sequelize.literal(`
-( ${planetRadius} * acos(
-    cos( radians(${lat}) )
-    * cos( radians(Postcode.lat) )
-    * cos( radians(Postcode.lng) - radians(${lng}) )
-    + sin( radians(${lat}) )
-    * sin( radians(Postcode.lat) )
-    )
-)`),
+                                    orm.Sequelize.fn(
+                                        'ST_Distance_Sphere',
+                                        orm.Sequelize.fn('POINT', lat, lng),
+                                        orm.Sequelize.fn('POINT', orm.Sequelize.col('Postcode.lat'), orm.Sequelize.col('Postcode.lng')),
+                                    ),
                                     'distance'
                                 ],
                             ],
