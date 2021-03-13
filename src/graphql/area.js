@@ -3,7 +3,7 @@ export default {
         extend type Query {
             areaSearch(
                 pattern: String
-                perPage: Int = 25
+                perPage: Int = 100
                 page: Int = 1
             ): [Area]
         }

@@ -2,12 +2,16 @@ export default {
     typeDefs: `
         extend type Query {
             property(id: ID!): Property
-            propertySearch(postcode: String!, perPage: Int = 25, page: Int = 1): [Property]
+            propertySearch(
+                postcode: String!
+                perPage: Int = 100
+                page: Int = 1
+            ): [Property]
             propertySearchWithInRange(
                 pos: Point!
                 range: Int = 1
                 rangeUnit: GeoUnit = km
-                perPage: Int = 25
+                perPage: Int = 100
                 page: Int = 1
             ): [Property]
         }
