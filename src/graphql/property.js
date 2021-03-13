@@ -41,7 +41,6 @@ export default {
             transactions: [Transaction]
         # distance fields, used only in propertySearchWithInRange
             distance: Float
-            distanceUnit: String
         }
     `,
     resolvers: {
@@ -68,21 +67,10 @@ export default {
             },
             propertySearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }, info) => {
                 const offset = (page - 1) * limit;
+                const coefficient = 'ml' === rangeUnit ? 1.60934 : 1;
+                const adjust = (range / 111) * coefficient;
+                const radius = range * 1000 * coefficient;
                 const { lat, lng } = pos;
-
-                /**
-                One degree of latitude equals approximately 364,000 feet (69 miles)
-                One-degree of longitude equals 288,200 feet (54.6 miles)
-                */
-                const coefficient = 'ml' === rangeUnit ? 1 : 1 / 0.621371;
-
-                const adjustLat = (range / 69) * coefficient;
-                const adjustLng = (range / 54.6) * coefficient;
-
-                /** ST_Distance_Sphere */
-                const radius = range * 1000 * ('ml' === rangeUnit ? 1 / 0.621371 : 1);
-
-                const planetRadius = 'ml' === rangeUnit ? 3961 : 6371;
 
                 return orm.Property.findAll({
                     include: [
@@ -91,33 +79,20 @@ export default {
                             required: true,
                             attributes: [
                                 [
-                                    // orm.Sequelize.fn(
-                                    //     'ST_Distance_Sphere',
-                                    //     orm.Sequelize.fn('POINT', lat, lng),
-                                    //     orm.Sequelize.fn('POINT', orm.Sequelize.col('Postcode.lat'), orm.Sequelize.col('Postcode.lng')),
-                                    // ),
-                                    orm.Sequelize.literal(`
-( ${planetRadius} * acos(
-    cos( radians(${lat}) )
-    * cos( radians(Postcode.lat) )
-    * cos( radians(Postcode.lng) - radians(${lng}) )
-    + sin( radians(${lat}) )
-    * sin( radians(Postcode.lat) )
-    )
-)`),
+                                    orm.Sequelize.fn(
+                                        'ST_Distance_Sphere',
+                                        orm.Sequelize.fn('POINT', lat, lng),
+                                        orm.Sequelize.fn('POINT', orm.Sequelize.col('Postcode.lat'), orm.Sequelize.col('Postcode.lng')),
+                                    ),
                                     'distance'
-                                ],
-                                [
-                                    orm.Sequelize.literal(`"${rangeUnit}"`),
-                                    'distanceUnit'
                                 ],
                             ],
                             where: {
                                 lat: {
-                                    [orm.Sequelize.Op.between]: [lat - adjustLat, lat + adjustLat],
+                                    [orm.Sequelize.Op.between]: [lat - adjust, lat + adjust],
                                 },
                                 lng: {
-                                    [orm.Sequelize.Op.between]: [lng - adjustLng, lng + adjustLng],
+                                    [orm.Sequelize.Op.between]: [lng - adjust, lng + adjust],
                                 },
                             },
                         },
@@ -143,10 +118,6 @@ export default {
             distance: (entity, args, context, info) => {
                 /** check propertySearchWithInRange resolver */
                 return entity['Postcode.distance'];
-            },
-            distanceUnit: (entity, args, context, info) => {
-                /** check propertySearchWithInRange resolver */
-                return entity['Postcode.distanceUnit'];
             },
             transactions: (entity, args, { dataloader }, info) => {
                 return dataloader.getTransactions.load(entity.guid);
