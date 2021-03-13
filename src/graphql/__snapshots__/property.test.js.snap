@@ -108,7 +108,7 @@ Array [
 exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in kilometers 1`] = `
 Array [
   Object {
-    "distance": 0.03183094324908036,
+    "distance": 40.7813355670442,
     "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
     "postcode": Object {
       "lat": 51.548136,
@@ -124,7 +124,7 @@ Array [
     ],
   },
   Object {
-    "distance": 0.03183094324908036,
+    "distance": 40.7813355670442,
     "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
     "postcode": Object {
       "lat": 51.548136,
@@ -140,7 +140,7 @@ Array [
     ],
   },
   Object {
-    "distance": 0.03183094324908036,
+    "distance": 40.7813355670442,
     "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
     "postcode": Object {
       "lat": 51.548136,
@@ -161,7 +161,7 @@ Array [
 exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in miles 1`] = `
 Array [
   Object {
-    "distance": 0.019790043354199857,
+    "distance": 40.7813355670442,
     "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
     "postcode": Object {
       "lat": 51.548136,
@@ -177,7 +177,7 @@ Array [
     ],
   },
   Object {
-    "distance": 0.019790043354199857,
+    "distance": 40.7813355670442,
     "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
     "postcode": Object {
       "lat": 51.548136,
@@ -193,7 +193,7 @@ Array [
     ],
   },
   Object {
-    "distance": 0.019790043354199857,
+    "distance": 40.7813355670442,
     "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
     "postcode": Object {
       "lat": 51.548136,
@@ -214,7 +214,7 @@ Array [
 exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coordinates, in miles: 2nd page 1`] = `
 Array [
   Object {
-    "distance": 0.03229480901237426,
+    "distance": 63.31395972406662,
     "paon": "ea0a2532c26bff35b2ea9816cf08e6f5c8482e3a",
     "postcode": Object {
       "lat": 51.547526,
@@ -230,7 +230,7 @@ Array [
     ],
   },
   Object {
-    "distance": 0.038058671020356094,
+    "distance": 75.61527512194343,
     "paon": "450ddec8dd206c2e2ab1aeeaa90e85e51753b8b7",
     "postcode": Object {
       "lat": 51.547465,
@@ -249,18 +249,18 @@ Array [
     ],
   },
   Object {
-    "distance": 0.04123474779321359,
-    "paon": "f7825d2dc362be4d0801402db55c771744811b70",
+    "distance": 91.4970526895493,
+    "paon": "47aab377e9f899aef28c7d6c5a9f6d0a15d22d1e",
     "postcode": Object {
-      "lat": 51.547684,
-      "lng": -0.006547,
-      "postcode": "E20 1AR",
+      "lat": 51.548685433,
+      "lng": -0.007142,
+      "postcode": "E20 1BB",
     },
-    "saon": "06b0c0225085b8530aac9de7eac4cf47cc4eb8bd",
-    "street": "LIBERTY BRIDGE ROAD",
+    "saon": "cb3241dde4dc92c7fb922d38f0cb03edb4ddac09",
+    "street": "CHEERING LANE",
     "transactions": Array [
       Object {
-        "date": "2017-09-01",
+        "date": "2013-12-18",
       },
     ],
   },
