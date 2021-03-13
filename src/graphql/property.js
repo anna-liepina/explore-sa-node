@@ -41,7 +41,6 @@ export default {
             transactions: [Transaction]
         # distance fields, used only in propertySearchWithInRange
             distance: Float
-            distanceUnit: String
         }
     `,
     resolvers: {
@@ -107,10 +106,6 @@ export default {
 )`),
                                     'distance'
                                 ],
-                                [
-                                    orm.Sequelize.literal(`"${rangeUnit}"`),
-                                    'distanceUnit'
-                                ],
                             ],
                             where: {
                                 lat: {
@@ -143,10 +138,6 @@ export default {
             distance: (entity, args, context, info) => {
                 /** check propertySearchWithInRange resolver */
                 return entity['Postcode.distance'];
-            },
-            distanceUnit: (entity, args, context, info) => {
-                /** check propertySearchWithInRange resolver */
-                return entity['Postcode.distanceUnit'];
             },
             transactions: (entity, args, { dataloader }, info) => {
                 return dataloader.getTransactions.load(entity.guid);
