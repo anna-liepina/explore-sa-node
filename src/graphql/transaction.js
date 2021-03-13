@@ -5,7 +5,7 @@ export default {
             transactionSearch(
                 from: String
                 to: String
-                perPage: Int = 25
+                perPage: Int = 100
                 page: Int = 1
             ): [Transaction]
         }
