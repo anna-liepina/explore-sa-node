@@ -67,21 +67,10 @@ export default {
             },
             propertySearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }, info) => {
                 const offset = (page - 1) * limit;
+                const coefficient = 'ml' === rangeUnit ? 1.60934 : 1;
+                const adjust = (range / 111) * coefficient;
+                const radius = range * 1000 * coefficient;
                 const { lat, lng } = pos;
-
-                /**
-                One degree of latitude equals approximately 364,000 feet (69 miles)
-                One-degree of longitude equals 288,200 feet (54.6 miles)
-                */
-                const coefficient = 'ml' === rangeUnit ? 1 : 1 / 0.621371;
-
-                const adjustLat = (range / 69) * coefficient;
-                const adjustLng = (range / 54.6) * coefficient;
-
-                /** ST_Distance_Sphere */
-                const radius = range * 1000 * ('ml' === rangeUnit ? 1 / 0.621371 : 1);
-
-                const planetRadius = 'ml' === rangeUnit ? 3961 : 6371;
 
                 return orm.Property.findAll({
                     include: [
@@ -100,10 +89,10 @@ export default {
                             ],
                             where: {
                                 lat: {
-                                    [orm.Sequelize.Op.between]: [lat - adjustLat, lat + adjustLat],
+                                    [orm.Sequelize.Op.between]: [lat - adjust, lat + adjust],
                                 },
                                 lng: {
-                                    [orm.Sequelize.Op.between]: [lng - adjustLng, lng + adjustLng],
+                                    [orm.Sequelize.Op.between]: [lng - adjust, lng + adjust],
                                 },
                             },
                         },
