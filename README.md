@@ -100,7 +100,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 | PORT                | 8081          | number    | port on which application will be made available
 | SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/server.key`
 | SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/server.key`
-| ***                 | ***           | ***       | if replica's config specified then used only for writes
+| ***                 | ***           | ***       | if replica's config specified then non-replica connections are used only writes
 | DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
 | DB_USERNAME         | root          | string    | database user
 | DB_PASSWORD         | password      | string    | database user's password
