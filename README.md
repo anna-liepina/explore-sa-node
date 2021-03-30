@@ -13,10 +13,9 @@
 | __tests__     | [![tests][ci.tests-master-badge]][ci.tests-master]            | [![tests][ci.tests-heroku-badge]][ci.tests-heroku]
 | __coverage__  | [![coverage][ci.coverage-master-badge]][ci.coverage-master]   | [![coverage][ci.coverage-heroku-badge]][ci.coverage-heroku]
 
-##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS!
-
 # 'Data Explorer' GraphQL back-end
 
+##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS!
 the project aims to parse UK government data on the property sales, and some geo data to link postcodes by latitude and longitude.
 This project is done to demonstrate my knowledge, which I learned recently as I try to get into the software development industry, I had a mentor to help me out
 
