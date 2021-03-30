@@ -50,7 +50,6 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 * [codecov](https://codecov.io/)
 * [code climate](https://codeclimate.com/)
 * [snyk](https://snyk.io/)
-* [heroku](https://www.heroku.com/)
 
 ### where to get data-sets
  * [UK Postcodes](https://www.freemaptools.com/download-uk-postcode-lat-lng.htm)
