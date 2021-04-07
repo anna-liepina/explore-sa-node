@@ -6,6 +6,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 const os = require('os');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
+const yargs = require('yargs');
 
 const { performance, PerformanceObserver } = require('perf_hooks');
 
@@ -30,6 +31,7 @@ const argv = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
+        default: false,
     })
     .option('dry', {
         type: 'boolean',
@@ -46,18 +48,19 @@ console.log(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
 
-env. variables:
-name\t| default\t| current
-LIMIT\t| ${defaultLimit}\t\t| ${limit}
-LOGGING\t| ${false}\t\t| ${!!logging}
-DRY\t| ${false}\t\t| ${!!dryRun}
+name\t\tdescription
+--file\t\tabsolute path to csv file to parse
+--limit\t\tamount of records in one bulk SQL qeuery
+--sql\t\tprint out SQL queries
+--dry\t\tdry run do not execute SQL
+
 --------------------------------------------------
 database connection info:
 host: \t\t${process.env.DB_HOSTNAME}
 port: \t\t${process.env.DB_PORT}
 database: \t${process.env.DB_NAME}
 dialect: \t${process.env.DB_DIALECT}
---------------------------------------------------
+
 `);
 
 (async () => {
@@ -108,11 +111,6 @@ dialect: \t${process.env.DB_DIALECT}
             [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('postcode'), ' ', 1), 'area'],
             // [orm.Sequelize.fn('COUNT', orm.Sequelize.col('postcode')), 'unique'],
         ],
-        where: {
-            postcode: {
-                [orm.Sequelize.Op.like]: '% %',
-            }
-        },
         group: ['area', 'city'],
         raw: true,
         logging,

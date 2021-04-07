@@ -31,6 +31,7 @@ const argv = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
+        default: false,
     })
     .option('dry', {
         type: 'boolean',
