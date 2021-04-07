@@ -9,7 +9,7 @@ export default {
             ): [Property]
             propertySearchWithInRange(
                 pos: Point!
-                range: Int = 1
+                range: Float = 1
                 rangeUnit: GeoUnit = km
                 perPage: Int = 100
                 page: Int = 1
