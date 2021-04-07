@@ -21,7 +21,6 @@ const perfObserver = new PerformanceObserver(
     }
 )
 const argv = yargs
-    .command('--file', 'absolute path to csv file to parse')
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
@@ -30,6 +29,7 @@ const argv = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
+        default: false,
     })
     .option('dry', {
         type: 'boolean',
@@ -63,17 +63,7 @@ host: \t\t${process.env.DB_HOSTNAME}
 port: \t\t${process.env.DB_PORT}
 database: \t${process.env.DB_NAME}
 dialect: \t${process.env.DB_DIALECT}
-
---------------------------------------------------
-
-file to parse: ${file}
 `);
-
-if (!file) {
-    console.log(`>>> NO FILE TO PARSE`);
-
-    process.exit(0);
-}
 
 (async () => {
     performance.mark('init');
