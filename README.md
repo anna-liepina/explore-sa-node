@@ -53,7 +53,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 * [snyk](https://snyk.io/)
 
 ### where to get data-sets
- * [UK Postcodes](https://www.freemaptools.com/download-uk-postcode-lat-lng.htm)
+ * [UK Postcodes](https://www.getthedata.com/open-postcode-geo)
  * [UK house sales data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads)
 
 ### how to install
