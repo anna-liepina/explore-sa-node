@@ -59,6 +59,7 @@ export default {
                     offset,
                     limit,
                     order: [
+                        ['guid', 'ASC'],
                         ['date', 'ASC'],
                     ],
                     raw: true,
