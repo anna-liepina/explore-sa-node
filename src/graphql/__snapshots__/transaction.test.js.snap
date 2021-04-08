@@ -5,6 +5,11 @@ Object {
   "date": "2019-04-26",
   "id": "1",
   "price": 375000,
+  "property": Object {
+    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "saon": "cd435dfdc23e7d95665b678f176329c14ac2af4a",
+    "street": "PRIZE WALK",
+  },
 }
 `;
 
@@ -14,16 +19,31 @@ Array [
     "date": "2019-04-26",
     "id": "2",
     "price": 545000,
+    "property": Object {
+      "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+      "saon": "1b762366cdf7cc97e2764e932f60c0edc61b5e86",
+      "street": "PRIZE WALK",
+    },
   },
   Object {
     "date": "2019-04-26",
     "id": "1",
     "price": 375000,
+    "property": Object {
+      "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+      "saon": "cd435dfdc23e7d95665b678f176329c14ac2af4a",
+      "street": "PRIZE WALK",
+    },
   },
   Object {
     "date": "2019-03-25",
     "id": "3",
     "price": 341250,
+    "property": Object {
+      "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+      "saon": "fe78fa628e2a410375cb37144fbdff5a766fcee3",
+      "street": "PRIZE WALK",
+    },
   },
 ]
 `;

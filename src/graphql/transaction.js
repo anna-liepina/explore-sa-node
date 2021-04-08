@@ -15,6 +15,7 @@ export default {
             id: ID
             price: Int
             date: String
+            property: Property
         }
     `,
     resolvers: {
@@ -64,6 +65,11 @@ export default {
                     ],
                     raw: true,
                 });
+            },
+        },
+        Transaction: {
+            property: (entity, args, { dataloader }, info) => {
+                return dataloader.getProperty.load(entity.guid);
             },
         },
     },
