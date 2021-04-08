@@ -8,6 +8,11 @@ describe('GraphQL: Transaction', () => {
                         id
                         price
                         date
+                        property {
+                            street
+                            paon
+                            saon
+                        }
                     }
                 }`
             });
@@ -71,6 +76,11 @@ describe('GraphQL: Transaction', () => {
                         id
                         price
                         date
+                        property {
+                            street
+                            paon
+                            saon
+                        }
                     }
                 }`
             });
@@ -87,6 +97,11 @@ describe('GraphQL: Transaction', () => {
                         id
                         price
                         date
+                        property {
+                            street
+                            paon
+                            saon
+                        }
                     }
                 }`
             });
