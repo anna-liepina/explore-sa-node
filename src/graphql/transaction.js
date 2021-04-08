@@ -50,6 +50,9 @@ export default {
                     where,
                     offset,
                     limit,
+                    order: [
+                        ['date', 'ASC'],
+                    ],
                     raw: true,
                 });
             },
