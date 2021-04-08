@@ -7,7 +7,7 @@ const os = require('os');
 const yargs = require('yargs');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
-const executeMigrations = require('./parse:utils')('parse:timeline', orm);
+const executeMigrations = require('./parse:utils')('parse:timelines', orm);
 
 const { performance, PerformanceObserver } = require('perf_hooks');
 
@@ -35,16 +35,12 @@ const argv = yargs
         type: 'boolean',
         description: 'dry run - do not affect a database',
     })
-    .option('update', {
-        type: 'boolean',
-        description: 'flush update [do not drop/restore indexes, useful with small csv files]',
-    })
     .help()
     .argv;
 
 perfObserver.observe({ entryTypes: ['measure'], buffer: true });
 
-const { file, sql: logging, dry: dryRun, limit, update } = argv;
+const { file, sql: logging, dry: dryRun, limit } = argv;
 
 console.log(`
 --------------------------------------------------
