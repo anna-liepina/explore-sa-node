@@ -2,15 +2,15 @@ import DataLoader from 'dataloader';
 import { processSQLResult } from './utils';
 
 export default (orm) => ({
-    getPostcode: new DataLoader(
-        (postcode) => {
-            return orm.Postcode.findAll({
+    getProperty: new DataLoader(
+        (guid) => {
+            return orm.Property.findAll({
                 where: {
-                    postcode,
+                    guid,
                 },
                 raw: true,
             })
-                .then((v) => processSQLResult(postcode, 'postcode', v))
+                .then((v) => processSQLResult(guid, 'guid', v))
         }
     ),
 })

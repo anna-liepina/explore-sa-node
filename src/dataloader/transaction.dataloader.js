@@ -5,7 +5,6 @@ export default (orm) => ({
     getTransactions: new DataLoader(
         (guid) => {
             return orm.Transaction.findAll({
-                attributes: ['id', 'guid', 'price', 'date'],
                 order: [['date', 'ASC']],
                 where: {
                     guid,

@@ -1,7 +1,11 @@
 export default {
     typeDefs: `
         extend type Query {
-            postcodeSearch(pattern: String!, perPage: Int = 25, page: Int = 1): [Postcode]
+            postcodeSearch(
+                pattern: String!
+                perPage: Int = 100
+                page: Int = 1
+            ): [Postcode]
         }
 
         type Postcode {

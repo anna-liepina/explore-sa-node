@@ -13,10 +13,9 @@
 | __tests__     | [![tests][ci.tests-master-badge]][ci.tests-master]            | [![tests][ci.tests-heroku-badge]][ci.tests-heroku]
 | __coverage__  | [![coverage][ci.coverage-master-badge]][ci.coverage-master]   | [![coverage][ci.coverage-heroku-badge]][ci.coverage-heroku]
 
-##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS!
-
 # 'Data Explorer' GraphQL back-end
 
+##### THIS IS A SPARE TIME PROJECT, WORK IN PROGRESS!
 the project aims to parse UK government data on the property sales, and some geo data to link postcodes by latitude and longitude.
 This project is done to demonstrate my knowledge, which I learned recently as I try to get into the software development industry, I had a mentor to help me out
 
@@ -24,7 +23,9 @@ the aim is to build a scalable graphql backend, which can quickly return request
 to demonstrate complex cases of GraphQL use, such as N+1 problem, scaling where more than one database required [write/read nodes]
 complex automated QA, anonymized data seeding for QA purposes, flexibility on javascript, some limits of Javascript, where for example by default object in V8 object can have ~8.4mil of fields, but Map can handle way more. Queue system for data processing
 
-live [DEMO](https://data-explorer.co.uk/graphql), and front-end repository can be found [here](https://github.com/anna-liepina/explore-cwa-react)
+* GraphQL live [demo](https://api.data-explorer.co.uk/graphql)
+* Web Application [example](https://github.com/anna-liepina/explore-cwa-react) of how data can me consumed
+  * Web Application live [demo](https://www.data-explorer.co.uk) 
 
 ### software requirements
 
@@ -50,10 +51,9 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 * [codecov](https://codecov.io/)
 * [code climate](https://codeclimate.com/)
 * [snyk](https://snyk.io/)
-* [heroku](https://www.heroku.com/)
 
 ### where to get data-sets
- * [UK Postcodes](https://www.freemaptools.com/download-uk-postcode-lat-lng.htm)
+ * [UK Postcodes](https://www.getthedata.com/open-postcode-geo)
  * [UK house sales data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads)
 
 ### how to install
@@ -101,7 +101,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 | PORT                | 8081          | number    | port on which application will be made available
 | SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/server.key`
 | SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/server.key`
-| ***                 | ***           | ***       | if replica's config specified then used only for writes
+| ***                 | ***           | ***       | if replica's config specified then non-replica connections are used only writes
 | DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
 | DB_USERNAME         | root          | string    | database user
 | DB_PASSWORD         | password      | string    | database user's password
@@ -129,10 +129,10 @@ code, migrations, and fixtures are written in a way, that is supports 3 differen
 
 | database      | version   | adapter                                           | main purpose
 |---            |---        | ---                                               | ---
-| MySQL*        | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | local development
-| PostgreSQL**  | 11        | [pg](https://www.npmjs.com/package/pg)            | 'heroku' deployment
-| SQLite**      | 4         | [sqlite3](https://www.npmjs.com/package/sqlite3)  | QA Automation & CI pipelines
+| MySQL         | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | local development & production
+| PostgreSQL    | 11        | [pg](https://www.npmjs.com/package/pg)            | local development & production
+| SQLite        | 4         | [sqlite3](https://www.npmjs.com/package/sqlite3)  | QA Automation & CI
 
 * if you use MySQL 5.7+ you need make sure it can work with [mysql native password](https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661)
 
-* PostrgeSQL and SQLite is partially supported
+* PostrgeSQL and SQLite are partially supported, because some of the queuries are not fully engine-agnostic, and some function do not exists in SQLite for example

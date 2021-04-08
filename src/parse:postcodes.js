@@ -9,6 +9,7 @@ const csv = require('csv-parse');
 const yargs = require('yargs');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
+const executeMigrations = require('./parse:utils')('parse:postcodes', orm);
 
 const { performance, PerformanceObserver } = require('perf_hooks');
 
@@ -31,17 +32,22 @@ const argv = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
+        default: false,
     })
     .option('dry', {
         type: 'boolean',
         description: 'dry run - do not affect a database',
+    })
+    .option('update', {
+        type: 'boolean',
+        description: 'flush update [do not drop/restore indexes, useful with small csv files]',
     })
     .help()
     .argv;
 
 perfObserver.observe({ entryTypes: ['measure'], buffer: true });
 
-const { file, sql: logging, dry: dryRun, limit } = argv;
+const { file, sql: logging, dry: dryRun, limit, update } = argv;
 
 console.log(`
 --------------------------------------------------
@@ -52,6 +58,7 @@ name\t\tdescription
 --limit\t\tamount of records in one bulk SQL qeuery
 --sql\t\tprint out SQL queries
 --dry\t\tdry run do not execute SQL
+--update\tflush update [do not drop/restore indexes, useful with small csv files]
 
 --------------------------------------------------
 database connection info:
@@ -101,6 +108,10 @@ if (!file) {
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
 
+    if (!dryRun && !update) {
+        await executeMigrations('down');
+    }
+
     const queue = new PQueue({ concurrency: os.cpus().length });
 
     const parser = fs
@@ -116,19 +127,19 @@ if (!file) {
     performance.mark(`iter-${iter}`);
 
     for await (const row of parser) {
-        const [, postcode, lat, lng] = row;
+        const [postcode, _1, _2, _3, _4, _5, _6, lat, lng] = row;
+
+        i++;
+
+        if (isNaN(lat) || isNaN(lng)) {
+            continue;
+        }
 
         const obj = {
             postcode,
             lat,
             lng,
         };
-
-        i++;
-
-        if (!lat || !lng) {
-            continue;
-        }
 
         if (!postcodeMap.has(postcode)) {
             postcodeMap.set(postcode);
@@ -141,7 +152,7 @@ if (!file) {
 
             console.log(`
 ------------------------------------
->>> missing data on postcodes: ${(i - postcodeMap.size).toLocaleString()}
+>>> postcodes without proper coodinates: ${(i - postcodeMap.size).toLocaleString()}
 >>> postcodes proccessed: ${postcodeMap.size.toLocaleString()}
 >>> postcodes in this batch: ${postcodes.length.toLocaleString()}
 >>> SQL transactions in queue: ${queue.size.toLocaleString()}
@@ -165,13 +176,22 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
     queue.add(persist(orm.Postcode, postcodes));
 
-    console.log(`
+    if (!dryRun) {
+        console.log(`
 ------------------------------------
 execute queued SQL ...
 ------------------------------------`);
 
-    if (!dryRun) {
         await queue.onEmpty();
+    }
+
+    if (!dryRun && !update) {
+        console.log(`
+------------------------------------
+>>> restoring database indexes ...
+------------------------------------`);
+
+        await executeMigrations('up')
     }
 
     console.log(`
@@ -187,66 +207,3 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
     performance.mark('end');
     performance.measure('total', 'init', 'end');
 })()
-
-// 352910,SK7 0AY,53.335323,-2.17216
-// 1773486,EN77 1AA,,
-// 1773487,EN77 1AB,,
-// 1773488,EN77 1AD,,
-// 1773489,EN77 1AE,,
-// 1773490,EN77 1AN,,
-// 1773491,EN77 1AS,,
-// 1773492,EN77 1AU,,
-// 1773493,EN77 1AW,,
-// 1773494,EN77 1AZ,,
-// 1773495,EN77 1BA,,
-// 1773496,EN77 1BD,,
-// 1773497,EN77 1BE,,
-// 1773498,EN77 1DL,,
-// 1773499,EN77 1ES,,
-// 1773500,EN77 1EW,,
-// 1773501,EN77 1FF,,
-// 1773502,EN77 1FN,,
-// 1773503,EN77 1FP,,
-// 1773504,EN77 1HQ,,
-// 1773505,EN77 1JL,,
-// 1773506,EN77 1LD,,
-// 1773507,EN77 1LG,,
-// 1773508,EN77 1LJ,,
-// 1773509,EN77 1LL,,
-// 1773510,EN77 1LX,,
-// 1773511,EN77 1NF,,
-// 1773512,EN77 1NS,,
-// 1773513,EN77 1NT,,
-// 1773514,EN77 1NU,,
-// 1773515,EN77 1NW,,
-// 1773516,EN77 1PH,,
-// 1773517,EN77 1PS,,
-// 1773518,EN77 1QA,,
-// 1773519,EN77 1RB,,
-// 1773520,EN77 1RG,,
-// 1773521,EN77 1RP,,
-// 1773522,EN77 1RS,,
-// 1773523,EN77 1RZ,,
-// 1773524,EN77 1SA,,
-// 1773525,EN77 1SE,,
-// 1773526,EN77 1SF,,
-// 1773527,EN77 1SP,,
-// 1773528,EN77 1SR,,
-// 1773529,EN77 1SW,,
-// 1773530,EN77 1SZ,,
-// 1773531,EN77 1TA,,
-// 1773532,EN77 1TE,,
-// 1773533,EN77 1TF,,
-// 1773534,EN77 1TG,,
-// 1773535,EN77 1TJ,,
-// 1773536,EN77 1TQ,,
-// 1773537,EN77 1TS,,
-// 1773538,EN77 1TW,,
-// 1773539,EN77 1TX,,
-// 1773540,EN77 1UA,,
-// 1773541,EN77 1UB,,
-// 1773542,EN77 1UF,,
-// 1773543,EN77 1WB,,
-// 1773544,EN77 1XY,,
-// 1773545,EN77 1YL,,
-// 1773546,EN77 1ZA,,

@@ -3,9 +3,10 @@ export default {
         extend type Query {
             transaction(id: ID!): Transaction
             transactionSearch(
+                postcode: String
                 from: String
                 to: String
-                perPage: Int = 25
+                perPage: Int = 100
                 page: Int = 1
             ): [Transaction]
         }
@@ -14,6 +15,7 @@ export default {
             id: ID
             price: Int
             date: String
+            property: Property
         }
     `,
     resolvers: {
@@ -24,10 +26,17 @@ export default {
                     raw: true,
                 });
             },
-            transactionSearch: (entity, { from, to, perPage: limit, page }, { orm }, info) => {
+            transactionSearch: (entity, { postcode, from, to, perPage: limit, page }, { orm }, info) => {
                 const offset = (page - 1) * limit;
 
                 const where = {};
+
+                if (postcode) {
+                    where.guid = {
+                        [orm.Sequelize.Op.like]: `${postcode}%`,
+                    }
+                }
+
                 if (from) {
                     where.date = {
                         [orm.Sequelize.Op.gte]: from,
@@ -40,7 +49,7 @@ export default {
                     };
                 }
 
-                if (from || to) {
+                if (from && to) {
                     where.date = {
                         [orm.Sequelize.Op.between]: [from, to],
                     };
@@ -50,8 +59,17 @@ export default {
                     where,
                     offset,
                     limit,
+                    order: [
+                        ['guid', 'ASC'],
+                        ['date', 'ASC'],
+                    ],
                     raw: true,
                 });
+            },
+        },
+        Transaction: {
+            property: (entity, args, { dataloader }, info) => {
+                return dataloader.getProperty.load(entity.guid);
             },
         },
     },

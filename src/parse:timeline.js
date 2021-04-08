@@ -7,7 +7,7 @@ const os = require('os');
 const yargs = require('yargs');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
-const executeMigrations = require('./parse:utils')('parse:timeline', orm);
+const executeMigrations = require('./parse:utils')('parse:timelines', orm);
 
 const { performance, PerformanceObserver } = require('perf_hooks');
 
@@ -21,7 +21,6 @@ const perfObserver = new PerformanceObserver(
     }
 )
 const argv = yargs
-    .command('--file', 'absolute path to csv file to parse')
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
@@ -30,21 +29,18 @@ const argv = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
+        default: false,
     })
     .option('dry', {
         type: 'boolean',
         description: 'dry run - do not affect a database',
-    })
-    .option('update', {
-        type: 'boolean',
-        description: 'flush update [do not drop/restore indexes, useful with small csv files]',
     })
     .help()
     .argv;
 
 perfObserver.observe({ entryTypes: ['measure'], buffer: true });
 
-const { file, sql: logging, dry: dryRun, limit, update } = argv;
+const { file, sql: logging, dry: dryRun, limit } = argv;
 
 console.log(`
 --------------------------------------------------
@@ -63,17 +59,7 @@ host: \t\t${process.env.DB_HOSTNAME}
 port: \t\t${process.env.DB_PORT}
 database: \t${process.env.DB_NAME}
 dialect: \t${process.env.DB_DIALECT}
-
---------------------------------------------------
-
-file to parse: ${file}
 `);
-
-if (!file) {
-    console.log(`>>> NO FILE TO PARSE`);
-
-    process.exit(0);
-}
 
 (async () => {
     performance.mark('init');
