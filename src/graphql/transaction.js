@@ -48,7 +48,7 @@ export default {
                     };
                 }
 
-                if (from || to) {
+                if (from && to) {
                     where.date = {
                         [orm.Sequelize.Op.between]: [from, to],
                     };
