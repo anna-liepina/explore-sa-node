@@ -3,6 +3,7 @@ export default {
         extend type Query {
             transaction(id: ID!): Transaction
             transactionSearch(
+                postcode: String
                 from: String
                 to: String
                 perPage: Int = 100
@@ -24,10 +25,17 @@ export default {
                     raw: true,
                 });
             },
-            transactionSearch: (entity, { from, to, perPage: limit, page }, { orm }, info) => {
+            transactionSearch: (entity, { postcode, from, to, perPage: limit, page }, { orm }, info) => {
                 const offset = (page - 1) * limit;
 
                 const where = {};
+
+                if (postcode) {
+                    where.guid = {
+                        [orm.Sequelize.Op.like]: `${postcode}%`,
+                    }
+                }
+
                 if (from) {
                     where.date = {
                         [orm.Sequelize.Op.gte]: from,
