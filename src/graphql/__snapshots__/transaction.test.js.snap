@@ -8,6 +8,28 @@ Object {
 }
 `;
 
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcode range: 1st page 1`] = `
+Array [
+  Object {
+    "date": "2019-03-25",
+    "id": "3",
+    "price": 341250,
+  },
+  Object {
+    "date": "2019-04-26",
+    "id": "1",
+    "price": 375000,
+  },
+  Object {
+    "date": "2019-04-26",
+    "id": "2",
+    "price": 545000,
+  },
+]
+`;
+
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcode range: 2nd page 1`] = `Array []`;
+
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date range 1`] = `
 Array [
   Object {
