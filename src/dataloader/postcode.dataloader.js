@@ -5,7 +5,6 @@ export default (orm) => ({
     getPostcode: new DataLoader(
         (postcode) => {
             return orm.Postcode.findAll({
-                attributes: ['postcode', 'lat', 'lng'],
                 where: {
                     postcode,
                 },
