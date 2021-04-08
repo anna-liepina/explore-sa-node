@@ -51,19 +51,19 @@ Array [
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] without criteria 1`] = `
 Array [
   Object {
-    "date": "2019-04-26",
-    "id": "1",
-    "price": 375000,
+    "date": "2007-08-22",
+    "id": "36",
+    "price": 229400,
   },
   Object {
-    "date": "2019-04-26",
-    "id": "2",
-    "price": 545000,
+    "date": "2013-10-23",
+    "id": "65",
+    "price": 100000,
   },
   Object {
-    "date": "2019-03-25",
-    "id": "3",
-    "price": 341250,
+    "date": "2013-12-03",
+    "id": "67",
+    "price": 130000,
   },
 ]
 `;
