@@ -2,7 +2,7 @@
 
 module.exports = {
     /** @see parse:properties.js */
-    'parse:timelines': true,
+    'parse:timeline': true,
 
     up: (queryInterface, Sequelize) => {
         return Promise.all([
