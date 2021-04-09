@@ -191,7 +191,7 @@ execute queued SQL ...
 >>> restoring database indexes ...
 ------------------------------------`);
 
-        await executeMigrations('up')
+        await executeMigrations('up');
     }
 
     console.log(`
