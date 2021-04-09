@@ -7,7 +7,7 @@ const os = require('os');
 const yargs = require('yargs');
 const { default: PQueue } = require('p-queue');
 const orm = require('./orm');
-const executeMigrations = require('./parse:utils')('parse:timelines', orm);
+const executeMigrations = require('./parse:utils')('parse:timeline', orm);
 
 const { performance, PerformanceObserver } = require('perf_hooks');
 
