@@ -25,7 +25,7 @@ complex automated QA, anonymized data seeding for QA purposes, flexibility on ja
 
 * GraphQL live [demo](https://api.data-explorer.co.uk/graphql)
 * Web Application [example](https://github.com/anna-liepina/explore-cwa-react) of how data can be consumed
-  * Web Application live [demo](https://www.data-explorer.co.uk) 
+  * Web Application live [demo](https://www.data-explorer.co.uk) 
 
 ### software requirements
 
@@ -53,8 +53,8 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 * [snyk](https://snyk.io/)
 
 ### where to get data-sets
- * [UK Postcodes](https://www.getthedata.com/open-postcode-geo)
- * [UK house sales data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads)
+ * [UK Postcodes](https://www.getthedata.com/open-postcode-geo)
+ * [UK house sales data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads)
 
 ### how to install
 
@@ -63,9 +63,9 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 ### how to run tests
 
 * `$ make test` or `$ npm test`
-  * __optional__ [ 'jest' CLI params](https://facebook.github.io/jest/docs/en/cli.html), examples:
-    * to collect coverage, example: `$ npm test -- --coverage`, report will be located in __./coverage__ directory
-    * to execute tests __only__ in a specific file, for example: `$ npm test src/graphql/user.test.js`
+  * __optional__ [ 'jest' CLI params](https://facebook.github.io/jest/docs/en/cli.html), examples:
+    * to collect coverage, example: `$ npm test -- --coverage`, report will be located in __./coverage__ directory
+    * to execute tests __only__ in a specific file, for example: `$ npm test src/graphql/user.test.js`
 
 ### how to set up a database
 
@@ -81,7 +81,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 * `$ make serve`, there is no *npm* equivalent
 * if you __only__ need to generate static assets
-  * `$ make build` or `$ npm run build` - generated assets will be located in __./build__ directory
+  * `$ make build` or `$ npm run build` - generated assets will be located in __./build__ directory
 
 ### how to run containers with different variables using 'make'
 
@@ -96,32 +96,32 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 ### used environment variables
 
-| variable            | default value | used as   | purpose
-| ---                 | ---           | ---       | ---
-| PORT                | 8081          | number    | port on which application will be made available
-| SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/server.key`
-| SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/server.key`
-| ***                 | ***           | ***       | if replica's config specified then non-replica connections are used only writes
-| DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
-| DB_USERNAME         | root          | string    | database user
-| DB_PASSWORD         | password      | string    | database user's password
-| DB_PORT             | 3306          | number    | port on which database can be reached
-| DB_NAME             | explore       | string    | database [schema] name
-| DB_DIALECT          | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
-| DB_REPLICA_HOSTNAME | 127.0.0.1     | string    | database replica's host for read-only
-| DB_REPLICA_USERNAME | root          | string    | database replica's user for read-only
-| DB_REPLICA_PASSWORD | password      | string    | database replica's user's password for read-only
+| variable            | default value | used as   | purpose
+| ---                 | ---           | ---       | ---
+| PORT                | 8081          | number    | port on which application will be made available
+| SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/server.key`
+| SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/server.key`
+| ***                 | ***           | ***       | if replica's config specified then non-replica connections are used only writes
+| DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
+| DB_USERNAME         | root          | string    | database user
+| DB_PASSWORD         | password      | string    | database user's password
+| DB_PORT             | 3306          | number    | port on which database can be reached
+| DB_NAME             | explore       | string    | database [schema] name
+| DB_DIALECT          | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
+| DB_REPLICA_HOSTNAME | 127.0.0.1     | string    | database replica's host for read-only
+| DB_REPLICA_USERNAME | root          | string    | database replica's user for read-only
+| DB_REPLICA_PASSWORD | password      | string    | database replica's user's password for read-only
 
 
 ### data processors
 
-| NPM command            | corresponding JS file
-| ---                    | ---
-| `parse`                | `src/parse:properties`
-| `parse:postcodes`      | `src/parse:postcodes`
-| `parse:postcodes:geo`  | `src/parse:postcodes:geo`
-| `parse:area`           | `src/parse:area`
-| `parse:timeline`       | `src/parse:timeline`
+| NPM command            | corresponding JS file
+| ---                    | ---
+| `parse`                | `src/parse:properties`
+| `parse:postcodes`      | `src/parse:postcodes`
+| `parse:postcodes:geo`  | `src/parse:postcodes:geo`
+| `parse:area`           | `src/parse:area`
+| `parse:timeline`       | `src/parse:timeline`
 
 
 code, migrations, and fixtures are written in a way, that is supports 3 different database engines
