@@ -128,7 +128,8 @@ if (!file) {
     let iter = 0;
     let corrupted = 0;
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const concurrency = os.cpus().length;
+    const queue = new PQueue({ concurrency });
 
     performance.mark(`iter-${iter}`);
 
@@ -186,7 +187,7 @@ if (!file) {
             i += transactions.length;
 
             queue.add(persist(orm.Property, [...properties]));
-            const job = queue.add(persist(orm.Transaction, [...transactions]));
+            queue.add(persist(orm.Transaction, [...transactions]));
 
             console.log(`
 ------------------------------------
@@ -210,7 +211,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 ------------------------------------
 >>> catching up with SQL queue ...
 ------------------------------------`);
-                await job;
+                await queue.onSizeLessThan(concurrency);
             }
         }
     }
