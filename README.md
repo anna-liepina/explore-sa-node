@@ -122,6 +122,8 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 | `parse:area`           | `src/parse:area`
 | `parse:timeline`       | `src/parse:timeline`
 
+example: `npm run parse`
+
 ### supported databases
 
 | database      | version   | adapter                                           | main purpose
