@@ -15,17 +15,16 @@
 
 # 'Data Explorer' GraphQL back-end
 
-##### THIS IS A SPARE-TIME PROJECT, A WORK IN PROGRESS!
-the project aims to parse UK government data on property sales, and some geo data to link postcodes by latitude and longitude.
-This project is done to demonstrate my knowledge, which I learned recently as I try to get into the software development industry, I had a mentor to help me out
+This project is done to demonstrate my knowledge, which I learned recently as I try to get into the software development industry, I had a mentor to help me out.
+The project aims to parse UK government data on property sales, and perform statistical analysis, as well as link it with geology data, like addresses and latitude and longitude.
 
 the aim is to build a scalable graphql backend, which can quickly return requested results
 to demonstrate complex cases of GraphQL use, such as N+1 problem, scaling where more than one database is required [write/read nodes]
-complex automated QA, anonymized data seeding for QA purposes, flexibility on javascript, some limits of Javascript, where for example by default object in V8 object can have ~8.4mil of fields, but Map can handle way more. Queue system for data processing
+complex automated QA, anonymized data seeding for QA purposes, and some limits of JavaScript, where for example by default objects in V8 object can have ~8.4mil of fields, but Map can handle way more. Queue system for data processing.
 
-* GraphQL live [demo](https://api.data-explorer.co.uk/graphql)
+* GraphQL live [demo](https://api.data-explorer.co.uk/graphql) [currently unavailable]
 * Web Application [example](https://github.com/anna-liepina/explore-cwa-react) of how data can be consumed
-  * Web Application live [demo](https://www.data-explorer.co.uk) 
+  * Web Application live [demo](https://www.data-explorer.co.uk) [currently unavailable]
 
 ### software requirements
 
@@ -53,7 +52,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 * [snyk](https://snyk.io/)
 
 ### where to get data-sets
- * [UK Postcodes](https://www.getthedata.com/open-postcode-geo)
+ * [UK postcodes](https://www.getthedata.com/open-postcode-geo)
  * [UK house sales data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads)
 
 ### how to install
@@ -91,7 +90,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 * *heroku* -> current __production__, contains *production specific changes*, trigger production deploment on *every push*
 * *master* -> most upto date __production ready__, all pull requests in to this branch got mandatory check 'ci/circleci: jest'
-* *feature branches* -> get merged into master branch when they are ready and mandatory checks passed
+* *feature branches* -> get merged into the master branch when they are ready and mandatory checks passed
 * *CI executes tests in an isolated environment*
 
 ### used environment variables
@@ -123,18 +122,14 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 | `parse:area`           | `src/parse:area`
 | `parse:timeline`       | `src/parse:timeline`
 
-
-code, migrations, and fixtures are written in a way, that is supports 3 different database engines
 ### supported databases
-
-code, migrations, and fixtures are written in a way, that is supports 3 different database engines
 
 | database      | version   | adapter                                           | main purpose
 | ---           | ---       | ---                                               | ---
-| MySQL         | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | local development & production
-| PostgreSQL    | 11        | [pg](https://www.npmjs.com/package/pg)            | local development & production
+| MySQL         | 8         | [mysql2](https://www.npmjs.com/package/mysql2)    | production
+| PostgreSQL    | 11        | [pg](https://www.npmjs.com/package/pg)            | production
 | SQLite        | 4         | [sqlite3](https://www.npmjs.com/package/sqlite3)  | QA Automation & CI
 
 * if you use MySQL 5.7+ you need to make sure it can work with [mysql native password](https://medium.com/@crmcmullen/how-to-run-mysql-8-0-with-native-password-authentication-502de5bac661)
 
-* PostrgeSQL and SQLite are partially supported because some of the queries are not fully engine-agnostic, and some function do not exist in SQLite for example
+* PostrgeSQL and SQLite are partially supported because some of the queries are not fully engine-agnostic, and some functions do not exist in SQLite for example
