@@ -211,6 +211,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 ------------------------------------
 >>> catching up with SQL queue ...
 ------------------------------------`);
+
                 await queue.onSizeLessThan(concurrency);
             }
         }
