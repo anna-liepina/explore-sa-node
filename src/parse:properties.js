@@ -117,12 +117,12 @@ if (!file) {
     const properties = [];
     const transactions = [];
 
-    const propertiesGUIDMap = new Map();
+    const propertiesGUIDMap = new Set();
 
     await orm.Property.findAll({
         attributes: ['guid'],
         raw: true,
-    }).then((data) => data.forEach((v) => propertiesGUIDMap.set(v.guid)));
+    }).then((data) => data.forEach((v) => propertiesGUIDMap.add(v.guid)));
 
     let i = 0;
     let iter = 0;
@@ -167,7 +167,7 @@ if (!file) {
             continue;
         }
 
-        obj.guid = `${obj.postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`;
+        obj.guid = `${obj.postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`.toUpperCase();
 
         transactions.push({
             guid: obj.guid,
@@ -178,7 +178,7 @@ if (!file) {
         });
 
         if (!propertiesGUIDMap.has(obj.guid)) {
-            propertiesGUIDMap.set(obj.guid);
+            propertiesGUIDMap.add(obj.guid);
 
             properties.push(obj);
         }
