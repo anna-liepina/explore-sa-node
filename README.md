@@ -29,7 +29,7 @@ complex automated QA, anonymized data seeding for QA purposes, and some limits o
 ### software requirements
 
 if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ and __[docker-compose](https://docs.docker.com/compose/install/)__ are required, and local __[node.js](https://nodejs.org/)__ with __[npm](https://www.npmjs.com/)__ are optional
-* [node.js](https://nodejs.org/) v14+
+* [node.js](https://nodejs.org/) v18+
 * [npm](https://www.npmjs.com/) v5+ or [yarn](https://yarnpkg.com/)
 * __optional__ [makefile](https://en.wikipedia.org/wiki/Makefile) comes out of the box in *unix* enviroments
 * __optional__ [docker](https://www.docker.com/) v18.09+
