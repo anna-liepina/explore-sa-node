@@ -3,15 +3,16 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
-const fs = require('fs');
-const os = require('os');
-const csv = require('csv-parse');
-const yargs = require('yargs');
+import fs from 'fs';
+import os from 'os';
+import yargs from 'yargs';
+import csv from 'csv-parse';
 const { default: PQueue } = require('p-queue');
-const orm = require('./orm');
+import orm from './orm';
+console.log( { orm });
 const executeMigrations = require('./parse:utils')('parse:properties', orm);
 
-const { performance, PerformanceObserver } = require('perf_hooks');
+import { performance, PerformanceObserver } from 'perf_hooks';
 
 const perfObserver = new PerformanceObserver(
     (items) => {

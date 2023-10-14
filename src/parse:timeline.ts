@@ -3,13 +3,13 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
-const os = require('os');
-const yargs = require('yargs');
+import os from 'os';
+import yargs from 'yargs';
 const { default: PQueue } = require('p-queue');
-const orm = require('./orm');
+import orm from './orm';
 const executeMigrations = require('./parse:utils')('parse:timeline', orm);
 
-const { performance, PerformanceObserver } = require('perf_hooks');
+import { performance, PerformanceObserver } from 'perf_hooks';
 
 const perfObserver = new PerformanceObserver(
     (items) => {
