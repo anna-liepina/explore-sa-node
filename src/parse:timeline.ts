@@ -9,7 +9,7 @@ import yargs from 'yargs';
 import PQueue from 'p-queue';
 import orm from './orm';
 import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
-import { TransactionType } from './models/transaction';
+import type { TransactionType } from './models/transaction';
 
 const executeMigrations = composeOperation(OperationMarker.timeline, orm);
 perfObserver().observe({ entryTypes: ['measure'], buffered: true });
