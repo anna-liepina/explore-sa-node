@@ -249,7 +249,7 @@ exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 3] by coo
     ],
   },
   {
-    "distance": 91.49705268954928,
+    "distance": 91.4970526895493,
     "paon": "47aab377e9f899aef28c7d6c5a9f6d0a15d22d1e",
     "postcode": {
       "lat": 51.548685433,
