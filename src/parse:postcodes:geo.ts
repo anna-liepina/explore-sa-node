@@ -11,7 +11,7 @@ import csv from 'csv-parse'
 import PQueue from 'p-queue';
 import orm from './orm'
 import { perfObserver } from './parse:utils';
-import type{ PostcodeType } from './models/postcode';
+import type { PostcodeType } from './models/postcode';
 
 perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
