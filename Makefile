@@ -28,6 +28,7 @@ DB_DIALECT := $(.DB_DIALECT)
 	-v $(PWD)/.babelrc:/www/.babelrc \
 	-v $(PWD)/.env:/www/.env \
 	-v $(PWD)/.sequelizerc:/www/.sequelizerc \
+	-v $(PWD)/tsconfig.json:/www/tsconfig.json \
 	-v $(PWD)/nodemon.json:/www/nodemon.json
 
 .ENV_VARIABLES := \
