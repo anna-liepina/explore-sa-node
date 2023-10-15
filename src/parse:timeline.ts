@@ -3,23 +3,16 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
+import { performance } from 'perf_hooks';
 import os from 'os';
 import yargs from 'yargs';
-const { default: PQueue } = require('p-queue');
+import PQueue from 'p-queue';
 import orm from './orm';
-const executeMigrations = require('./parse:utils')('parse:timeline', orm);
+import { composeOperation, perfObserver } from './parse:utils';
 
-import { performance, PerformanceObserver } from 'perf_hooks';
+const executeMigrations = composeOperation('parse:timeline', orm);
+const perf = perfObserver();
 
-const perfObserver = new PerformanceObserver(
-    (items) => {
-        items
-            .getEntries()
-            .forEach((o) => {
-                console.log(`duration: ${(o.duration / 1000).toFixed(2)}s`);
-            });
-    }
-)
 const argv = yargs
     .option('limit', {
         type: 'number',
@@ -38,7 +31,7 @@ const argv = yargs
     .help()
     .argv;
 
-perfObserver.observe({ entryTypes: ['measure'], buffer: true });
+perf.observe({ entryTypes: ['measure'], buffer: true });
 
 const { file, sql: logging, dry: dryRun, limit } = argv;
 
@@ -249,8 +242,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 >>> --------------------------------
 >>> queued in total: ${j.toLocaleString()}
 >>> SQL transactions in queue: ${queue.size.toLocaleString()}
->>> SQL workers used ${queue.pending} of ${queue.concurrency}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
+>>> SQL workers used ${queue.pending} of ${queue.concurrency}`);
 
         performance.mark(`iter-${iter}`);
         performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
@@ -286,7 +278,6 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
 ------------------------------------
 >>> >> recorded ${i.toLocaleString()}
 >>> >> postcode areas proccessed: ${areas.length.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');

@@ -3,25 +3,18 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
+import { performance } from 'perf_hooks';
 import fs from 'fs';
 import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
-const { default: PQueue } = require('p-queue');
+import PQueue from 'p-queue';
 import orm from './orm';
-const executeMigrations = require('./parse:utils')('parse:properties', orm);
+import { composeOperation, perfObserver } from './parse:utils';
 
-import { performance, PerformanceObserver } from 'perf_hooks';
+const executeMigrations = composeOperation('parse:properties', orm);
+const perf = perfObserver();
 
-const perfObserver = new PerformanceObserver(
-    (items) => {
-        items
-            .getEntries()
-            .forEach((o) => {
-                console.log(`duration: ${(o.duration / 1000).toFixed(2)}s`);
-            });
-    }
-)
 const argv = yargs
     .command('--file', 'absolute path to csv file to parse')
     .option('limit', {
@@ -45,7 +38,7 @@ const argv = yargs
     .help()
     .argv;
 
-perfObserver.observe({ entryTypes: ['measure'], buffer: true });
+perf.observe({ entryTypes: ['measure'], buffer: true });
 
 const { file, sql: logging, dry: dryRun, limit, update } = argv;
 
@@ -202,8 +195,7 @@ if (!fs.existsSync(file)) {
 >>> unique properties in batch: ${properties.length.toLocaleString()}
 >>> unique properties so far: ${propertiesGUIDMap.size.toLocaleString()}
 >>> SQL transactions in queue: ${queue.size.toLocaleString()}
->>> SQL workers used ${queue.pending} of ${queue.concurrency}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
+>>> SQL workers used ${queue.pending} of ${queue.concurrency}`);
 
             transactions.length = 0;
             properties.length = 0;
@@ -254,7 +246,6 @@ FINAL BATCH
 >>> >> corrupted records: ${corrupted.toLocaleString()}
 >>> >> unique properties batch: ${properties.length.toLocaleString()}
 >>> >> unique properties: ${propertiesGUIDMap.size.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');

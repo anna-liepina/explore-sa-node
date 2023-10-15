@@ -3,24 +3,14 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
+import { performance } from 'perf_hooks';
 import os from 'os';
 import yargs from 'yargs';
-const { default: PQueue } = require('p-queue');
+import PQueue from 'p-queue';
 import orm from './orm';
 
-import { performance, PerformanceObserver } from 'perf_hooks';
-
-const perfObserver = new PerformanceObserver(
-    (items) => {
-        items
-            .getEntries()
-            .forEach((o) => {
-                console.log(`duration: ${(o.duration / 1000).toFixed(2)}s`);
-            });
-    }
-)
-
-perfObserver.observe({ entryTypes: ['measure'], buffer: true });
+import { perfObserver } from './parse:utils';
+const perf = perfObserver();
 
 const argv = yargs
     .option('limit', {
@@ -39,6 +29,8 @@ const argv = yargs
     })
     .help()
     .argv;
+
+perf.observe({ entryTypes: ['measure'], buffer: true });
 
 const { sql: logging, dry: dryRun, limit } = argv;
 
@@ -157,8 +149,7 @@ dialect: \t${process.env.DB_DIALECT}
 >>> parsed records: ${i.toLocaleString()}
 >>> collisions detected: ${collisions.toLocaleString()}
 >>> areas in batch: ${data.length.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
+>>> SQL transactions in queue: ${queue.size.toLocaleString()}`);
 
             data.length = 0;
             iter++;
@@ -192,7 +183,6 @@ FINAL BATCH
 >>> >> parsed records: ${i.toLocaleString()}
 >>> >> areas in batch: ${data.length.toLocaleString()}
 >>> >> collisions detected: ${collisions.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');
