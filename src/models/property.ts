@@ -1,4 +1,15 @@
-//@ts-nocheck
+import type { GloballyIdentifiedModel, IdentifiedModel } from "../orm.types";
+
+export type PropertyType = {
+    postcode: string,
+    propertyType: string,
+    propertyForm: string,
+    paon: string,
+    saon: string,
+    street: string,
+    city: string,
+} & GloballyIdentifiedModel & IdentifiedModel;
+
 export default (sequelize, DataTypes) => {
     const model = sequelize.define(
         'Property',

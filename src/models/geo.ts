@@ -1,4 +1,8 @@
-//@ts-nocheck
+export type GeoType = {
+    postcode: string,
+    c: any,
+}
+
 export default (sequelize, DataTypes) => {
     const model = sequelize.define(
         'Geo',

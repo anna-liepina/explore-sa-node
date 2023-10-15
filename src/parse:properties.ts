@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-//@ts-nocheck
 
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
@@ -12,10 +11,13 @@ import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
 import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
+import type { PropertyType } from './models/property';
+import type { TransactionType } from './models/transaction';
 
 const executeMigrations = composeOperation(OperationMarker.properties, orm);
 perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
+//@ts-ignore
 const { file, sql: logging, dry: dryRun, limit, update } = yargs
     .command('--file', 'absolute path to csv file to parse')
     .option('limit', {
@@ -69,7 +71,7 @@ if (!file) {
 }
 
 if (!fs.existsSync(file)) {
-    console.log(`>>> NO FILE DO NOT EXISTS`);
+    console.log(`>>> FILE DO NOT EXISTS`);
 
     process.exit(0);
 }
@@ -110,15 +112,15 @@ if (!fs.existsSync(file)) {
         await executeMigrations(MigrationsDirection.down);
     }
 
-    const properties = [];
-    const transactions = [];
+    const properties: Partial<PropertyType>[] = [];
+    const transactions: Partial<TransactionType>[] = [];
 
-    const propertiesGUIDMap = new Set();
+    const propertiesGUIDMap: Set<string> = new Set();
 
     await orm.Property.findAll({
         attributes: ['guid'],
         raw: true,
-    }).then((data) => data.forEach((v) => propertiesGUIDMap.add(v.guid)));
+    }).then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesGUIDMap.add(v.guid)));
 
     let i = 0;
     let iter = 0;
@@ -136,11 +138,20 @@ if (!fs.existsSync(file)) {
     for await (const row of parser) {
         const date = row[2].split(' ')[0];
         const price = parseInt(row[1], 10);
-        const obj = {
+        const postcode = row[3];
+        /** some records do not contain postcode */
+        if (postcode.indexOf(' ') < 1) {
+            corrupted++;
+            i++;
+
+            continue;
+        }
+
+        const obj: Partial<PropertyType> = {
             // uuid: row[0],
             // price,
             // date,
-            postcode: row[3],
+            postcode,
             propertyType: row[4],
             // purchaseType: row[5],
             propertyForm: row[6],
@@ -154,14 +165,6 @@ if (!fs.existsSync(file)) {
             // ppd: row[14],
             // status: row[15],
         };
-
-        /** some records do not contain postcode */
-        if (obj.postcode.indexOf(' ') < 1) {
-            corrupted++;
-            i++;
-
-            continue;
-        }
 
         obj.guid = `${obj.postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`.toUpperCase();
 
@@ -207,7 +210,8 @@ if (!fs.existsSync(file)) {
 >>> catching up with SQL queue ...
 ------------------------------------`);
 
-                await queue.onSizeLessThan(concurrency);
+                // await queue.onSizeLessThan(concurrency);
+                await queue.onEmpty();
             }
         }
     }

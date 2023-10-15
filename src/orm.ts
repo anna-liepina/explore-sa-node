@@ -1,7 +1,10 @@
-//@ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import Sequelize from 'sequelize';
+import type SequelizeType from "sequelize/types/sequelize";
+import type { ORM } from './orm.types';
+
+//@ts-ignore
 import conf from './orm-config';
 
 // will be fixed later with dynamic import and typescript
@@ -14,6 +17,7 @@ import Transaction from './models/transaction';
 
 const c = conf[process.env.NODE_ENV];
 
+// @ts-ignore
 const s = new Sequelize(c.database, c.username, c.password, c);
 
 // const orm = fs
@@ -33,7 +37,7 @@ const s = new Sequelize(c.database, c.username, c.password, c);
 //         {}
 //     );
 
-const orm = [
+const orm: Partial<ORM> = [
     Area,
     Geo,
     Postcode,
@@ -62,6 +66,6 @@ for (const name in orm) {
 }
 
 orm.sequelize = s;
-orm.Sequelize = Sequelize;
+orm.Sequelize = Sequelize as unknown as SequelizeType;
 
-export default orm;
+export default orm as ORM;
