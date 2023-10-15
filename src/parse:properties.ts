@@ -9,7 +9,6 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 const { default: PQueue } = require('p-queue');
 import orm from './orm';
-console.log( { orm });
 const executeMigrations = require('./parse:utils')('parse:properties', orm);
 
 import { performance, PerformanceObserver } from 'perf_hooks';
