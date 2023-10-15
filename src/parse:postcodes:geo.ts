@@ -10,6 +10,7 @@ import yargs from 'yargs'
 import csv from 'csv-parse'
 import PQueue from 'p-queue';
 import orm from './orm'
+
 import { perfObserver } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
