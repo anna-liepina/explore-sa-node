@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 //@ts-nocheck
+
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
@@ -8,12 +9,12 @@ import os from 'os';
 import yargs from 'yargs';
 import PQueue from 'p-queue';
 import orm from './orm';
-import { composeOperation, perfObserver } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
 
-const executeMigrations = composeOperation('parse:timeline', orm);
-perfObserver().observe({ entryTypes: ['measure'], buffer: true });
+const executeMigrations = composeOperation(OperationMarker.timeline, orm);
+perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
-const { file, sql: logging, dry: dryRun, limit } = yargs
+const { sql: logging, dry: dryRun, limit } = yargs
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
@@ -81,7 +82,7 @@ dialect: \t${process.env.DB_DIALECT}
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
     if (!dryRun) {
-        await executeMigrations('down');
+        await executeMigrations(MigrationsDirection.down);
     }
     /** fast but INCLUDE empty cycles ~2,978 */
     // SELECT
@@ -265,7 +266,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 >>> restoring database indexes ...
 ------------------------------------`);
 
-        await executeMigrations('up');
+        await executeMigrations(MigrationsDirection.up);
     }
 
     console.log(`

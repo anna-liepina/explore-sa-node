@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 //@ts-nocheck
+
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
@@ -10,7 +11,7 @@ import PQueue from 'p-queue';
 import orm from './orm';
 
 import { perfObserver } from './parse:utils';
-perfObserver().observe({ entryTypes: ['measure'], buffer: true });
+perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
 const { sql: logging, dry: dryRun, limit } = yargs
     .option('limit', {

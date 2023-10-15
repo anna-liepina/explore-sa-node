@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 //@ts-nocheck
+
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
@@ -10,10 +11,10 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
-import { composeOperation, perfObserver } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
 
-const executeMigrations = composeOperation('parse:properties', orm);
-perfObserver().observe({ entryTypes: ['measure'], buffer: true });
+const executeMigrations = composeOperation(OperationMarker.properties, orm);
+perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
 const { file, sql: logging, dry: dryRun, limit, update } = yargs
     .command('--file', 'absolute path to csv file to parse')
@@ -106,7 +107,7 @@ if (!fs.existsSync(file)) {
     const f = (v) => !v ? undefined : v;
 
     if (!dryRun && !update) {
-        await executeMigrations('down');
+        await executeMigrations(MigrationsDirection.down);
     }
 
     const properties = [];
@@ -231,7 +232,7 @@ if (!fs.existsSync(file)) {
 >>> restoring database indexes ...
 ------------------------------------`);
 
-        await executeMigrations('up');
+        await executeMigrations(MigrationsDirection.up);
     }
 
     console.log(`
