@@ -11,9 +11,9 @@ import orm from './orm';
 import { composeOperation, perfObserver } from './parse:utils';
 
 const executeMigrations = composeOperation('parse:timeline', orm);
-const perf = perfObserver();
+perfObserver().observe({ entryTypes: ['measure'], buffer: true });
 
-const argv = yargs
+const { file, sql: logging, dry: dryRun, limit } = yargs
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
@@ -30,10 +30,6 @@ const argv = yargs
     })
     .help()
     .argv;
-
-perf.observe({ entryTypes: ['measure'], buffer: true });
-
-const { file, sql: logging, dry: dryRun, limit } = argv;
 
 console.log(`
 --------------------------------------------------

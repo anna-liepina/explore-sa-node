@@ -10,9 +10,9 @@ import PQueue from 'p-queue';
 import orm from './orm';
 
 import { perfObserver } from './parse:utils';
-const perf = perfObserver();
+perfObserver().observe({ entryTypes: ['measure'], buffer: true });
 
-const argv = yargs
+const { sql: logging, dry: dryRun, limit } = yargs
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
@@ -29,10 +29,6 @@ const argv = yargs
     })
     .help()
     .argv;
-
-perf.observe({ entryTypes: ['measure'], buffer: true });
-
-const { sql: logging, dry: dryRun, limit } = argv;
 
 console.log(`
 --------------------------------------------------
