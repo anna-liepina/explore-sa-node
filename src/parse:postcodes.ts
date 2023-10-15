@@ -67,6 +67,12 @@ if (!file) {
     process.exit(0);
 }
 
+if (!fs.existsSync(file)) {
+    console.log(`>>> FILE DO NOT EXISTS`);
+
+    process.exit(0);
+}
+
 (async () => {
     performance.mark('init');
 
