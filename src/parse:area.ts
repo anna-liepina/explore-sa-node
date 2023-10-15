@@ -40,8 +40,6 @@ const argv = yargs
     .help()
     .argv;
 
-perfObserver.observe({ entryTypes: ['measure'], buffer: true });
-
 const { sql: logging, dry: dryRun, limit } = argv;
 
 console.log(`
