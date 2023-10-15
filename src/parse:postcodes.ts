@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 //@ts-nocheck
+
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
@@ -10,10 +11,10 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
-import { composeOperation, perfObserver } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
 
-const executeMigrations = composeOperation('parse:postcodes', orm);
-perfObserver().observe({ entryTypes: ['measure'], buffer: true });
+const executeMigrations = composeOperation(OperationMarker.postcodes, orm);
+perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
 const { file, sql: logging, dry: dryRun, limit, update } = yargs
     .command('--file', 'absolute path to csv file to parse')
@@ -104,7 +105,7 @@ if (!fs.existsSync(file)) {
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
 
     if (!dryRun && !update) {
-        await executeMigrations('down');
+        await executeMigrations(MigrationsDirection.down);
     }
 
     const queue = new PQueue({ concurrency: os.cpus().length });
@@ -185,7 +186,7 @@ execute queued SQL ...
 >>> restoring database indexes ...
 ------------------------------------`);
 
-        await executeMigrations('up');
+        await executeMigrations(MigrationsDirection.up);
     }
 
     console.log(`

@@ -3,13 +3,13 @@ import type Sequelize from "sequelize/types/sequelize";
 import { PerformanceObserver } from "perf_hooks";
 
 export enum MigrationsDirection {
-  "up",
-  "down",
+  up = "up",
+  down = "down",
 }
 export enum OperationMarker {
-  "parse:properties",
-  "parse:postcodes",
-  "parse:timeline",
+  properties = "parse:properties",
+  postcodes = "parse:postcodes",
+  timeline = "parse:timeline",
 }
 
 export type ORM = {
