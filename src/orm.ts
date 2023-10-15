@@ -36,7 +36,7 @@ const s = new Sequelize(c.database, c.username, c.password, c);
 //         },
 //         {}
 //     );
-  
+
 const orm: Partial<ORM> = [
     Area,
     Geo,
