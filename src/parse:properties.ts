@@ -6,7 +6,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 import { performance } from 'perf_hooks';
 import fs from 'fs';
 import os from 'os';
-import yargs, { Argv } from 'yargs';
+import yargs from 'yargs';
 import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
