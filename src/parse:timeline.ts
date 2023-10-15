@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-//@ts-nocheck
 
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
@@ -10,10 +9,12 @@ import yargs from 'yargs';
 import PQueue from 'p-queue';
 import orm from './orm';
 import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
+import { TransactionType } from './models/transaction';
 
 const executeMigrations = composeOperation(OperationMarker.timeline, orm);
 perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
+//@ts-ignore
 const { sql: logging, dry: dryRun, limit } = yargs
     .option('limit', {
         type: 'number',
@@ -118,7 +119,7 @@ dialect: \t${process.env.DB_DIALECT}
         group: ['area'],
         raw: true,
         logging,
-    });
+    }) as Partial<{ area: string }>[];
 
     console.log(`
 ------------------------------------
@@ -161,12 +162,13 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
             ],
             where: {
                 guid: {
+                    //@ts-ignore
                     [orm.Sequelize.Op.like]: `${row.area}%`,
                 },
             },
             raw: true,
             logging,
-        });
+        }) as Partial<TransactionType & { postcode: string }>[];
 
         iter++;
 

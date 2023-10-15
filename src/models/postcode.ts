@@ -1,4 +1,9 @@
-//@ts-nocheck
+export type PostcodeType = {
+    postcode: string,
+    lat: number,
+    lng: number,
+}
+
 export default (sequelize, DataTypes) => {
     const model = sequelize.define(
         'Postcode',

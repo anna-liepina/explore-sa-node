@@ -1,4 +1,12 @@
-//@ts-nocheck
+import type { IdentifiedModel } from "../orm.types";
+
+export type TimelineType = {
+    postcode: string,
+    date: string,
+    avg: number,
+    count: number,
+} & IdentifiedModel;
+
 export default (sequelize, DataTypes) => {
     const model = sequelize.define(
         'Timeline',

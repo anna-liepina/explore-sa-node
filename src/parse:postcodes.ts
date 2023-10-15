@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-//@ts-nocheck
 
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
@@ -12,10 +11,12 @@ import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
 import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
+import type { PostcodeType } from './models/postcode';
 
 const executeMigrations = composeOperation(OperationMarker.postcodes, orm);
 perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
+//@ts-ignore
 const { file, sql: logging, dry: dryRun, limit, update } = yargs
     .command('--file', 'absolute path to csv file to parse')
     .option('limit', {
@@ -68,6 +69,12 @@ if (!file) {
     process.exit(0);
 }
 
+if (!fs.existsSync(file)) {
+    console.log(`>>> FILE DO NOT EXISTS`);
+
+    process.exit(0);
+}
+
 (async () => {
     performance.mark('init');
 
@@ -111,8 +118,8 @@ if (!file) {
     let i = 0;
     let iter = 0;
 
-    const postcodes = [];
-    const postcodeMap = new Map();
+    const postcodes: Partial<PostcodeType>[] = [];
+    const postcodeMap: Set<string> = new Set();
 
     performance.mark(`iter-${iter}`);
 
@@ -132,7 +139,7 @@ if (!file) {
         };
 
         if (!postcodeMap.has(postcode)) {
-            postcodeMap.set(postcode);
+            postcodeMap.add(postcode);
 
             postcodes.push(obj);
         }

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-//@ts-nocheck
 
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
@@ -13,6 +12,7 @@ import orm from './orm';
 import { perfObserver } from './parse:utils';
 perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
+//@ts-ignore
 const { sql: logging, dry: dryRun, limit } = yargs
     .option('limit', {
         type: 'number',
@@ -101,7 +101,7 @@ dialect: \t${process.env.DB_DIALECT}
         group: ['area', 'city'],
         raw: true,
         logging,
-    });
+    }) as Partial<{ area: string, city: string }>[];
 
     let i = 0;
     let iter = 0;

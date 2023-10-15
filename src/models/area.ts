@@ -1,4 +1,8 @@
-//@ts-nocheck
+export type AreaType = {
+    area: string,
+    city: string,
+}
+
 export default (sequelize, DataTypes) => {
     const model = sequelize.define(
         'Area',

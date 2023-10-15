@@ -1,4 +1,10 @@
-//@ts-nocheck
+import type { GloballyIdentifiedModel, IdentifiedModel } from "../orm.types";
+
+export type TransactionType = {
+    price: number,
+    date: string,
+} & GloballyIdentifiedModel & IdentifiedModel;
+
 export default (sequelize, DataTypes) => {
     const model = sequelize.define(
         'Transaction',
