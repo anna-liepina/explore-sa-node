@@ -18,7 +18,7 @@
 This project is done to demonstrate my knowledge, which I learned recently as I try to get into the software development industry, I had a mentor to help me out.
 The project aims to parse UK government data on property sales, and perform statistical analysis, as well as link it with geology data, like addresses and latitude and longitude.
 
-the aim is to build a scalable graphql backend, which can quickly return requested results
+the aim is to build a scalable GraphQL backend, which can quickly return requested results
 to demonstrate complex cases of GraphQL use, such as N+1 problem, scaling where more than one database is required [write/read nodes]
 complex automated QA, anonymized data seeding for QA purposes, and some limits of JavaScript, where for example by default objects in V8 object can have ~8.4mil of fields, but Map can handle way more. Queue system for data processing.
 
@@ -29,7 +29,7 @@ complex automated QA, anonymized data seeding for QA purposes, and some limits o
 ### software requirements
 
 if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ and __[docker-compose](https://docs.docker.com/compose/install/)__ are required, and local __[node.js](https://nodejs.org/)__ with __[npm](https://www.npmjs.com/)__ are optional
-* [node.js](https://nodejs.org/) v14+
+* [node.js](https://nodejs.org/) v18+
 * [npm](https://www.npmjs.com/) v5+ or [yarn](https://yarnpkg.com/)
 * __optional__ [makefile](https://en.wikipedia.org/wiki/Makefile) comes out of the box in *unix* enviroments
 * __optional__ [docker](https://www.docker.com/) v18.09+
@@ -84,7 +84,7 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 ### how to run containers with different variables using 'make'
 
-* example: `make PORT=18081`
+* `make PORT=18081`
 
 ### gitflow
 
@@ -98,8 +98,8 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 | variable            | default value | used as   | purpose
 | ---                 | ---           | ---       | ---
 | PORT                | 8081          | number    | port on which application will be made available
-| SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/server.key`
-| SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/server.key`
+| SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/private.key`
+| SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/certificate.crt`
 | ***                 | ***           | ***       | if replica's config specified then non-replica connections are used only writes
 | DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
 | DB_USERNAME         | root          | string    | database user
