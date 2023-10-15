@@ -3,24 +3,17 @@
 require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
+import { performance } from 'perf_hooks';
 import fs from 'fs'
 import os from 'os'
 import yargs from 'yargs'
 import csv from 'csv-parse'
-const { default: PQueue } = require('p-queue');
+import PQueue from 'p-queue';
 import orm from './orm'
 
-import { performance, PerformanceObserver } from 'perf_hooks';
+import { perfObserver } from './parse:utils';
+const perf = perfObserver();
 
-const perfObserver = new PerformanceObserver(
-    (items) => {
-        items
-            .getEntries()
-            .forEach((o) => {
-                console.log(`duration: ${(o.duration / 1000).toFixed(2)}s`);
-            });
-    }
-)
 const argv = yargs
     .command('--file', 'absolute path to csv file to parse')
     .option('limit', {
@@ -40,7 +33,7 @@ const argv = yargs
     .help()
     .argv;
 
-perfObserver.observe({ entryTypes: ['measure'], buffer: true });
+perf.observe({ entryTypes: ['measure'], buffer: true });
 
 const { file, sql: logging, dry: dryRun, limit } = argv;
 
@@ -153,8 +146,7 @@ if (!file) {
 >>> missing data on postcodes: ${(i - postcodeMap.size).toLocaleString()}
 >>> postcodes proccessed: ${postcodeMap.size.toLocaleString()}
 >>> postcodes in this batch: ${postcodes.length.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
+>>> SQL transactions in queue: ${queue.size.toLocaleString()}`);
 
             postcodes.length = 0;
             iter++;
@@ -191,7 +183,6 @@ FINAL BATCH
 >>> >> postcodes so far parsed: ${postcodeMap.size.toLocaleString()}
 >>> >> postcodes proccessed: ${postcodeMap.size.toLocaleString()}
 >>> >> postcodes in this batch: ${postcodes.length.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');
