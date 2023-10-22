@@ -47,7 +47,6 @@
     "parse:postcodes:geo": "tsc && node -r dotenv/config ./build/parse:postcodes:geo",
     "parse:area": "tsc && node -r dotenv/config ./build/parse:area",
     "parse:timeline": "tsc && node -r dotenv/config ./build/parse:timeline",
-    "build2": "babel . --out-dir ./build --source-maps --copy-files --delete-dir-on-start --verbose",
     "build": "tsc",
     "start:watch": "tsc-watch --onSuccess \"node -r dotenv/config ./build/app.js\"",
     "start": "node -r dotenv/config ./build/app.js",
