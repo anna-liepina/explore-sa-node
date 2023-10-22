@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "dependencies": {
     "apollo-server-express": "^2.19.2",
