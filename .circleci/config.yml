@@ -3,8 +3,8 @@ version: 2
 jobs:
   jest:
     docker:
-      - image: cimg/node:14.15.5
-      - image: circleci/mysql:latest
+      - image: cimg/node:lts
+      - image: cimg/mysql:8.0
         command: [--default-authentication-plugin=mysql_native_password]
         environment:
           MYSQL_DATABASE: explore_test
