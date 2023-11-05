@@ -1,40 +1,14 @@
-//@ts-nocheck
 /** maintained as separate file, because of Sequlize CLI way of including config */
-/**
-export interface Config {
-  readonly database: string;
-  readonly dialectModule?: object;
-  readonly host?: string;
-  readonly port?: string;
-  readonly username: string;
-  readonly password: string | null;
-  readonly pool?: {
-    readonly acquire: number;
-    readonly idle: number;
-    readonly max: number;
-    readonly min: number;
-  };
-  readonly protocol: 'tcp';
-  readonly native: boolean;
-  readonly ssl: boolean;
-  readonly replication: boolean;
-  readonly dialectModulePath: null | string;
-  readonly keepDefaultTimezone?: boolean;
-  readonly dialectOptions?: {
-    readonly charset?: string;
-    readonly timeout?: number;
-  };
-}
-*/
 
-const orm = {
+import type { Dialect, Options } from "sequelize";
+
+const orm: Options = {
     host: process.env.DB_HOSTNAME,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: parseInt(process.env.DB_PORT, 10),
-    dialect: process.env.DB_DIALECT,
-    storage: `${__dirname}/../var/database.sqlite`,
+    dialect: process.env.DB_DIALECT as Dialect,
     pool: {
         acquire: 60000,
         idle: 10000,
@@ -69,8 +43,8 @@ const test = {
 };
 
 module.exports = {
-    development: orm,
     production: orm,
+    development: orm,
     'undefined': orm,
     test,
 }
