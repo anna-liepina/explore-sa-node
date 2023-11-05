@@ -1,18 +1,20 @@
-//@ts-nocheck
 import DataLoader from 'dataloader';
-import { processSQLResult } from './utils';
+import { resolveSQLResult } from './utils';
 
-export default (orm) => ({
+import type { ORM } from '../orm.types';
+import type { WhereAttributeHash } from 'sequelize';
+
+export default (orm: ORM) => ({
     getTransactions: new DataLoader(
-        (guid) => {
+        (guid: string[]) => {
             return orm.Transaction.findAll({
                 order: [['date', 'ASC']],
                 where: {
                     guid,
-                },
+                } as WhereAttributeHash,
                 raw: true,
             })
-                .then((v) => processSQLResult(guid, 'guid', v, true))
+                .then((v) => resolveSQLResult(guid, 'guid', v, true))
         }
     ),
 })
