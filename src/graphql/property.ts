@@ -1,4 +1,7 @@
-//@ts-nocheck
+import type { PostcodeType } from "../models/postcode";
+import type { PropertyType } from "../models/property";
+import type { TransactionType } from "../models/transaction";
+
 export default {
     typeDefs: `
         extend type Query {
@@ -50,14 +53,14 @@ export default {
     `,
     resolvers: {
         Query: {
-            property: (entity, args, { orm }, info) => {
+            property: (entity, args, { orm }): Promise<PropertyType> => {
                 return orm.Property.findOne({
                     where: args,
                     raw: true,
                 });
             },
-            propertySearch: (entity, { postcode, perPage: limit, page }, { orm }, info) => {
-                const offset = (page - 1) * limit;
+            propertySearch: (entity, { postcode, perPage: limit, page }, { orm }): Promise<PropertyType[]>  => {
+                const offset: number = (page - 1) * limit;
 
                 return orm.Property.findAll({
                     where: {
@@ -70,13 +73,13 @@ export default {
                     raw: true,
                 });
             },
-            propertySearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }, info) => {
-                const offset = (page - 1) * limit;
+            propertySearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<PropertyType>[]> => {
+                const offset: number = (page - 1) * limit;
                 /** 1ml = 1.60934km */
-                const coefficient = 'ml' === rangeUnit ? 1.60934 : 1;
-                const distance = range * 1000 * coefficient;
+                const coefficient: number = 'ml' === rangeUnit ? 1.60934 : 1;
+                const distance: number = range * 1000 * coefficient;
                 /** 1 lat/lng is ~111km */
-                const adjust = range / 111 * coefficient;
+                const adjust: number = range / 111 * coefficient;
                 const { lat, lng } = pos;
 
                 return orm.Property.findAll({
@@ -119,14 +122,14 @@ export default {
             },
         },
         Property: {
-            postcode: (entity, args, { dataloader }, info) => {
+            postcode: (entity: PropertyType, args, { dataloader }): Promise<PostcodeType> => {
                 return dataloader.getPostcode.load(entity.postcode);
             },
-            distance: (entity, args, context, info) => {
+            distance: (entity: Partial<PropertyType>) => {
                 /** check propertySearchWithInRange resolver */
                 return entity['Postcode.distance'];
             },
-            transactions: (entity, args, { dataloader }, info) => {
+            transactions: (entity: PropertyType, args, { dataloader }): Promise<TransactionType[]> => {
                 return dataloader.getTransactions.load(entity.guid);
             }
         }

@@ -1,4 +1,6 @@
-//@ts-nocheck
+import type { AreaType } from "../models/area";
+import type { WhereCondition } from "../orm.types";
+
 export default {
     typeDefs: `
         extend type Query {
@@ -16,9 +18,9 @@ export default {
     `,
     resolvers: {
         Query: {
-            areaSearch: (entity, { pattern, perPage: limit, page }, { orm }, info) => {
-                const offset = (page - 1) * limit;
-                const where = {};
+            areaSearch: (entity, { pattern, perPage: limit, page }, { orm }): Promise<AreaType[]> => {
+                const where: WhereCondition = {};
+                const offset: number = (page - 1) * limit;
 
                 if (pattern) {
                     where[orm.Sequelize.Op.or] = [

@@ -1,4 +1,6 @@
-//@ts-nocheck
+import type { TimelineType } from "../models/timeline";
+import type { WhereCondition } from "../orm.types";
+
 export default {
     typeDefs: `
         extend type Query {
@@ -21,10 +23,9 @@ export default {
     `,
     resolvers: {
         Query: {
-            timelineSearch: (entity, { postcodes, pattern, from, to, perPage: limit, page }, { orm }, info) => {
-                const offset = (page - 1) * limit;
-
-                const where = {
+            timelineSearch: (entity, { postcodes, pattern, from, to, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
+                const offset: number = (page - 1) * limit;
+                const where: WhereCondition = {
                     postcode: {
                         [orm.Sequelize.Op.or]: [],
                     },
