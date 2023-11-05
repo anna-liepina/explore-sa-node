@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { processSQLResult } from './utils';
 
 describe('dataloader utils', () => {
