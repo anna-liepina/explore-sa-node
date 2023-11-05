@@ -1,4 +1,5 @@
-//@ts-nocheck
+import type { PostcodeType } from "../models/postcode";
+
 export default {
     typeDefs: `
         extend type Query {
@@ -18,8 +19,8 @@ export default {
     `,
     resolvers: {
         Query: {
-            postcodeSearch: (entity, { pattern, perPage: limit, page }, { orm }, info) => {
-                const offset = (page - 1) * limit;
+            postcodeSearch: (entity, { pattern, perPage: limit, page }, { orm }): Promise<PostcodeType[]> => {
+                const offset: number = (page - 1) * limit;
 
                 return orm.Postcode.findAll({
                     where: {
@@ -34,7 +35,7 @@ export default {
             },
         },
         Postcode: {
-            url: (entity, args, context, info) => `https://www.google.com/maps/search/?api=1&query=${entity.lat},${entity.lng}`,
+            url: (entity: PostcodeType): string => `https://www.google.com/maps/search/?api=1&query=${entity.lat},${entity.lng}`,
         }
     },
 }

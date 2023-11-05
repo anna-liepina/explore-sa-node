@@ -1,4 +1,7 @@
-//@ts-nocheck
+import type { PropertyType } from "../models/property";
+import type { TransactionType } from "../models/transaction";
+import type { WhereCondition } from "../orm.types";
+
 export default {
     typeDefs: `
         extend type Query {
@@ -21,16 +24,15 @@ export default {
     `,
     resolvers: {
         Query: {
-            transaction: (entity, args, { orm }, info) => {
+            transaction: (entity, args, { orm }): Promise<TransactionType> => {
                 return orm.Transaction.findOne({
-                    where: args,
+                    where: args as WhereCondition,
                     raw: true,
                 });
             },
-            transactionSearch: (entity, { postcode, from, to, perPage: limit, page }, { orm }, info) => {
-                const offset = (page - 1) * limit;
-
-                const where = {};
+            transactionSearch: (entity, { postcode, from, to, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
+                const offset: number = (page - 1) * limit;
+                const where: WhereCondition = {};
 
                 if (postcode) {
                     where.guid = {
@@ -69,7 +71,7 @@ export default {
             },
         },
         Transaction: {
-            property: (entity, args, { dataloader }, info) => {
+            property: (entity, args, { dataloader }): Promise<PropertyType> => {
                 return dataloader.getProperty.load(entity.guid);
             },
         },
