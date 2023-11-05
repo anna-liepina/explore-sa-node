@@ -1,6 +1,6 @@
+import type { WhereAttributeHash } from "sequelize/types/model";
 import type { PropertyType } from "../models/property";
 import type { TransactionType } from "../models/transaction";
-import type { WhereCondition } from "../orm.types";
 
 export default {
     typeDefs: `
@@ -26,13 +26,13 @@ export default {
         Query: {
             transaction: (entity, args, { orm }): Promise<TransactionType> => {
                 return orm.Transaction.findOne({
-                    where: args as WhereCondition,
+                    where: args as WhereAttributeHash,
                     raw: true,
                 });
             },
             transactionSearch: (entity, { postcode, from, to, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
                 const offset: number = (page - 1) * limit;
-                const where: WhereCondition = {};
+                const where: WhereAttributeHash = {};
 
                 if (postcode) {
                     where.guid = {

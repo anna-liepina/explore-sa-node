@@ -1,5 +1,5 @@
+import type { WhereAttributeHash } from "sequelize/types/model";
 import type { AreaType } from "../models/area";
-import type { WhereCondition } from "../orm.types";
 
 export default {
     typeDefs: `
@@ -19,7 +19,7 @@ export default {
     resolvers: {
         Query: {
             areaSearch: (entity, { pattern, perPage: limit, page }, { orm }): Promise<AreaType[]> => {
-                const where: WhereCondition = {};
+                const where: WhereAttributeHash = {};
                 const offset: number = (page - 1) * limit;
 
                 if (pattern) {

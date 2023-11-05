@@ -1,5 +1,5 @@
+import type { WhereAttributeHash } from "sequelize/types/model";
 import type { TimelineType } from "../models/timeline";
-import type { WhereCondition } from "../orm.types";
 
 export default {
     typeDefs: `
@@ -25,7 +25,7 @@ export default {
         Query: {
             timelineSearch: (entity, { postcodes, pattern, from, to, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
                 const offset: number = (page - 1) * limit;
-                const where: WhereCondition = {
+                const where: WhereAttributeHash = {
                     postcode: {
                         [orm.Sequelize.Op.or]: [],
                     },
