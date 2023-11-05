@@ -46,10 +46,7 @@ const orm: Partial<ORM> = [
     Transaction,
 ].reduce(
     (acc, construct) => {
-        const model = construct(
-            s,
-            Sequelize.DataTypes,
-        );
+        const model = construct(s);
         acc[model.name] = model;
 
         return acc;
