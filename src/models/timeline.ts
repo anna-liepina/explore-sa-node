@@ -1,3 +1,6 @@
+import type { Sequelize } from 'sequelize';
+import { DataTypes } from 'sequelize';
+
 import type { IdentifiedModel } from "../orm.types";
 
 export type TimelineType = {
@@ -7,7 +10,7 @@ export type TimelineType = {
     count: number,
 } & IdentifiedModel;
 
-export default (sequelize, DataTypes) => {
+export default (sequelize: Sequelize) => {
     const model = sequelize.define(
         'Timeline',
         {
@@ -37,6 +40,7 @@ export default (sequelize, DataTypes) => {
         }
     );
 
+    //@ts-ignore
     model.associate = ({ Postcode, Timeline }) => {
         Postcode.hasMany(Timeline, { foreignKey: 'postcode', sourceKey: 'postcode' });
         Timeline.belongsTo(Postcode, { foreignKey: 'postcode', targetKey: 'postcode' });

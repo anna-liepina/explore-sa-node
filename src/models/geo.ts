@@ -1,9 +1,12 @@
+import type { Sequelize } from 'sequelize';
+import { DataTypes } from 'sequelize';
+
 export type GeoType = {
     postcode: string,
     c: any,
 }
 
-export default (sequelize, DataTypes) => {
+export default (sequelize: Sequelize) => {
     const model = sequelize.define(
         'Geo',
         {
@@ -22,6 +25,7 @@ export default (sequelize, DataTypes) => {
         }
     );
 
+    // @ts-ignore
     model.associate = ({ Geo, Property }) => {
         Geo.hasMany(Property, { foreignKey: 'postcode', sourceKey: 'postcode' });
         Property.belongsTo(Geo, { foreignKey: 'postcode', targetKey: 'postcode' });

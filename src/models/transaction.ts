@@ -1,42 +1,11 @@
+import type { Sequelize } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import type { GloballyIdentifiedModel, IdentifiedModel } from "../orm.types";
 
 export type TransactionType = {
     price: number,
     date: string,
 } & GloballyIdentifiedModel & IdentifiedModel;
-
-export default (sequelize, DataTypes) => {
-    const model = sequelize.define(
-        'Transaction',
-        {
-            id: {
-                type: DataTypes.INTEGER,
-                primaryKey: true,
-                autoIncrement: true,
-            },
-            guid: {
-                type: DataTypes.STRING,
-            },
-            price: {
-                type: DataTypes.INTEGER,
-            },
-            date: {
-                type: DataTypes.DATEONLY,
-            },
-        },
-        {
-            tableName: 'transactions',
-            timestamps: false,
-        }
-    );
-
-    model.associate = ({ Property, Transaction }) => {
-        Property.hasMany(Transaction, { foreignKey: 'guid', sourceKey: 'guid' });
-        Transaction.belongsTo(Property, { foreignKey: 'guid', targetKey: 'guid' });
-    }
-
-    return model;
-};
 
 // https://www.gov.uk/guidance/about-the-price-paid-data#download-options
 // [
@@ -70,3 +39,37 @@ export default (sequelize, DataTypes) => {
                                                 // D = Delete.
                                                 // Note that where a transaction changes category type due to misallocation (as above) it will be deleted from the original category type and added to the correct category with a new transaction unique identifier.
 // ]
+
+export default (sequelize: Sequelize) => {
+    const model = sequelize.define(
+        'Transaction',
+        {
+            id: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                autoIncrement: true,
+            },
+            guid: {
+                type: DataTypes.STRING,
+            },
+            price: {
+                type: DataTypes.INTEGER,
+            },
+            date: {
+                type: DataTypes.DATEONLY,
+            },
+        },
+        {
+            tableName: 'transactions',
+            timestamps: false,
+        }
+    );
+
+    //@ts-ignore
+    model.associate = ({ Property, Transaction }) => {
+        Property.hasMany(Transaction, { foreignKey: 'guid', sourceKey: 'guid' });
+        Transaction.belongsTo(Property, { foreignKey: 'guid', targetKey: 'guid' });
+    }
+
+    return model;
+};
