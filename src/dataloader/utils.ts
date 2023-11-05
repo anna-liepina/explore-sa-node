@@ -1,9 +1,8 @@
-//@ts-nocheck
 /**
  * @param {Number[]|String[]} keys
  * @param {Number|String} key
- * @param {Boolean} aggregateInArray
  * @param {Object[]} values
+ * @param {Boolean} aggregateInArray
  *
  * @returns {Object[]|Object[][]}
  *
@@ -45,7 +44,7 @@
  *  ]
  *
  */
-export const processSQLResult = (keys, key, values, aggregateInArray) => {
+export const processSQLResult = (keys: string[]|number[], key: string, values: Object[], aggregateInArray?: boolean): Object[] | Object[][] => {
     const acc = {};
 
     for (const v of values) {
@@ -60,5 +59,5 @@ export const processSQLResult = (keys, key, values, aggregateInArray) => {
         } else acc[v[key]] = v;
     }
 
-    return keys.map((v) => acc[v] || null);
+    return keys.map((v: string|number) => acc[v] || null);
 }
