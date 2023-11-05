@@ -7,7 +7,7 @@
  * @returns {Object[]|Object[][]}
  *
  * examples:
- *  - processSQLResult(
+ *  - resolveSQLResult(
  *      [1, 3, 2 ],
  *      'id',
  *      [
@@ -22,7 +22,8 @@
  *      { id: 2 }
  *  ]
  *
- *  - processSQLResult(
+ *
+ *  - resolveSQLResult(
  *      [1, 3, 2 ],
  *      'id',
  *      [
@@ -44,7 +45,7 @@
  *  ]
  *
  */
-export const processSQLResult = (keys: string[]|number[], key: string, values: Object[], aggregateInArray?: boolean): Object[] | Object[][] => {
+export const resolveSQLResult = (keys: string[]|number[], key: string, values: object[], aggregateInArray?: boolean): Object[] | Object[][] => {
     const acc = {};
 
     for (const v of values) {

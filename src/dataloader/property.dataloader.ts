@@ -1,17 +1,17 @@
-//@ts-nocheck
 import DataLoader from 'dataloader';
-import { processSQLResult } from './utils';
+import { resolveSQLResult } from './utils';
+import type { ORM } from '../orm.types';
 
-export default (orm) => ({
+export default (orm: ORM) => ({
     getProperty: new DataLoader(
-        (guid) => {
+        (guid: string[]) => {
             return orm.Property.findAll({
                 where: {
                     guid,
                 },
                 raw: true,
             })
-                .then((v) => processSQLResult(guid, 'guid', v))
+                .then((v: Object[]) => resolveSQLResult(guid, 'guid', v))
         }
     ),
 })

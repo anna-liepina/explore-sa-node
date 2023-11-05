@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`dataloader utils processSQLResult should return Array<Array<Object>>, ordered by key value, and injecting NULL in absense of a value [2nd and 3rd values should duplicated, because of key value] 1`] = `
+exports[`dataloader utils resolveSQLResult should return Array<Array<Object>>, ordered by key value, and injecting NULL in absense of a value [2nd and 3rd values should duplicated, because of key value] 1`] = `
 [
   [
     {
@@ -26,7 +26,7 @@ exports[`dataloader utils processSQLResult should return Array<Array<Object>>, o
 ]
 `;
 
-exports[`dataloader utils processSQLResult should return Array<Array<Object>>, ordered by key value, and injecting NULL in absense/falsy value 1`] = `
+exports[`dataloader utils resolveSQLResult should return Array<Array<Object>>, ordered by key value, and injecting NULL in absense/falsy value 1`] = `
 [
   [
     {
@@ -45,7 +45,7 @@ exports[`dataloader utils processSQLResult should return Array<Array<Object>>, o
 ]
 `;
 
-exports[`dataloader utils processSQLResult should return Array<Object>, ordered by key value, and injecting NULL in absense of/falsy value 1`] = `
+exports[`dataloader utils resolveSQLResult should return Array<Object>, ordered by key value, and injecting NULL in absense of/falsy value 1`] = `
 [
   {
     "v": 1,
