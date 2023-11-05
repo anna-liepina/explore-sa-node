@@ -68,7 +68,7 @@ describe('GraphQL: Property', () => {
         });
     });
 
-    describe('propertySearchWithInRange [presets: perPage 3]', () => {
+    describe('propertySearchWithInRange [presets: perPage 2]', () => {
         it(`by coordinates, in kilometers`, async () => {
             const { data: { propertySearchWithInRange: data } } = await query({
                 query: `
@@ -111,7 +111,7 @@ describe('GraphQL: Property', () => {
                         },
                         rangeUnit: ml,
                         range: 10,
-                        perPage: 3
+                        perPage: 2
                     ) {
                         saon
                         paon
@@ -143,7 +143,7 @@ describe('GraphQL: Property', () => {
                         },
                         rangeUnit: ml,
                         range: 10,
-                        perPage: 3,
+                        perPage: 2,
                         page: 2
                     ) {
                         saon
