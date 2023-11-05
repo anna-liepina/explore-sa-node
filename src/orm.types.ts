@@ -30,7 +30,3 @@ export type IdentifiedModel = {
 export type GloballyIdentifiedModel = {
     guid: string
 }
-  
-export interface WhereCondition {
-    [key: string]: any;
-}
