@@ -10,6 +10,7 @@ export enum OperationMarker {
     properties = "parse:properties",
     postcodes = "parse:postcodes",
     timeline = "parse:timeline",
+    incidents = "parse:incidents",
 }
 
 export const composeOperation =
@@ -21,7 +22,7 @@ export const composeOperation =
                 const obj = require(require.resolve(`${path}/${file}`));
 
                 if (!obj[operationMarker]) {
-                continue;
+                    continue;
                 }
 
                 await obj[direction](orm.sequelize.getQueryInterface(), orm.Sequelize);

@@ -245,7 +245,7 @@ FINAL BATCH
 ------------------------------------
 >>> >> processed transactions: ${i.toLocaleString()}
 >>> >> corrupted records: ${corrupted.toLocaleString()}
->>> >> unique properties batch: ${properties.length.toLocaleString()}
+>>> >> unique properties in batch: ${properties.length.toLocaleString()}
 >>> >> unique properties: ${propertiesGUIDMap.size.toLocaleString()}
 ------------------------------------`);
     performance.mark('end');

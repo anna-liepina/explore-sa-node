@@ -47,6 +47,7 @@
     "parse:postcodes:geo": "tsc && node -r dotenv/config ./build/parse:postcodes:geo",
     "parse:area": "tsc && node -r dotenv/config ./build/parse:area",
     "parse:timeline": "tsc && node -r dotenv/config ./build/parse:timeline",
+    "parse:incidents": "tsc && node -r dotenv/config ./build/parse:incidents",
     "build": "tsc",
     "start:watch": "tsc-watch --onSuccess \"node -r dotenv/config ./build/app.js\"",
     "start": "node -r dotenv/config ./build/app.js",
