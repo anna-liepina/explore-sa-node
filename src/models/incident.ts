@@ -10,11 +10,8 @@ export type IncidentType = {
     lng: number,
     type: string,
     outcome: string,
-    lsoa: string,
-    area: string,
     creator: string,
     assignee: string,
-    json: string
 }
 
 export default (sequelize: Sequelize) => {
@@ -55,14 +52,14 @@ export default (sequelize: Sequelize) => {
             outcome: {
                 type: DataTypes.STRING,
             },
-            // LSOA code
-            lsoa: {
-                type: DataTypes.STRING,
-            },
-            // LSOA name
-            area: {
-                type: DataTypes.STRING,
-            },
+            // // LSOA code
+            // lsoa: {
+            //     type: DataTypes.STRING,
+            // },
+            // // LSOA name
+            // area: {
+            //     type: DataTypes.STRING,
+            // },
             // Reported By
             creator: {
                 type: DataTypes.STRING,
@@ -71,10 +68,10 @@ export default (sequelize: Sequelize) => {
             assignee: {
                 type: DataTypes.STRING,
             },
-            // Context
-            json: {
-                type: DataTypes.TEXT,
-            }
+            // // Context
+            // json: {
+            //     type: DataTypes.TEXT,
+            // }
         },
         {
             tableName: 'incidents',

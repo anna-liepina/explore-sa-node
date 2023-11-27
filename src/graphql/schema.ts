@@ -6,6 +6,7 @@ import postcode from './postcode';
 import property from './property';
 import timeline from './timeline';
 import transaction from './transaction';
+import incidents from './incidents';
 
 export const typeDefs = gql`
     type Query
@@ -15,6 +16,7 @@ export const typeDefs = gql`
     ${property.typeDefs}
     ${timeline.typeDefs}
     ${transaction.typeDefs}
+    ${incidents.typeDefs}
 `;
 
 export const resolvers = merge(
@@ -23,4 +25,5 @@ export const resolvers = merge(
     property.resolvers,
     timeline.resolvers,
     transaction.resolvers,
+    incidents.resolvers,
 );

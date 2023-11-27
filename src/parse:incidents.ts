@@ -19,9 +19,8 @@ const executeMigrations = composeOperation(OperationMarker.incidents, orm);
 perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
 //@ts-ignore
-const { path: _path, areaPath, sql: logging, dry: dryRun, limit, update } = yargs
+const { path: _path, sql: logging, dry: dryRun, limit, update } = yargs
     .command('--path', 'absolute path to csvs to parse')
-    .command('--areaPath', 'area')
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
@@ -89,13 +88,13 @@ function scanDirectory(directoryPath: string): string[] {
     return result;
 }
 
-if (!_path || !areaPath) {
+if (!_path) {
     console.log(`>>> PATH NOT PROVIDED`);
 
     process.exit(0);
 }
 
-if (!fs.existsSync(_path) || !fs.existsSync(areaPath)) {
+if (!fs.existsSync(_path)) {
     console.log(`>>> PATH / AREA DO NOT EXITS`);
 
     process.exit(0);
@@ -145,48 +144,31 @@ if (!files.length) {
     let total = 0;
     let iter = 0;
     let corrupted = 0;
-    let missingPostcode = 0;
+    let postcodes = 0;
 
     const concurrency = os.cpus().length;
     const queue = new PQueue({ concurrency });
 
-    const lsoaStream = fs
-        .createReadStream(areaPath)
-        .pipe(csv({ columns: true }));
-
     performance.mark('lsoa-start');
-    const postcodes = await orm.Postcode.findAll({
+    const lsoas: Map<string, PostcodeType[]> = await orm.Postcode.findAll({
         attributes: ['postcode', 'lat', 'lng'],
         raw: true,
-    }).then((v) => v.reduce((acc, v) => {
-        acc[(v as Partial<PostcodeType>).postcode] = v;
+    })
+        .then((v) => {
+            postcodes = v.length;
+            const store = new Map();
+            v.forEach((v) => {
+                const lsoa = (v as unknown as PostcodeType).lsoa;
 
-        return acc;
-    }, []));
-
-    const lsoas: Map<string, PostcodeType[]> = await new Promise((resolve) => {
-        const store = new Map<string, PostcodeType[]>();
-      
-        lsoaStream
-          .on('data', (area) => {
-            const lsoa = area.lsoa11cd;
-            const postcode = area.pcds;
-            const verifiedPostcode = postcodes[postcode];
-
-            if (!verifiedPostcode) {
-                missingPostcode++;
-            }  
-
-            if (verifiedPostcode && lsoa) {
                 if (!store.has(lsoa)) {
                     store.set(lsoa, []);
                 }
 
-                store.get(lsoa).push(verifiedPostcode);
-            }
-          })
-          .on('end', () => resolve(store));
-    });
+                store.get(lsoa).push(v);
+            })
+
+            return store;
+        });
 
     performance.mark('lsoa-end');
     performance.measure('lsoa', 'lsoa-start', 'lsoa-end');
@@ -196,8 +178,7 @@ if (!files.length) {
 ------------------------------------
 >>> LSOA (Lower Super Output Areas)
 >>> total LSOAs: ${lsoas.size.toLocaleString()}
->>> total POSTCODES: ${postcodes.length.toLocaleString()}
->>> total missing POSTCODES ${missingPostcode.toLocaleString()}
+>>> total POSTCODES: ${postcodes.toLocaleString()}
 `);
 
     const incidents = [];
@@ -247,7 +228,6 @@ if (!files.length) {
                 Latitude: lat,
                 // Location: location,
                 'LSOA code': lsoa,
-                'LSOA name': area,
                 'Crime type': type,
                 'Last outcome category': outcome,
                 // Context: context
@@ -272,11 +252,8 @@ if (!files.length) {
                 lng,
                 type,
                 outcome,
-                lsoa,
-                area,
                 creator,
                 assignee,
-                json: JSON.stringify(row)
             };
 
             incidents.push(obj);

@@ -1,0 +1,211 @@
+#!/usr/bin/env node
+
+require('dotenv');
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
+import { performance } from 'perf_hooks';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import yargs from 'yargs';
+import csv from 'csv-parse';
+import PQueue from 'p-queue';
+import orm from './orm';
+import { perfObserver } from './parse:utils';
+import type { PostcodeType } from './models/postcode';
+
+perfObserver().observe({ entryTypes: ['measure'], buffered: true });
+
+//@ts-ignore
+const { file, sql: logging, dry: dryRun, limit, update } = yargs
+    .command('--file', 'absolute path to csv to parse')
+    .option('limit', {
+        type: 'number',
+        description: 'amount of records in one bulk SQL qeuery',
+        default: 10000,
+    })
+    .option('sql', {
+        type: 'boolean',
+        description: 'print out SQL queries',
+        default: false,
+    })
+    .option('dry', {
+        type: 'boolean',
+        description: 'dry run - do not affect a database',
+    })
+    .option('update', {
+        type: 'boolean',
+        description: 'flush update [do not drop/restore indexes, useful with small csv files]',
+    })
+    .help()
+    .argv;
+
+console.log(`
+--------------------------------------------------
+--------------------- CONFIG ---------------------
+
+name\t\tdescription
+--path\t\tabsolute path to csv file to parse
+--limit\t\tamount of records in one bulk SQL qeuery
+--sql\t\tprint out SQL queries
+--dry\t\tdry run do not execute SQL
+--update\tflush update [do not drop/restore indexes, useful with small csv files]
+
+--------------------------------------------------
+database connection info:
+host: \t\t${process.env.DB_HOSTNAME}
+port: \t\t${process.env.DB_PORT}
+database: \t${process.env.DB_NAME}
+dialect: \t${process.env.DB_DIALECT}
+
+--------------------------------------------------
+
+files to parse: ${file}
+`);
+
+
+if (!file) {
+    console.log(`>>> PATH NOT PROVIDED`);
+
+    process.exit(0);
+}
+
+if (!fs.existsSync(file)) {
+    console.log(`>>> PATH / AREA DO NOT EXITS`);
+
+    process.exit(0);
+}
+
+(async () => {
+    performance.mark('init');
+
+    /**
+     * Create and insert multiple instances in bulk.
+     *
+     * The success handler is passed an array of instances, but please notice that these may not completely represent the state of the rows in the DB. This is because MySQL
+     * and SQLite do not make it easy to obtain back automatically generated IDs and other default values in a way that can be mapped to multiple records.
+     * To obtain Instances for the newly created values, you will need to query for them again.
+     *
+     * If validation fails, the promise is rejected with an array-like AggregateError
+     *
+     * @param  {Array}          records                          List of objects (key/value pairs) to create instances from
+     * @param  {object}         [options]                        Bulk create options
+     * @param  {Array}          [options.fields]                 Fields to insert (defaults to all fields)
+     * @param  {boolean}        [options.validate=false]         Should each row be subject to validation before it is inserted. The whole insert will fail if one row fails validation
+     * @param  {boolean}        [options.hooks=true]             Run before / after bulk create hooks?
+     * @param  {boolean}        [options.individualHooks=false]  Run before / after create hooks for each individual Instance? BulkCreate hooks will still be run if options.hooks is true.
+     * @param  {boolean}        [options.ignoreDuplicates=false] Ignore duplicate values for primary keys? (not supported by MSSQL or Postgres < 9.5)
+     * @param  {Array}          [options.updateOnDuplicate]      Fields to update if row key already exists (on duplicate key update)? (only supported by MySQL, MariaDB, SQLite >= 3.24.0 & Postgres >= 9.5). By default, all fields are updated.
+     * @param  {Transaction}    [options.transaction]            Transaction to run query under
+     * @param  {Function}       [options.logging=false]          A function that gets executed while running the query to log the sql.
+     * @param  {boolean}        [options.benchmark=false]        Pass query execution time in milliseconds as second argument to logging function (options.logging).
+     * @param  {boolean|Array}  [options.returning=false]        If true, append RETURNING <model columns> to get back all defined values; if an array of column names, append RETURNING <columns> to get back specific columns (Postgres only)
+     * @param  {string}         [options.searchPath=DEFAULT]     An optional parameter to specify the schema search_path (Postgres only)
+     *
+     * @returns {Promise<Array<Model>>}
+     */
+    const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false, updateOnDuplicate: ['lsoa']});
+
+    if (!dryRun && !update) {
+    }
+
+    let total = 0;
+    let iter = 0;
+    let corrupted = 0;
+    let missingPostcode = 0;
+
+    const concurrency = os.cpus().length;
+    const queue = new PQueue({ concurrency });
+
+    const postcodes = await orm.Postcode.findAll({
+        attributes: ['postcode', 'lat', 'lng', 'lsoa'],
+        raw: true,
+    }).then((v) => v.reduce((acc, v) => {
+        acc[(v as Partial<PostcodeType>).postcode] = v;
+
+        return acc;
+    }, []));
+
+    performance.mark(`iter-${iter}`);
+
+    const processedPostcodes = [];
+    
+    const parser = fs
+        .createReadStream(file)
+        .pipe(csv({ columns: true }));
+
+    for await (const row of parser) {
+        const lsoa = row.lsoa11cd;
+        const postcode = row.pcds;
+        const verifiedPostcode = postcodes[postcode];
+
+        if (!verifiedPostcode || !lsoa) {
+            missingPostcode++;
+            continue;
+        }
+
+        processedPostcodes.push(verifiedPostcode);
+
+        if (processedPostcodes.length === limit) {
+            total += processedPostcodes.length;
+
+            queue.add(persist(orm.Postcode, [...processedPostcodes]));
+
+            console.log(`
+------------------------------------
+>>> processed postcodes: ${total.toLocaleString()}
+>>> corrupted records so far: ${corrupted.toLocaleString()}
+>>> unique postcodes in batch: ${processedPostcodes.length.toLocaleString()}
+>>> unique postcodes so far: ${'guidMap.size'.toLocaleString()}
+>>> SQL transactions in queue: ${queue.size.toLocaleString()}
+>>> SQL workers used ${queue.pending} of ${queue.concurrency}`);
+
+            processedPostcodes.length = 0;
+            iter++;
+
+            performance.mark(`iter-${iter}`);
+            performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
+
+            if (queue.size > queue.concurrency) {
+                console.log(`
+------------------------------------
+>>> catching up with SQL queue ...
+------------------------------------`);
+
+                // await queue.onSizeLessThan(concurrency);
+                await queue.onEmpty();
+            }
+        }
+    }
+
+    await queue.onEmpty();
+
+    queue.add(persist(orm.Postcode, processedPostcodes));
+
+    total += processedPostcodes.length;
+
+    console.log(`
+------------------------------------
+>>> execute remaining SQL queue ...
+------------------------------------`);
+
+    if (!dryRun && !update) {
+        await queue.onEmpty();
+
+        console.log(`
+------------------------------------
+>>> restoring database indexes ...
+------------------------------------`);
+    }
+
+    console.log(`
+------------------------------------
+FINAL BATCH
+------------------------------------
+>>> >> processed incidents: ${total.toLocaleString()}
+>>> >> corrupted records: ${corrupted.toLocaleString()}
+>>> >> unique postcodes in final batch: ${processedPostcodes.length.toLocaleString()}
+------------------------------------`);
+    performance.mark('end');
+    performance.measure('total', 'init', 'end');
+})()

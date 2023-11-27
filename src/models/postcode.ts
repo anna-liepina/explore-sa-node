@@ -5,6 +5,7 @@ export type PostcodeType = {
     postcode: string,
     lat: number,
     lng: number,
+    lsoa: string,
 }
 
 export default (sequelize: Sequelize) => {
@@ -14,6 +15,9 @@ export default (sequelize: Sequelize) => {
             postcode: {
                 type: DataTypes.STRING(9),
                 primaryKey: true,
+            },
+            lsoa: {
+                type: DataTypes.STRING,
             },
             lat: {
                 type: DataTypes.DECIMAL(12, 9),
