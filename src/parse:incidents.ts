@@ -151,20 +151,23 @@ if (!files.length) {
 
     performance.mark('lsoa-start');
     const lsoas: Map<string, PostcodeType[]> = await orm.Postcode.findAll({
-        attributes: ['postcode', 'lat', 'lng'],
+        attributes: ['postcode', 'lat', 'lng', 'lsoa'],
         raw: true,
     })
         .then((v) => {
             postcodes = v.length;
             const store = new Map();
+
             v.forEach((v) => {
                 const lsoa = (v as unknown as PostcodeType).lsoa;
 
-                if (!store.has(lsoa)) {
-                    store.set(lsoa, []);
+                if (lsoa) {
+                    if (!store.has(lsoa)) {
+                        store.set(lsoa, []);
+                    }
+    
+                    store.get(lsoa).push(v);    
                 }
-
-                store.get(lsoa).push(v);
             })
 
             return store;

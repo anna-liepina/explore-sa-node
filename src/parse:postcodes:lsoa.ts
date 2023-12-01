@@ -5,7 +5,6 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
-import path from 'path';
 import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
@@ -63,7 +62,6 @@ dialect: \t${process.env.DB_DIALECT}
 files to parse: ${file}
 `);
 
-
 if (!file) {
     console.log(`>>> PATH NOT PROVIDED`);
 
@@ -106,9 +104,6 @@ if (!fs.existsSync(file)) {
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false, updateOnDuplicate: ['lsoa']});
 
-    if (!dryRun && !update) {
-    }
-
     let total = 0;
     let iter = 0;
     let corrupted = 0;
@@ -120,15 +115,19 @@ if (!fs.existsSync(file)) {
     const postcodes = await orm.Postcode.findAll({
         attributes: ['postcode', 'lat', 'lng', 'lsoa'],
         raw: true,
-    }).then((v) => v.reduce((acc, v) => {
-        acc[(v as Partial<PostcodeType>).postcode] = v;
+    }).then((v) => {
+        const map = new Map<string, PostcodeType>();
+        
+        (v as unknown as PostcodeType[]).forEach((v: PostcodeType) => {
+            map.set(v.postcode, v);
+        })
 
-        return acc;
-    }, []));
+        return map;
+    });
 
     performance.mark(`iter-${iter}`);
 
-    const processedPostcodes = [];
+    const verifiedPostcodes = [];
     
     const parser = fs
         .createReadStream(file)
@@ -137,30 +136,31 @@ if (!fs.existsSync(file)) {
     for await (const row of parser) {
         const lsoa = row.lsoa11cd;
         const postcode = row.pcds;
-        const verifiedPostcode = postcodes[postcode];
+        const verifiedPostcode = postcodes.get(postcode);
 
         if (!verifiedPostcode || !lsoa) {
             missingPostcode++;
             continue;
         }
 
-        processedPostcodes.push(verifiedPostcode);
+        verifiedPostcode.lsoa = lsoa;
+        verifiedPostcodes.push(verifiedPostcode);
 
-        if (processedPostcodes.length === limit) {
-            total += processedPostcodes.length;
+        if (verifiedPostcodes.length === limit) {
+            total += verifiedPostcodes.length;
 
-            queue.add(persist(orm.Postcode, [...processedPostcodes]));
+            queue.add(persist(orm.Postcode, [...verifiedPostcodes]));
 
             console.log(`
 ------------------------------------
 >>> processed postcodes: ${total.toLocaleString()}
 >>> corrupted records so far: ${corrupted.toLocaleString()}
->>> unique postcodes in batch: ${processedPostcodes.length.toLocaleString()}
+>>> unique postcodes in batch: ${verifiedPostcodes.length.toLocaleString()}
 >>> unique postcodes so far: ${'guidMap.size'.toLocaleString()}
 >>> SQL transactions in queue: ${queue.size.toLocaleString()}
 >>> SQL workers used ${queue.pending} of ${queue.concurrency}`);
 
-            processedPostcodes.length = 0;
+            verifiedPostcodes.length = 0;
             iter++;
 
             performance.mark(`iter-${iter}`);
@@ -180,9 +180,9 @@ if (!fs.existsSync(file)) {
 
     await queue.onEmpty();
 
-    queue.add(persist(orm.Postcode, processedPostcodes));
+    queue.add(persist(orm.Postcode, verifiedPostcodes));
 
-    total += processedPostcodes.length;
+    total += verifiedPostcodes.length;
 
     console.log(`
 ------------------------------------
@@ -204,7 +204,7 @@ FINAL BATCH
 ------------------------------------
 >>> >> processed incidents: ${total.toLocaleString()}
 >>> >> corrupted records: ${corrupted.toLocaleString()}
->>> >> unique postcodes in final batch: ${processedPostcodes.length.toLocaleString()}
+>>> >> unique postcodes in final batch: ${verifiedPostcodes.length.toLocaleString()}
 ------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');
