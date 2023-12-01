@@ -42,10 +42,10 @@ module.exports = {
                         type: Sequelize.STRING,
                     },
                     // LSOA code
-                    lsoa: {
-                        type: Sequelize.STRING,
-                    },
-                    // // LSOA name
+                    // lsoa: {
+                    //     type: Sequelize.STRING,
+                    // },
+                    // LSOA name
                     // area: {
                     //     type: Sequelize.STRING,
                     // },
@@ -57,7 +57,7 @@ module.exports = {
                     assignee: {
                         type: Sequelize.STRING,
                     },
-                    // // Context
+                    // Context
                     // json: {
                     //     type: Sequelize.TEXT,
                     // }
