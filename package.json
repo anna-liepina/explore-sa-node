@@ -42,7 +42,7 @@
   "main": "src/app.js",
   "scripts": {
     "sql": "node -r dotenv/config ./node_modules/.bin/sequelize --config ./build/orm-config.js",
-    "parse": "tsc && node -r dotenv/config ./build/parse:properties.js",
+    "parse:properties": "tsc && node -r dotenv/config ./build/parse:properties.js",
     "parse:postcodes": "tsc && node -r dotenv/config ./build/parse:postcodes",
     "parse:postcodes:geo": "tsc && node -r dotenv/config ./build/parse:postcodes:geo",
     "parse:area": "tsc && node -r dotenv/config ./build/parse:area",
