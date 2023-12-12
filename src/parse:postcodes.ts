@@ -10,11 +10,10 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeOperation, perfObserver2, Output } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
 const executeMigrations = composeOperation(OperationMarker.postcodes, orm);
-perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
 //@ts-ignore
 const { file, sql: logging, dry: dryRun, limit, update } = yargs
@@ -36,10 +35,43 @@ const { file, sql: logging, dry: dryRun, limit, update } = yargs
     .option('update', {
         type: 'boolean',
         description: 'flush update [do not drop/restore indexes, useful with small csv files]',
+        default: false
     })
     .help()
     .argv;
 
+
+/**
+ * Create and insert multiple instances in bulk.
+ *
+ * The success handler is passed an array of instances, but please notice that these may not completely represent the state of the rows in the DB. This is because MySQL
+ * and SQLite do not make it easy to obtain back automatically generated IDs and other default values in a way that can be mapped to multiple records.
+ * To obtain Instances for the newly created values, you will need to query for them again.
+ *
+ * If validation fails, the promise is rejected with an array-like AggregateError
+ *
+ * @param  {Array}          records                          List of objects (key/value pairs) to create instances from
+ * @param  {object}         [options]                        Bulk create options
+ * @param  {Array}          [options.fields]                 Fields to insert (defaults to all fields)
+ * @param  {boolean}        [options.validate=false]         Should each row be subject to validation before it is inserted. The whole insert will fail if one row fails validation
+ * @param  {boolean}        [options.hooks=true]             Run before / after bulk create hooks?
+ * @param  {boolean}        [options.individualHooks=false]  Run before / after create hooks for each individual Instance? BulkCreate hooks will still be run if options.hooks is true.
+ * @param  {boolean}        [options.ignoreDuplicates=false] Ignore duplicate values for primary keys? (not supported by MSSQL or Postgres < 9.5)
+ * @param  {Array}          [options.updateOnDuplicate]      Fields to update if row key already exists (on duplicate key update)? (only supported by MySQL, MariaDB, SQLite >= 3.24.0 & Postgres >= 9.5). By default, all fields are updated.
+ * @param  {Transaction}    [options.transaction]            Transaction to run query under
+ * @param  {Function}       [options.logging=false]          A function that gets executed while running the query to log the sql.
+ * @param  {boolean}        [options.benchmark=false]        Pass query execution time in milliseconds as second argument to logging function (options.logging).
+ * @param  {boolean|Array}  [options.returning=false]        If true, append RETURNING <model columns> to get back all defined values; if an array of column names, append RETURNING <columns> to get back specific columns (Postgres only)
+ * @param  {string}         [options.searchPath=DEFAULT]     An optional parameter to specify the schema search_path (Postgres only)
+ *
+ * @returns {Promise<Array<Model>>}
+ */
+const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
+
+const output = new Output(`processing ${file}`);
+output.sections = [[], []];
+perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
+    
 console.log(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
@@ -77,36 +109,13 @@ if (!fs.existsSync(file)) {
 
 (async () => {
     performance.mark('init');
-
-    /**
-     * Create and insert multiple instances in bulk.
-     *
-     * The success handler is passed an array of instances, but please notice that these may not completely represent the state of the rows in the DB. This is because MySQL
-     * and SQLite do not make it easy to obtain back automatically generated IDs and other default values in a way that can be mapped to multiple records.
-     * To obtain Instances for the newly created values, you will need to query for them again.
-     *
-     * If validation fails, the promise is rejected with an array-like AggregateError
-     *
-     * @param  {Array}          records                          List of objects (key/value pairs) to create instances from
-     * @param  {object}         [options]                        Bulk create options
-     * @param  {Array}          [options.fields]                 Fields to insert (defaults to all fields)
-     * @param  {boolean}        [options.validate=false]         Should each row be subject to validation before it is inserted. The whole insert will fail if one row fails validation
-     * @param  {boolean}        [options.hooks=true]             Run before / after bulk create hooks?
-     * @param  {boolean}        [options.individualHooks=false]  Run before / after create hooks for each individual Instance? BulkCreate hooks will still be run if options.hooks is true.
-     * @param  {boolean}        [options.ignoreDuplicates=false] Ignore duplicate values for primary keys? (not supported by MSSQL or Postgres < 9.5)
-     * @param  {Array}          [options.updateOnDuplicate]      Fields to update if row key already exists (on duplicate key update)? (only supported by MySQL, MariaDB, SQLite >= 3.24.0 & Postgres >= 9.5). By default, all fields are updated.
-     * @param  {Transaction}    [options.transaction]            Transaction to run query under
-     * @param  {Function}       [options.logging=false]          A function that gets executed while running the query to log the sql.
-     * @param  {boolean}        [options.benchmark=false]        Pass query execution time in milliseconds as second argument to logging function (options.logging).
-     * @param  {boolean|Array}  [options.returning=false]        If true, append RETURNING <model columns> to get back all defined values; if an array of column names, append RETURNING <columns> to get back specific columns (Postgres only)
-     * @param  {string}         [options.searchPath=DEFAULT]     An optional parameter to specify the schema search_path (Postgres only)
-     *
-     * @returns {Promise<Array<Model>>}
-     */
-    const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
-
+    
     if (!dryRun && !update) {
         await executeMigrations(MigrationsDirection.down);
+
+        output.sections[0] = [
+            '✅ dropping table\'s indexes ...',
+        ];
     }
 
     const queue = new PQueue({ concurrency: os.cpus().length });
@@ -115,44 +124,40 @@ if (!fs.existsSync(file)) {
         .createReadStream(file)
         .pipe(csv());
 
-    let i = 0;
     let iter = 0;
+    let count = 0;
 
     const postcodes: Partial<PostcodeType>[] = [];
     const postcodeMap: Set<string> = new Set();
 
     performance.mark(`iter-${iter}`);
 
+    const out = (final?: boolean) => 
+        output.processingInfo(postcodeMap.size, count - postcodeMap.size, postcodes.length, queue, final);
+
     for await (const row of parser) {
         const [postcode, _1, _2, _3, _4, _5, _6, lat, lng] = row;
 
-        i++;
+        count++;
 
         if (isNaN(lat) || isNaN(lng)) {
             continue;
         }
 
-        const obj = {
-            postcode,
-            lat,
-            lng,
-        };
-
         if (!postcodeMap.has(postcode)) {
             postcodeMap.add(postcode);
 
-            postcodes.push(obj);
+            postcodes.push({
+                postcode,
+                lat,
+                lng,
+            });
         }
 
         if (postcodes.length === limit) {
             const job = queue.add(persist(orm.Postcode, [...postcodes]));
 
-            console.log(`
-------------------------------------
->>> postcodes without proper coodinates: ${(i - postcodeMap.size).toLocaleString()}
->>> postcodes proccessed: ${postcodeMap.size.toLocaleString()}
->>> postcodes in this batch: ${postcodes.length.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}`);
+            output.sections[1] = out();
 
             postcodes.length = 0;
             iter++;
@@ -161,44 +166,39 @@ if (!fs.existsSync(file)) {
             performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
             if (queue.size > queue.concurrency) {
-                console.log(`
-------------------------------------
->>> catching up with SQL queue ...
-------------------------------------`);
+                output.sections.push([
+                    '',
+                    '⏱️ catching up with SQL queue ...',
+                ]);
+
                 await job;
+
+                output.sections.length = 2;
             }
         }
     }
 
     queue.add(persist(orm.Postcode, postcodes));
+    output.sections[1] = out(true);
 
     if (!dryRun) {
-        console.log(`
-------------------------------------
-execute queued SQL ...
-------------------------------------`);
+        output.sections.push([
+            Output.line,
+            '✅ await queued SQL ...',
+        ]);
 
         await queue.onEmpty();
     }
 
     if (!dryRun && !update) {
-        console.log(`
-------------------------------------
->>> restoring database indexes ...
-------------------------------------`);
+        output.sections.push([
+            Output.line,
+            '✅ restore table\'s indexes ...',
+        ]);
 
         await executeMigrations(MigrationsDirection.up);
     }
 
-    console.log(`
-------------------------------------
-FINAL BATCH
-------------------------------------
->>> >> missing data on postcodes: ${(i - postcodeMap.size).toLocaleString()}
->>> >> postcodes so far parsed: ${postcodeMap.size.toLocaleString()}
->>> >> postcodes proccessed: ${postcodeMap.size.toLocaleString()}
->>> >> postcodes in this batch: ${postcodes.length.toLocaleString()}
-------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');
 })()

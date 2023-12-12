@@ -1,11 +1,14 @@
 import fs from "fs";
 import { PerformanceObserver } from "perf_hooks";
 import type { ORM } from "./orm.types";
+import type PQueue from "p-queue";
+import type { BulkCreateOptions, Model, ModelStatic } from "sequelize";
 
 export enum MigrationsDirection {
     up = "up",
     down = "down",
 }
+
 export enum OperationMarker {
     properties = "parse:properties",
     postcodes = "parse:postcodes",
@@ -13,32 +16,166 @@ export enum OperationMarker {
     incidents = "parse:incidents",
 }
 
+// export const finalBatch = async (dryRun: boolean, update: boolean, queue: PQueue, migration?: Function) => {
+//     if (!dryRun) {
+//         console.log(`
+// ------------------------------------
+// QUEUE: execute queued SQL ...
+// ------------------------------------`);
+//         await queue.onEmpty();
+//     }
+
+//     if (!dryRun && !update && migration) {
+//         console.log(`
+// ------------------------------------
+// >>> restoring database indexes ...
+// ------------------------------------`);
+//         await migration();
+//     }
+
+// //     console.log(`
+// // ------------------------------------
+// // FINAL BATCH
+// // ------------------------------------
+// // >>> >> missing data on postcodes: ${(i - postcodeMap.size).toLocaleString()}
+// // >>> >> postcodes so far parsed: ${postcodeMap.size.toLocaleString()}
+// // >>> >> postcodes proccessed: ${postcodeMap.size.toLocaleString()}
+// // >>> >> postcodes in this batch: ${postcodes.length.toLocaleString()}
+// // ------------------------------------`);
+// }
+
 export const composeOperation =
     (operationMarker: OperationMarker, orm: ORM) =>
         async (direction: MigrationsDirection) => {
             const executeFiles = async (path: string) => {
-            const files = fs.readdirSync(path);
-            for (const file of files) {
-                const obj = require(require.resolve(`${path}/${file}`));
+                const files = fs.readdirSync(path);
+                for (const file of files) {
+                    const obj = require(require.resolve(`${path}/${file}`));
 
-                if (!obj[operationMarker]) {
-                    continue;
+                    if (!obj[operationMarker]) {
+                        continue;
+                    }
+
+                    await obj[direction](orm.sequelize.getQueryInterface(), orm.Sequelize);
                 }
-
-                await obj[direction](orm.sequelize.getQueryInterface(), orm.Sequelize);
-            }
             };
 
             return executeFiles(`${__dirname}/../database/migrations`);
         };
 
-export const perfObserver = () =>
+export const perfObserver2 = (output: Output) =>
   new PerformanceObserver((items) => {
         items.getEntries().forEach((o) => {
-            console.log(`
-PERFORMANCE OBSERVER METRICS
-duration: ${(o.duration / 1000).toFixed(2)}s      
-heapsize: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
+            const durationInSec = o.duration / 1000;
+            const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
+
+//             console.log(`
+// PERFORMANCE OBSERVER METRICS
+// duration: ${durationInSec.toFixed(2)}s      
+// heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
+
+
+            updateConsoleLog(output.out(durationInSec, usedMemoryInMB));
             }
         );
   });
+
+  export const perfObserver = () =>
+  new PerformanceObserver((items) => {
+        items.getEntries().forEach((o) => {
+            const durationInSec = o.duration / 1000;
+            const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
+
+            console.log(`
+PERFORMANCE OBSERVER METRICS
+duration: ${durationInSec.toFixed(2)}s      
+heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
+
+
+            // updateConsoleLog(output.out(durationInSec, usedMemoryInMB));
+            }
+        );
+  });
+
+export const out = (message) => {
+    process.stdout.write(`\r${message}`);
+}
+
+export const updateConsoleLog = (lines: string[]) => {
+    process.stdout.write('\x1Bc');
+    process.stdout.write(lines.join('\n'));
+}
+
+/**
+ * Create and insert multiple instances in bulk.
+ *
+ * The success handler is passed an array of instances, but please notice that these may not completely represent the state of the rows in the DB. This is because MySQL
+ * and SQLite do not make it easy to obtain back automatically generated IDs and other default values in a way that can be mapped to multiple records.
+ * To obtain Instances for the newly created values, you will need to query for them again.
+ *
+ * If validation fails, the promise is rejected with an array-like AggregateError
+ *
+ * @param  {Array}          records                          List of objects (key/value pairs) to create instances from
+ * @param  {object}         [options]                        Bulk create options
+ * @param  {Array}          [options.fields]                 Fields to insert (defaults to all fields)
+ * @param  {boolean}        [options.validate=false]         Should each row be subject to validation before it is inserted. The whole insert will fail if one row fails validation
+ * @param  {boolean}        [options.hooks=true]             Run before / after bulk create hooks?
+ * @param  {boolean}        [options.individualHooks=false]  Run before / after create hooks for each individual Instance? BulkCreate hooks will still be run if options.hooks is true.
+ * @param  {boolean}        [options.ignoreDuplicates=false] Ignore duplicate values for primary keys? (not supported by MSSQL or Postgres < 9.5)
+ * @param  {Array}          [options.updateOnDuplicate]      Fields to update if row key already exists (on duplicate key update)? (only supported by MySQL, MariaDB, SQLite >= 3.24.0 & Postgres >= 9.5). By default, all fields are updated.
+ * @param  {Transaction}    [options.transaction]            Transaction to run query under
+ * @param  {Function}       [options.logging=false]          A function that gets executed while running the query to log the sql.
+ * @param  {boolean}        [options.benchmark=false]        Pass query execution time in milliseconds as second argument to logging function (options.logging).
+ * @param  {boolean|Array}  [options.returning=false]        If true, append RETURNING <model columns> to get back all defined values; if an array of column names, append RETURNING <columns> to get back specific columns (Postgres only)
+ * @param  {string}         [options.searchPath=DEFAULT]     An optional parameter to specify the schema search_path (Postgres only)
+ *
+ * @returns {Promise<Array<Model>>}
+ */
+// export const persist = (model: ModelStatic<Model>, entities: Model[], options: BulkCreateOptions = {}) => model.bulkCreate(entities as unknown, { ...options, hooks: false });
+
+
+export class Output {
+    static line = '------------------------------------';
+    constructor(public title: string, public sections = []) {}
+
+    performanceHeaders(durationInSec: number, usedMemoryInMB: number) {
+        return [
+            Output.line,
+            '📊 MEMORY USAGE',
+            Output.line,
+            `between updates: ${durationInSec.toFixed(2)}s`,
+            `used memory (heapsize): ${usedMemoryInMB.toFixed(2)} MB`
+        ]
+    }
+
+    processingInfo(
+        total: number,
+        totalCorrupedOrInvalid: number,
+        inBatch: number,
+        queue: PQueue,
+        final?: boolean
+    ): string[] {
+        return [
+            Output.line,
+            `${final ? '✅' : '⏱️ '} data processing ...`,
+            Output.line,
+            ` total records processed`,
+            `   valid: ${total.toLocaleString()}`,
+            `   corrupred or invalid: ${totalCorrupedOrInvalid.toLocaleString()}`,
+            ``,
+            ` valid records in the last batch: ${inBatch.toLocaleString()}`,
+            ` SQL workers used ${queue.pending.toLocaleString()} of ${queue.concurrency.toLocaleString()} ( queue: ${queue.size.toLocaleString()} )`,
+        ];
+    }
+
+    out(durationInSec: number, usedMemoryInMB: number): string[] {
+        return [
+            Output.line,
+            this.title,
+            Output.line,
+            ...this.sections.reduce((acc, v) => acc.concat(v), []),
+            ...this.performanceHeaders(durationInSec, usedMemoryInMB),
+            ''
+        ]
+    }
+}

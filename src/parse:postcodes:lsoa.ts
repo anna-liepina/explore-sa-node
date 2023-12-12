@@ -10,13 +10,11 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
-import { perfObserver } from './parse:utils';
+import { Output, perfObserver2 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
-perfObserver().observe({ entryTypes: ['measure'], buffered: true });
-
 //@ts-ignore
-const { file, sql: logging, dry: dryRun, limit, update } = yargs
+const { file, sql: logging, dry: dryRun, limit } = yargs
     .command('--file', 'absolute path to csv to parse')
     .option('limit', {
         type: 'number',
@@ -32,10 +30,6 @@ const { file, sql: logging, dry: dryRun, limit, update } = yargs
         type: 'boolean',
         description: 'dry run - do not affect a database',
     })
-    .option('update', {
-        type: 'boolean',
-        description: 'flush update [do not drop/restore indexes, useful with small csv files]',
-    })
     .help()
     .argv;
 
@@ -48,7 +42,6 @@ name\t\tdescription
 --limit\t\tamount of records in one bulk SQL qeuery
 --sql\t\tprint out SQL queries
 --dry\t\tdry run do not execute SQL
---update\tflush update [do not drop/restore indexes, useful with small csv files]
 
 --------------------------------------------------
 database connection info:
@@ -73,6 +66,9 @@ if (!fs.existsSync(file)) {
 
     process.exit(0);
 }
+
+const output = new Output(`processing ${file}`);
+perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
 
 (async () => {
     performance.mark('init');
@@ -103,11 +99,11 @@ if (!fs.existsSync(file)) {
      * @returns {Promise<Array<Model>>}
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false, updateOnDuplicate: ['lsoa']});
+    output.sections = [[], []];
 
-    let total = 0;
     let iter = 0;
-    let corrupted = 0;
-    let missingPostcode = 0;
+    let total = 0;
+    let missingPostcodes = 0;
 
     const concurrency = os.cpus().length;
     const queue = new PQueue({ concurrency });
@@ -125,9 +121,15 @@ if (!fs.existsSync(file)) {
         return map;
     });
 
+    output.sections[0] = [
+        '✅ fetch postcodes\' data ...',
+    ];
+
     performance.mark(`iter-${iter}`);
 
     const verifiedPostcodes = [];
+    const out = (final?: boolean) => 
+        output.processingInfo(total, missingPostcodes, verifiedPostcodes.length, queue, final);
     
     const parser = fs
         .createReadStream(file)
@@ -139,26 +141,18 @@ if (!fs.existsSync(file)) {
         const verifiedPostcode = postcodes.get(postcode);
 
         if (!verifiedPostcode || !lsoa) {
-            missingPostcode++;
+            missingPostcodes++;
             continue;
         }
+
+        total++;
 
         verifiedPostcode.lsoa = lsoa;
         verifiedPostcodes.push(verifiedPostcode);
 
         if (verifiedPostcodes.length === limit) {
-            total += verifiedPostcodes.length;
-
             queue.add(persist(orm.Postcode, [...verifiedPostcodes]));
-
-            console.log(`
-------------------------------------
->>> processed postcodes: ${total.toLocaleString()}
->>> corrupted records so far: ${corrupted.toLocaleString()}
->>> unique postcodes in batch: ${verifiedPostcodes.length.toLocaleString()}
->>> unique postcodes so far: ${'guidMap.size'.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}
->>> SQL workers used ${queue.pending} of ${queue.concurrency}`);
+            output.sections[1] = out();
 
             verifiedPostcodes.length = 0;
             iter++;
@@ -167,45 +161,30 @@ if (!fs.existsSync(file)) {
             performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
             if (queue.size > queue.concurrency) {
-                console.log(`
-------------------------------------
->>> catching up with SQL queue ...
-------------------------------------`);
+                output.sections.push([
+                    '',
+                    '⏱️ catching up with SQL queue ...',
+                ]);
 
                 // await queue.onSizeLessThan(concurrency);
                 await queue.onEmpty();
             }
+            output.sections.length = 2;
         }
     }
 
-    await queue.onEmpty();
-
     queue.add(persist(orm.Postcode, verifiedPostcodes));
+    output.sections[1] = out(true);
 
-    total += verifiedPostcodes.length;
+    if (!dryRun) {
+        output.sections.push([
+            Output.line,
+            '✅ await queued SQL ...',
+        ]);
 
-    console.log(`
-------------------------------------
->>> execute remaining SQL queue ...
-------------------------------------`);
-
-    if (!dryRun && !update) {
         await queue.onEmpty();
-
-        console.log(`
-------------------------------------
->>> restoring database indexes ...
-------------------------------------`);
     }
 
-    console.log(`
-------------------------------------
-FINAL BATCH
-------------------------------------
->>> >> processed incidents: ${total.toLocaleString()}
->>> >> corrupted records: ${corrupted.toLocaleString()}
->>> >> unique postcodes in final batch: ${verifiedPostcodes.length.toLocaleString()}
-------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');
 })()

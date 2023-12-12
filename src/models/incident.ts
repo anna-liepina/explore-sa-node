@@ -52,11 +52,11 @@ export default (sequelize: Sequelize) => {
             outcome: {
                 type: DataTypes.STRING,
             },
-            // // LSOA code
+            // LSOA code
             // lsoa: {
             //     type: DataTypes.STRING,
             // },
-            // // LSOA name
+            // LSOA name
             // area: {
             //     type: DataTypes.STRING,
             // },
@@ -79,11 +79,11 @@ export default (sequelize: Sequelize) => {
         }
     );
 
-    // //@ts-ignore
-    // model.associate = ({ Postcode, Property }) => {
-    //     Postcode.hasMany(Property, { foreignKey: 'postcode', sourceKey: 'postcode' });
-    //     Property.belongsTo(Postcode, { foreignKey: 'postcode', targetKey: 'postcode' });
-    // }
+    //@ts-ignore
+    model.associate = ({ Postcode, Incident }) => {
+        Postcode.hasMany(Incident, { foreignKey: 'postcode', sourceKey: 'postcode' });
+        Incident.belongsTo(Postcode, { foreignKey: 'postcode', targetKey: 'postcode' });
+    }
 
     return model;
 };

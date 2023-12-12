@@ -10,12 +10,11 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
+import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver2 } from './parse:utils';
 import type { PropertyType } from './models/property';
 import type { TransactionType } from './models/transaction';
 
 const executeMigrations = composeOperation(OperationMarker.properties, orm);
-perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
 //@ts-ignore
 const { file, sql: logging, dry: dryRun, limit, update } = yargs
@@ -41,6 +40,9 @@ const { file, sql: logging, dry: dryRun, limit, update } = yargs
     .help()
     .argv;
 
+const output = new Output(`processing ${file}`);
+perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
+    
 console.log(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
@@ -106,10 +108,14 @@ if (!fs.existsSync(file)) {
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
-    const f = (v) => !v ? undefined : v;
+    const ifFalsyUndefined = <T>(v: T): T | undefined => !v ? undefined : v;
 
     if (!dryRun && !update) {
         await executeMigrations(MigrationsDirection.down);
+
+        output.sections[0] = [
+            '✅ dropping table\'s indexes ...',
+        ];
     }
 
     const properties: Partial<PropertyType>[] = [];
@@ -134,6 +140,9 @@ if (!fs.existsSync(file)) {
     const parser = fs
         .createReadStream(file)
         .pipe(csv());
+        
+    const out = (final?: boolean) => 
+        output.processingInfo(i, corrupted, transactions.length, queue, final);
 
     for await (const row of parser) {
         const date = row[2].split(' ')[0];
@@ -149,21 +158,14 @@ if (!fs.existsSync(file)) {
 
         const obj: Partial<PropertyType> = {
             // uuid: row[0],
-            // price,
-            // date,
             postcode,
             propertyType: row[4],
             // purchaseType: row[5],
             propertyForm: row[6],
-            paon: f(row[7]),
-            saon: f(row[8]),
-            street: f(row[9]),
-            // locality: row[10],
-            city: f(row[11]),
-            // district: row[12],
-            // county: row[13],
-            // ppd: row[14],
-            // status: row[15],
+            paon: ifFalsyUndefined(row[7]),
+            saon: ifFalsyUndefined(row[8]),
+            street: ifFalsyUndefined(row[9]),
+            city: ifFalsyUndefined(row[11]),
         };
 
         obj.guid = `${obj.postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`.toUpperCase();
@@ -172,8 +174,6 @@ if (!fs.existsSync(file)) {
             guid: obj.guid,
             price,
             date,
-            // type: row[5] === 'Y',
-            // sale: row[14] === 'A',
         });
 
         if (!propertiesGUIDMap.has(obj.guid)) {
@@ -188,14 +188,7 @@ if (!fs.existsSync(file)) {
             queue.add(persist(orm.Property, [...properties]));
             queue.add(persist(orm.Transaction, [...transactions]));
 
-            console.log(`
-------------------------------------
->>> processed transactions: ${i.toLocaleString()}
->>> corrupted records so far: ${corrupted.toLocaleString()}
->>> unique properties in batch: ${properties.length.toLocaleString()}
->>> unique properties so far: ${propertiesGUIDMap.size.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}
->>> SQL workers used ${queue.pending} of ${queue.concurrency}`);
+            output.sections[1] = out();
 
             transactions.length = 0;
             properties.length = 0;
@@ -205,49 +198,42 @@ if (!fs.existsSync(file)) {
             performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
             if (queue.size > queue.concurrency) {
-                console.log(`
-------------------------------------
->>> catching up with SQL queue ...
-------------------------------------`);
+                output.sections.push([
+                    '',
+                    '⏱️ catching up with SQL queue ...',
+                ]);
 
                 // await queue.onSizeLessThan(concurrency);
                 await queue.onEmpty();
+
+                output.sections.length = 2;
             }
         }
     }
-
-    await queue.onEmpty();
 
     queue.add(persist(orm.Property, properties));
     queue.add(persist(orm.Transaction, transactions));
 
     i += transactions.length;
 
-    console.log(`
-------------------------------------
->>> execute remaining SQL queue ...
-------------------------------------`);
+    if (!dryRun) {
+        output.sections.push([
+            Output.line,
+            '✅ await queued SQL ...',
+        ]);
+
+        await queue.onEmpty();
+    }
 
     if (!dryRun && !update) {
-        await queue.onEmpty();
-
-        console.log(`
-------------------------------------
->>> restoring database indexes ...
-------------------------------------`);
+        output.sections.push([
+            Output.line,
+            '✅ restore table\'s indexes ...',
+        ]);
 
         await executeMigrations(MigrationsDirection.up);
     }
 
-    console.log(`
-------------------------------------
-FINAL BATCH
-------------------------------------
->>> >> processed transactions: ${i.toLocaleString()}
->>> >> corrupted records: ${corrupted.toLocaleString()}
->>> >> unique properties in batch: ${properties.length.toLocaleString()}
->>> >> unique properties: ${propertiesGUIDMap.size.toLocaleString()}
-------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');
 })()

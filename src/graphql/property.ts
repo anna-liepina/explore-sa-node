@@ -20,16 +20,6 @@ export default {
             ): [Property]
         }
 
-        input Point {
-            lat: Float!
-            lng: Float!
-        }
-
-        enum GeoUnit {
-            km
-            ml
-        }
-
         type Property {
             id: ID!
             postcode: Postcode

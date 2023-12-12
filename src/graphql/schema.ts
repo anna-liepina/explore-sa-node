@@ -11,6 +11,16 @@ import incidents from './incidents';
 export const typeDefs = gql`
     type Query
 
+    input Point {
+        lat: Float!
+        lng: Float!
+    }
+
+    enum GeoUnit {
+        km
+        ml
+    }
+
     ${area.typeDefs}
     ${postcode.typeDefs}
     ${property.typeDefs}
