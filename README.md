@@ -54,6 +54,8 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 ### where to get data-sets
  * [UK postcodes](https://www.getthedata.com/open-postcode-geo)
  * [UK house sales data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads)
+ * [UK LSOA & Postcode data](https://geoportal.statistics.gov.uk/datasets/ons::postcode-to-output-area-to-lower-layer-super-output-area-to-middle-layer-super-output-area-to-local-authority-district-november-2018-lookup-in-the-uk-2/about)
+ * [Police Records Data](https://data.police.uk/data/archive/)
 
 ### how to install
 
