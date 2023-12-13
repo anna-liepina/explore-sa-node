@@ -1,6 +1,7 @@
 import type { PostcodeType } from "../models/postcode";
 import type { PropertyType } from "../models/property";
 import type { TransactionType } from "../models/transaction";
+import { coordinatesWithinRange } from "./utils";
 
 export default {
     typeDefs: `
@@ -27,10 +28,10 @@ export default {
         # Duration	Relates to the tenure: F = Freehold, L= Leasehold etc.
         # Note that HM Land Registry does not record leases of 7 years or less in the Price Paid Dataset.
             propertyForm: String,
-        # PAON	Primary Addressable Object Name. Typically the house number or name.
+        # PAON [Primary Addressable Object Name]. Typically the house number or name.
             paon: String
-        # SAON	Secondary Addressable Object Name. Where a property has been divided into separate units (for example, flats),
-        # the PAON (above) will identify the building and a SAON will be specified that identifies the separate unit/flat.
+        # SAON [Secondary Addressable Object Name]. Where a property has been divided into separate units (for example, flats)
+        # PAON (above) will identify the building and a SAON will be specified that identifies the separate unit/flat.
             saon: String
             street: String
             city: String
@@ -55,12 +56,8 @@ export default {
                 });
             },
             propertySearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<PropertyType>[]> => {
+                const { latitudeRange, longitudeRange } = coordinatesWithinRange(pos.lat, pos.lng, range, rangeUnit);
                 const offset: number = (page - 1) * limit;
-                /** 1ml = 1.60934km */
-                const coefficient: number = 'ml' === rangeUnit ? 1.60934 : 1;
-                /** 1 lat/lng is ~111km */
-                const adjust: number = range / 111 * coefficient;
-                const { lat, lng } = pos;
 
                 return orm.Property.findAll({
                     include: [
@@ -70,10 +67,10 @@ export default {
                             attributes: [],
                             where: {
                                 lat: {
-                                    [orm.Sequelize.Op.between]: [lat - adjust, lat + adjust],
+                                    [orm.Sequelize.Op.between]: latitudeRange,
                                 },
                                 lng: {
-                                    [orm.Sequelize.Op.between]: [lng - adjust, lng + adjust],
+                                    [orm.Sequelize.Op.between]: longitudeRange,
                                 },
                             },
                         },
