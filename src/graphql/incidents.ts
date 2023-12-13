@@ -12,7 +12,6 @@ export default {
                 perPage: Int = 100
                 page: Int = 1
             ): [Incident]
-
         }
 
         type Incident {
@@ -26,7 +25,6 @@ export default {
             outcome: String
             creator: String
             assignee: String
-            distance: Float
         }
     `,
     resolvers: {
@@ -108,11 +106,7 @@ export default {
         Incident: {
             postcode: (entity: IncidentType, args, { dataloader }): Promise<PostcodeType> => {
                 return dataloader.getPostcode.load(entity.postcode);
-            },
-            distance: (entity: Partial<PostcodeType>) => {
-                /** check propertySearchWithInRange resolver */
-                return entity['Incident.distance'];
-            },
+            }
         }
     },
 }
