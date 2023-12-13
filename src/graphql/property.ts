@@ -5,7 +5,6 @@ import type { TransactionType } from "../models/transaction";
 export default {
     typeDefs: `
         extend type Query {
-            property(id: ID!): Property
             propertySearch(
                 postcode: String!
                 perPage: Int = 100
@@ -37,18 +36,10 @@ export default {
             city: String
 
             transactions: [Transaction]
-        # distance fields, used only in propertySearchWithInRange
-            distance: Float
         }
     `,
     resolvers: {
         Query: {
-            property: (entity, args, { orm }): Promise<PropertyType> => {
-                return orm.Property.findOne({
-                    where: args,
-                    raw: true,
-                });
-            },
             propertySearch: (entity, { postcode, perPage: limit, page }, { orm }): Promise<PropertyType[]>  => {
                 const offset: number = (page - 1) * limit;
 
@@ -67,7 +58,6 @@ export default {
                 const offset: number = (page - 1) * limit;
                 /** 1ml = 1.60934km */
                 const coefficient: number = 'ml' === rangeUnit ? 1.60934 : 1;
-                const distance: number = range * 1000 * coefficient;
                 /** 1 lat/lng is ~111km */
                 const adjust: number = range / 111 * coefficient;
                 const { lat, lng } = pos;
@@ -77,16 +67,7 @@ export default {
                         {
                             model: orm.Postcode,
                             required: true,
-                            attributes: [
-                                [
-                                    orm.Sequelize.fn(
-                                        'ST_Distance_Sphere',
-                                        orm.Sequelize.fn('POINT', lat, lng),
-                                        orm.Sequelize.fn('POINT', orm.Sequelize.col('Postcode.lat'), orm.Sequelize.col('Postcode.lng')),
-                                    ),
-                                    'distance'
-                                ],
-                            ],
+                            attributes: [],
                             where: {
                                 lat: {
                                     [orm.Sequelize.Op.between]: [lat - adjust, lat + adjust],
@@ -97,14 +78,6 @@ export default {
                             },
                         },
                     ],
-                    having: {
-                        'Postcode.distance': {
-                            [orm.Sequelize.Op.lte]: distance,
-                        },
-                    },
-                    order: [
-                        [orm.Sequelize.literal('`Postcode.distance`'), 'ASC'],
-                    ],
                     offset,
                     limit,
                     raw: true,
@@ -114,10 +87,6 @@ export default {
         Property: {
             postcode: (entity: PropertyType, args, { dataloader }): Promise<PostcodeType> => {
                 return dataloader.getPostcode.load(entity.postcode);
-            },
-            distance: (entity: Partial<PropertyType>) => {
-                /** check propertySearchWithInRange resolver */
-                return entity['Postcode.distance'];
             },
             transactions: (entity: PropertyType, args, { dataloader }): Promise<TransactionType[]> => {
                 return dataloader.getTransactions.load(entity.guid);

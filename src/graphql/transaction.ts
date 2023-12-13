@@ -5,7 +5,6 @@ import type { TransactionType } from "../models/transaction";
 export default {
     typeDefs: `
         extend type Query {
-            transaction(id: ID!): Transaction
             transactionSearch(
                 postcode: String
                 from: String
@@ -24,12 +23,6 @@ export default {
     `,
     resolvers: {
         Query: {
-            transaction: (entity, args, { orm }): Promise<TransactionType> => {
-                return orm.Transaction.findOne({
-                    where: args as WhereAttributeHash,
-                    raw: true,
-                });
-            },
             transactionSearch: (entity, { postcode, from, to, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {};

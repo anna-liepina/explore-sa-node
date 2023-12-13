@@ -1,29 +1,5 @@
 //@ts-nocheck
 describe('GraphQL: Property', () => {
-    describe('property', () => {
-        it(`by exact ID`, async () => {
-            const { data: { property: data } } = await query({
-                query: `
-                {
-                    property(id: 1) {
-                        saon
-                        paon
-                        street
-                        postcode {
-                            postcode
-                        }
-                        distance
-                        transactions {
-                            date
-                        }
-                    }
-                }`
-            });
-
-            expect(data).toMatchSnapshot();
-        });
-    });
-
     describe('propertySearch [presets: perPage 3]', () => {
         it(`by postcode wildcard`, async () => {
             const { data: { propertySearch: data } } = await query({
@@ -89,7 +65,6 @@ describe('GraphQL: Property', () => {
                             lat
                             lng
                         }
-                        distance
                         transactions {
                             date
                         }
@@ -121,7 +96,6 @@ describe('GraphQL: Property', () => {
                             lat
                             lng
                         }
-                        distance
                         transactions {
                             date
                         }
@@ -154,7 +128,6 @@ describe('GraphQL: Property', () => {
                             lat
                             lng
                         }
-                        distance
                         transactions {
                             date
                         }
