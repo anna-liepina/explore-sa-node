@@ -65,7 +65,6 @@ describe('GraphQL: Property', () => {
                             lat
                             lng
                         }
-                        distance
                         transactions {
                             date
                         }
@@ -97,7 +96,6 @@ describe('GraphQL: Property', () => {
                             lat
                             lng
                         }
-                        distance
                         transactions {
                             date
                         }
@@ -130,7 +128,6 @@ describe('GraphQL: Property', () => {
                             lat
                             lng
                         }
-                        distance
                         transactions {
                             date
                         }
