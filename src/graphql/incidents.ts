@@ -5,7 +5,6 @@ import type { PostcodeType } from "../models/postcode";
 export default {
     typeDefs: `
         extend type Query {
-            incident(id: ID!): Incident
             incidentSearch(
                 postcode: String!
                 perPage: Int = 100
@@ -37,12 +36,6 @@ export default {
     `,
     resolvers: {
         Query: {
-            incident: (entity, args, { orm }): Promise<IncidentType> => {
-                return orm.Property.findOne({
-                    where: args,
-                    raw: true,
-                });
-            },
             incidentSearch: (entity, { postcode, perPage: limit, page }, { orm }): Promise<IncidentType[]>  => {
                 const offset: number = (page - 1) * limit;
 
