@@ -4,14 +4,14 @@ import type { ORM } from '../orm.types';
 
 export default (orm: ORM) => ({
     getPostcode: new DataLoader(
-        (postcode: string[]) => {
+        async (postcode: string[]) => {
             return orm.Postcode.findAll({
                 where: {
                     postcode,
                 },
                 raw: true,
             })
-                .then((v: Object[]) => resolveSQLResult(postcode, 'postcode', v))
+                .then((v) => resolveSQLResult(postcode, 'postcode', v))
         }
     ),
 })
