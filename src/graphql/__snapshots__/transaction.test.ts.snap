@@ -1,18 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GraphQL: Transaction transaction should fetch transaction by ID 1`] = `
-{
-  "date": "2019-04-26",
-  "id": "1",
-  "price": 375000,
-  "property": {
-    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
-    "saon": "cd435dfdc23e7d95665b678f176329c14ac2af4a",
-    "street": "PRIZE WALK",
-  },
-}
-`;
-
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcode range: 1st page 1`] = `
 [
   {
