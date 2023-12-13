@@ -5,11 +5,6 @@ import type { PostcodeType } from "../models/postcode";
 export default {
     typeDefs: `
         extend type Query {
-            incidentSearch(
-                postcode: String!
-                perPage: Int = 100
-                page: Int = 1
-            ): [Incident]
             incidentSearchWithInRange(
                 pos: Point!
                 range: Float = 1
@@ -36,20 +31,6 @@ export default {
     `,
     resolvers: {
         Query: {
-            incidentSearch: (entity, { postcode, perPage: limit, page }, { orm }): Promise<IncidentType[]>  => {
-                const offset: number = (page - 1) * limit;
-
-                return orm.Property.findAll({
-                    where: {
-                        postcode: {
-                            [orm.Sequelize.Op.like]: `${postcode}%`,
-                        },
-                    },
-                    offset,
-                    limit,
-                    raw: true,
-                });
-            },
             incidentSearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<IncidentType>[]> => {
                 const offset: number = (page - 1) * limit;
                 /** 1ml = 1.60934km */
