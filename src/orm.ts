@@ -9,7 +9,6 @@ import conf from './orm-config';
 
 // will be fixed later with dynamic import and typescript
 import Area from './models/area';
-import Geo from './models/geo';
 import Postcode from './models/postcode';
 import Property from './models/property';
 import Timeline from './models/timeline';
@@ -40,7 +39,6 @@ const s = new Sequelize(c.database, c.username, c.password, c);
 
 const orm: Partial<ORM> = [
     Area,
-    Geo,
     Postcode,
     Property,
     Timeline,

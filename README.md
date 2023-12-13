@@ -120,7 +120,6 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 | ---                    | ---
 | `parse`                | `src/parse:properties`
 | `parse:postcodes`      | `src/parse:postcodes`
-| `parse:postcodes:geo`  | `src/parse:postcodes:geo`
 | `parse:area`           | `src/parse:area`
 | `parse:timeline`       | `src/parse:timeline`
 
