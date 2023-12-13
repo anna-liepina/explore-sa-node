@@ -4,7 +4,6 @@ import type { ModelStatic } from 'sequelize';
 
 // will be fixed later with dynamic import and typescript
 import type { AreaType } from './models/area';
-import type { GeoType } from './models/geo';
 import type { PostcodeType } from './models/postcode';
 import type { PropertyType } from './models/property';
 import type { TimelineType } from './models/timeline';
@@ -17,7 +16,6 @@ export type ORM = {
     Sequelize: SequelizeType;
 
     Area: ModelStatic<Model<AreaType>>,
-    Geo: ModelStatic<Model<GeoType>>,
     Postcode: ModelStatic<Model<PostcodeType>>,
     Property: ModelStatic<Model<PropertyType>>,
     Timeline: ModelStatic<Model<TimelineType>>,
