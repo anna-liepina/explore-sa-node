@@ -1,6 +1,7 @@
 import type { WhereAttributeHash } from "sequelize/types/model";
 import type { IncidentType } from "../models/incident";
 import type { PostcodeType } from "../models/postcode";
+import { coordinatesWithinRange } from "./utils";
 
 export default {
     typeDefs: `
@@ -30,13 +31,8 @@ export default {
     resolvers: {
         Query: {
             incidentSearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<IncidentType>[]> => {
+                const { latitudeRange, longitudeRange } = coordinatesWithinRange(pos.lat, pos.lng, range, rangeUnit);
                 const offset: number = (page - 1) * limit;
-                /** 1ml = 1.60934km */
-                const coefficient: number = 'ml' === rangeUnit ? 1.60934 : 1;
-                const distance: number = range * 1000 * coefficient;
-                /** 1 lat/lng is ~111km */
-                const adjust: number = range / 111 * coefficient;
-                const { lat, lng } = pos;
 
                 return orm.Incident.findAll({
                     // attributes: [
@@ -52,10 +48,10 @@ export default {
                     // ],
                     where: {
                         lat: {
-                            [orm.Sequelize.Op.between]: [lat - adjust, lat + adjust],
+                            [orm.Sequelize.Op.between]: latitudeRange,
                         },
                         lng: {
-                            [orm.Sequelize.Op.between]: [lng - adjust, lng + adjust],
+                            [orm.Sequelize.Op.between]: longitudeRange,
                         },
                     },
                     // having: {
