@@ -5,7 +5,6 @@ import type { TransactionType } from "../models/transaction";
 export default {
     typeDefs: `
         extend type Query {
-            property(id: ID!): Property
             propertySearch(
                 postcode: String!
                 perPage: Int = 100
@@ -53,12 +52,6 @@ export default {
     `,
     resolvers: {
         Query: {
-            property: (entity, args, { orm }): Promise<PropertyType> => {
-                return orm.Property.findOne({
-                    where: args,
-                    raw: true,
-                });
-            },
             propertySearch: (entity, { postcode, perPage: limit, page }, { orm }): Promise<PropertyType[]>  => {
                 const offset: number = (page - 1) * limit;
 
