@@ -4,14 +4,14 @@ import type { ORM } from '../orm.types';
 
 export default (orm: ORM) => ({
     getProperty: new DataLoader(
-        (guid: string[]) => {
+        async (guid: string[]) => {
             return orm.Property.findAll({
                 where: {
                     guid,
                 },
                 raw: true,
             })
-                .then((v: Object[]) => resolveSQLResult(guid, 'guid', v))
+                .then((v) => resolveSQLResult(guid, 'guid', v))
         }
     ),
 })
