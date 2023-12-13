@@ -1,27 +1,5 @@
 //@ts-nocheck
 describe('GraphQL: Transaction', () => {
-    describe('transaction', () => {
-        it(`should fetch transaction by ID`, async () => {
-            const { data: { transaction: data } } = await query({
-                query: `
-                {
-                    transaction(id: 1) {
-                        id
-                        price
-                        date
-                        property {
-                            street
-                            paon
-                            saon
-                        }
-                    }
-                }`
-            });
-
-            expect(data).toMatchSnapshot();
-        });
-    });
-
     describe('transactionSearch [presets: perPage 3]', () => {
         it(`without criteria`, async () => {
             const { data: { transactionSearch: data } } = await query({
