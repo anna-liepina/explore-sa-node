@@ -1,22 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GraphQL: Property property by exact ID 1`] = `
-{
-  "distance": null,
-  "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
-  "postcode": {
-    "postcode": "E20 1AB",
-  },
-  "saon": "cd435dfdc23e7d95665b678f176329c14ac2af4a",
-  "street": "PRIZE WALK",
-  "transactions": [
-    {
-      "date": "2019-04-26",
-    },
-  ],
-}
-`;
-
 exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildcard 1`] = `
 [
   {
