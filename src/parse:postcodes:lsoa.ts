@@ -10,15 +10,12 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver2 } from './parse:utils';
-import type { PropertyType } from './models/property';
-import type { TransactionType } from './models/transaction';
-
-const executeMigrations = composeOperation(OperationMarker.properties, orm);
+import { Output, perfObserver2 } from './parse:utils';
+import type { PostcodeType } from './models/postcode';
 
 //@ts-ignore
-const { file, sql: logging, dry: dryRun, limit, update } = yargs
-    .command('--file', 'absolute path to csv file to parse')
+const { file, sql: logging, dry: dryRun, limit } = yargs
+    .command('--file', 'absolute path to csv to parse')
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
@@ -33,26 +30,18 @@ const { file, sql: logging, dry: dryRun, limit, update } = yargs
         type: 'boolean',
         description: 'dry run - do not affect a database',
     })
-    .option('update', {
-        type: 'boolean',
-        description: 'flush update [do not drop/restore indexes, useful with small csv files]',
-    })
     .help()
     .argv;
 
-const output = new Output(`processing ${file}`);
-perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
-    
 console.log(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
 
 name\t\tdescription
---file\t\tabsolute path to csv file to parse
+--path\t\tabsolute path to csv file to parse
 --limit\t\tamount of records in one bulk SQL qeuery
 --sql\t\tprint out SQL queries
 --dry\t\tdry run do not execute SQL
---update\tflush update [do not drop/restore indexes, useful with small csv files]
 
 --------------------------------------------------
 database connection info:
@@ -63,20 +52,23 @@ dialect: \t${process.env.DB_DIALECT}
 
 --------------------------------------------------
 
-file to parse: ${file}
+files to parse: ${file}
 `);
 
 if (!file) {
-    console.log(`>>> NO FILE TO PARSE`);
+    console.log(`>>> PATH NOT PROVIDED`);
 
     process.exit(0);
 }
 
 if (!fs.existsSync(file)) {
-    console.log(`>>> FILE DO NOT EXISTS`);
+    console.log(`>>> PATH / AREA DO NOT EXITS`);
 
     process.exit(0);
 }
+
+const output = new Output(`processing ${file}`);
+perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
 
 (async () => {
     performance.mark('init');
@@ -106,92 +98,63 @@ if (!fs.existsSync(file)) {
      *
      * @returns {Promise<Array<Model>>}
      */
-    const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
+    const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false, updateOnDuplicate: ['lsoa']});
+    output.sections = [[], []];
 
-    const ifFalsyUndefined = <T>(v: T): T | undefined => !v ? undefined : v;
-
-    if (!dryRun && !update) {
-        await executeMigrations(MigrationsDirection.down);
-
-        output.sections[0] = [
-            '✅ dropping table\'s indexes ...',
-        ];
-    }
-
-    const properties: Partial<PropertyType>[] = [];
-    const transactions: Partial<TransactionType>[] = [];
-
-    const propertiesGUIDMap: Set<string> = new Set();
-
-    await orm.Property.findAll({
-        attributes: ['guid'],
-        raw: true,
-    }).then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesGUIDMap.add(v.guid)));
-
-    let i = 0;
     let iter = 0;
-    let corrupted = 0;
+    let total = 0;
+    let missingPostcodes = 0;
 
     const concurrency = os.cpus().length;
     const queue = new PQueue({ concurrency });
 
+    const postcodes = await orm.Postcode.findAll({
+        attributes: ['postcode', 'lat', 'lng', 'lsoa'],
+        raw: true,
+    }).then((v) => {
+        const map = new Map<string, PostcodeType>();
+        
+        (v as unknown as PostcodeType[]).forEach((v: PostcodeType) => {
+            map.set(v.postcode, v);
+        })
+
+        return map;
+    });
+
+    output.sections[0] = [
+        '✅ fetch postcodes\' data ...',
+    ];
+
     performance.mark(`iter-${iter}`);
 
+    const verifiedPostcodes = [];
+    const out = (final?: boolean) => 
+        output.processingInfo(total, missingPostcodes, verifiedPostcodes.length, queue, final);
+    
     const parser = fs
         .createReadStream(file)
-        .pipe(csv());
-        
-    const out = (final?: boolean) => 
-        output.processingInfo(i, corrupted, transactions.length, queue, final);
+        .pipe(csv({ columns: true }));
 
     for await (const row of parser) {
-        const date = row[2].split(' ')[0];
-        const price = parseInt(row[1], 10);
-        const postcode = row[3];
-        /** some records do not contain postcode */
-        if (postcode.indexOf(' ') < 1) {
-            corrupted++;
-            i++;
+        const lsoa = row.lsoa11cd;
+        const postcode = row.pcds;
+        const verifiedPostcode = postcodes.get(postcode);
 
+        if (!verifiedPostcode || !lsoa) {
+            missingPostcodes++;
             continue;
         }
 
-        const obj: Partial<PropertyType> = {
-            // uuid: row[0],
-            postcode,
-            propertyType: row[4],
-            // purchaseType: row[5],
-            propertyForm: row[6],
-            paon: ifFalsyUndefined(row[7]),
-            saon: ifFalsyUndefined(row[8]),
-            street: ifFalsyUndefined(row[9]),
-            city: ifFalsyUndefined(row[11]),
-        };
+        total++;
 
-        obj.guid = `${obj.postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`.toUpperCase();
+        verifiedPostcode.lsoa = lsoa;
+        verifiedPostcodes.push(verifiedPostcode);
 
-        transactions.push({
-            guid: obj.guid,
-            price,
-            date,
-        });
-
-        if (!propertiesGUIDMap.has(obj.guid)) {
-            propertiesGUIDMap.add(obj.guid);
-
-            properties.push(obj);
-        }
-
-        if (transactions.length === limit) {
-            i += transactions.length;
-
-            queue.add(persist(orm.Property, [...properties]));
-            queue.add(persist(orm.Transaction, [...transactions]));
-
+        if (verifiedPostcodes.length === limit) {
+            queue.add(persist(orm.Postcode, [...verifiedPostcodes]));
             output.sections[1] = out();
 
-            transactions.length = 0;
-            properties.length = 0;
+            verifiedPostcodes.length = 0;
             iter++;
 
             performance.mark(`iter-${iter}`);
@@ -205,16 +168,13 @@ if (!fs.existsSync(file)) {
 
                 // await queue.onSizeLessThan(concurrency);
                 await queue.onEmpty();
-
-                output.sections.length = 2;
             }
+            output.sections.length = 2;
         }
     }
 
-    queue.add(persist(orm.Property, properties));
-    queue.add(persist(orm.Transaction, transactions));
-
-    i += transactions.length;
+    queue.add(persist(orm.Postcode, verifiedPostcodes));
+    output.sections[1] = out(true);
 
     if (!dryRun) {
         output.sections.push([
@@ -223,15 +183,6 @@ if (!fs.existsSync(file)) {
         ]);
 
         await queue.onEmpty();
-    }
-
-    if (!dryRun && !update) {
-        output.sections.push([
-            Output.line,
-            '✅ restore table\'s indexes ...',
-        ]);
-
-        await executeMigrations(MigrationsDirection.up);
     }
 
     performance.mark('end');

@@ -15,6 +15,7 @@ export default {
             lat: Float
             lng: Float
             url: String
+            lsoa: String
         }
     `,
     resolvers: {
