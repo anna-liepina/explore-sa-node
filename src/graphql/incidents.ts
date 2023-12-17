@@ -15,7 +15,6 @@ export default {
         }
 
         type Incident {
-            guid: String
             postcode: Postcode
             lat: Float
             lng: Float

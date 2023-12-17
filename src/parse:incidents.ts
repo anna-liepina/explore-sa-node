@@ -198,15 +198,13 @@ if (!files.length) {
         for await (const row of parser) {
             const { 
                 Month: date,
-                // 'Reported by': creator,
-                // 'Falls within': assignee,
+                'Reported by': creator,
+                'Falls within': assignee,
                 Longitude: lng,
                 Latitude: lat,
-                // Location: location,
                 'LSOA code': lsoa,
                 'Crime type': type,
                 'Last outcome category': outcome,
-                // Context: context
             } = row;
 
             if (
@@ -221,15 +219,14 @@ if (!files.length) {
                 continue;
             }
 
-            // const postcode = findClosestPostcode(lat, lng, lsoas.get(lsoa), Infinity)
             const obj: Partial<IncidentType> = {
                 date,
                 lat,
                 lng,
                 type,
                 outcome,
-                // creator,
-                // assignee,
+                creator,
+                assignee,
             };
 
             incidents.push(obj);
