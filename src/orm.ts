@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import Sequelize from 'sequelize';
 import type SequelizeType from "sequelize/types/sequelize";
 import type { ORM } from './orm.types';

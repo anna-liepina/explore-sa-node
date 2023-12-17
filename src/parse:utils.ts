@@ -2,7 +2,6 @@ import fs from "fs";
 import { PerformanceObserver } from "perf_hooks";
 import type { ORM } from "./orm.types";
 import type PQueue from "p-queue";
-import type { BulkCreateOptions, Model, ModelStatic } from "sequelize";
 
 export enum MigrationsDirection {
     up = "up",
@@ -16,34 +15,6 @@ export enum OperationMarker {
     incidents = "parse:incidents",
     markers = "parse:markers",
 }
-
-// export const finalBatch = async (dryRun: boolean, update: boolean, queue: PQueue, migration?: Function) => {
-//     if (!dryRun) {
-//         console.log(`
-// ------------------------------------
-// QUEUE: execute queued SQL ...
-// ------------------------------------`);
-//         await queue.onEmpty();
-//     }
-
-//     if (!dryRun && !update && migration) {
-//         console.log(`
-// ------------------------------------
-// >>> restoring database indexes ...
-// ------------------------------------`);
-//         await migration();
-//     }
-
-// //     console.log(`
-// // ------------------------------------
-// // FINAL BATCH
-// // ------------------------------------
-// // >>> >> missing data on postcodes: ${(i - postcodeMap.size).toLocaleString()}
-// // >>> >> postcodes so far parsed: ${postcodeMap.size.toLocaleString()}
-// // >>> >> postcodes proccessed: ${postcodeMap.size.toLocaleString()}
-// // >>> >> postcodes in this batch: ${postcodes.length.toLocaleString()}
-// // ------------------------------------`);
-// }
 
 export const composeOperation =
     (operationMarker: OperationMarker, orm: ORM) =>
@@ -65,24 +36,17 @@ export const composeOperation =
         };
 
 export const perfObserver2 = (output: Output) =>
-  new PerformanceObserver((items) => {
+    new PerformanceObserver((items) => {
         items.getEntries().forEach((o) => {
             const durationInSec = o.duration / 1000;
             const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
 
-//             console.log(`
-// PERFORMANCE OBSERVER METRICS
-// duration: ${durationInSec.toFixed(2)}s      
-// heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
-
-
             updateConsoleLog(output.out(durationInSec, usedMemoryInMB));
-            }
-        );
-  });
+        });
+    });
 
-  export const perfObserver = () =>
-  new PerformanceObserver((items) => {
+export const perfObserver = () =>
+    new PerformanceObserver((items) => {
         items.getEntries().forEach((o) => {
             const durationInSec = o.duration / 1000;
             const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
@@ -91,16 +55,8 @@ export const perfObserver2 = (output: Output) =>
 PERFORMANCE OBSERVER METRICS
 duration: ${durationInSec.toFixed(2)}s      
 heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
-
-
-            // updateConsoleLog(output.out(durationInSec, usedMemoryInMB));
-            }
-        );
-  });
-
-export const out = (message) => {
-    process.stdout.write(`\r${message}`);
-}
+        });
+    });
 
 export const updateConsoleLog = (lines: string[]) => {
     process.stdout.write('\x1Bc');
@@ -132,8 +88,7 @@ export const updateConsoleLog = (lines: string[]) => {
  *
  * @returns {Promise<Array<Model>>}
  */
-// export const persist = (model: ModelStatic<Model>, entities: Model[], options: BulkCreateOptions = {}) => model.bulkCreate(entities as unknown, { ...options, hooks: false });
-
+// export const persist = (model: ModelStatic<Model>, entities: Object[], options: BulkCreateOptions = {}) => model.bulkCreate(entities, { ...options, hooks: false });
 
 export class Output {
     static line = '------------------------------------';
