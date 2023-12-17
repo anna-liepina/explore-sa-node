@@ -236,11 +236,11 @@ if (!fs.existsSync(file)) {
         }
     }
 
+    processedRecords += transactions.length;
     queue.add(persist(orm.Marker, markers));
     queue.add(persist(orm.Property, properties));
     queue.add(persist(orm.Transaction, transactions));
-
-    processedRecords += transactions.length;
+    output.sections[1] = out(true);
 
     if (!dryRun) {
         output.sections.push([
