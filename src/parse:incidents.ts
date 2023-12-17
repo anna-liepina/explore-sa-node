@@ -198,8 +198,8 @@ if (!files.length) {
         for await (const row of parser) {
             const { 
                 Month: date,
-                'Reported by': creator,
-                'Falls within': assignee,
+                // 'Reported by': creator,
+                // 'Falls within': assignee,
                 Longitude: lng,
                 Latitude: lat,
                 'LSOA code': lsoa,
@@ -225,8 +225,8 @@ if (!files.length) {
                 lng,
                 type,
                 outcome,
-                creator,
-                assignee,
+                // creator,
+                // assignee,
             };
 
             incidents.push(obj);
