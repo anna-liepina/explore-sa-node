@@ -1,5 +1,7 @@
 'use strict';
 
+const { postcode } = require('../utils/commonFields');
+
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.
@@ -12,7 +14,8 @@ module.exports = {
                         autoIncrement: true,
                     },
                     postcode: {
-                        type: Sequelize.STRING(9),
+                        ...postcode(Sequelize).postcode,
+                        allowNull: false,
                     },
                     date: {
                         type: Sequelize.DATEONLY,
