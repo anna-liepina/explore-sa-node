@@ -152,31 +152,6 @@ if (!files.length) {
 
     const queue = new PQueue({ concurrency: os.cpus().length });
 
-    performance.mark('lsoa-start');
-    const lsoas: Map<string, PostcodeType[]> = await orm.Postcode.findAll({
-        attributes: ['lsoa'],
-        raw: true,
-    })
-        .then((v) => {
-            const store = new Map();
-
-            v.forEach((v) => {
-                const lsoa = (v as Partial<PostcodeType>).lsoa;
-
-                if (lsoa) {
-                    if (!store.has(lsoa)) {
-                        store.set(lsoa, []);
-                    }
-    
-                    store.get(lsoa).push(v);    
-                }
-            })
-
-            return store;
-        });
-
-    performance.mark('lsoa-end');
-    performance.measure('lsoa', 'lsoa-start', 'lsoa-end');
     performance.mark(`iter-${iter}`);
 
     const out = (final?: boolean) => 
@@ -186,6 +161,23 @@ if (!files.length) {
     const incidents = [];
     const markers = [];
     let processingFile = 0;
+
+    const resolveDate = (row) => {
+        const d = new Date(row.Month || row.Date);
+        if (isNaN(+d)) {
+            return false;
+        }
+
+        return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    }
+
+    const resolveOutcome = (row) => {
+        return row['Last outcome category'];
+    }
+
+    const resolveType = (row) => {
+        return row['Crime type'] || [row.Type, row["Object of search"]].filter(Boolean).join(' ');
+    }
 
     for await (const file of files) {
         processingFile++;
@@ -197,27 +189,27 @@ if (!files.length) {
 
         for await (const row of parser) {
             const { 
-                Month: date,
-                // 'Reported by': creator,
-                // 'Falls within': assignee,
                 Longitude: lng,
                 Latitude: lat,
-                'LSOA code': lsoa,
-                'Crime type': type,
-                'Last outcome category': outcome,
+
+                /** will be used later on to generate reports */
+                'Reported by': creator,
+                'Falls within': assignee,
             } = row;
+
+            const date = resolveDate(row);
 
             if (
                 !date
-                || (date as string).indexOf('-') === -1
                 || lat === undefined
                 || lng === undefined
-                || !lsoa
-                || !lsoas.get(lsoa)
             ) {
                 processedInvalidRecords++;
                 continue;
             }
+
+            const type = resolveType(row);
+            const outcome = resolveOutcome(row);
 
             const obj: Partial<IncidentType> = {
                 date,
