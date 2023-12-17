@@ -14,6 +14,7 @@ import Property from './models/property';
 import Timeline from './models/timeline';
 import Transaction from './models/transaction';
 import Incident from './models/incident';
+import Marker from './models/marker';
 
 const c = conf[process.env.NODE_ENV];
 
@@ -43,6 +44,7 @@ const orm: Partial<ORM> = [
     Property,
     Timeline,
     Transaction,
+    Marker,
     Incident
 ].reduce(
     (acc, construct) => {

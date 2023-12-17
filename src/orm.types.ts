@@ -9,7 +9,7 @@ import type { PropertyType } from './models/property';
 import type { TimelineType } from './models/timeline';
 import type { TransactionType } from './models/transaction';
 import type { IncidentType } from "./models/incident";
-
+import type { MarkerType } from "./models/marker";
 
 export type ORM = {
     sequelize: SequelizeType;
@@ -21,6 +21,7 @@ export type ORM = {
     Timeline: ModelStatic<Model<TimelineType>>,
     Transaction: ModelStatic<Model<TransactionType>>,
     Incident: ModelStatic<Model<IncidentType>>,
+    Marker: ModelStatic<Model<MarkerType>>,
 };
 
 export type IdentifiedModel = {
