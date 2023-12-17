@@ -249,15 +249,15 @@ if (!fs.existsSync(file)) {
         ]);
 
         await queue.onEmpty();
-    }
 
-    if (!dryRun && !update) {
-        output.sections.push([
-            Output.line,
-            '✅ restore table\'s indexes ...',
-        ]);
-
-        await executeMigrations(MigrationsDirection.up);
+        if (!update) {
+            output.sections.push([
+                Output.line,
+                '✅ restore table\'s indexes ...',
+            ]);
+    
+            await executeMigrations(MigrationsDirection.up);
+        }
     }
 
     performance.mark('end');

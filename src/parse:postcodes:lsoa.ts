@@ -105,8 +105,7 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
     let total = 0;
     let missingPostcodes = 0;
 
-    const concurrency = os.cpus().length;
-    const queue = new PQueue({ concurrency });
+    const queue = new PQueue({ concurrency: os.cpus().length });
 
     const postcodes = await orm.Postcode.findAll({
         attributes: ['postcode', 'lat', 'lng', 'lsoa'],
