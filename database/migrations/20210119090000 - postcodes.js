@@ -1,5 +1,7 @@
 'use strict';
 
+const { coordinates, postcode } = require('../utils/commonFields');
+
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.
@@ -7,15 +9,10 @@ module.exports = {
                 'postcodes',
                 {
                     postcode: {
-                        type: Sequelize.STRING(9),
+                        ...postcode(Sequelize).postcode,
                         primaryKey: true,
                     },
-                    lat: {
-                        type: Sequelize.DECIMAL(12, 9),
-                    },
-                    lng: {
-                        type: Sequelize.DECIMAL(12, 9),
-                    },
+                    ...coordinates(Sequelize)
                 }
             );
     },

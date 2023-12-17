@@ -1,5 +1,7 @@
 'use strict';
 
+const { coordinates, postcode } = require('../utils/commonFields');
+
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.
@@ -11,28 +13,18 @@ module.exports = {
                         primaryKey: true,
                         autoIncrement: true,
                     },
-                    /// Crime ID
+                    // Crime ID
                     guid: {
                         type: Sequelize.STRING,
                         // unique: true,
                         allowNull: false,
                     },
-                    /// Month
+                    // Month
                     date: {
                         type: Sequelize.DATEONLY,
                     },
-                    postcode: {
-                        type: Sequelize.STRING(9),
-                        primaryKey: true,
-                    },
-                    // Latitude
-                    lat: {
-                        type: Sequelize.DECIMAL(12, 9),
-                    },
-                    // Longitude
-                    lng: {
-                        type: Sequelize.DECIMAL(12, 9),
-                    },
+                    ...postcode(Sequelize),
+                    ...coordinates(Sequelize),
                     // Crime type
                     type: {
                         type: Sequelize.STRING,
@@ -53,14 +45,10 @@ module.exports = {
                     creator: {
                         type: Sequelize.STRING,
                     },
-                    // Reported by	Falls within
+                    // Reported by
                     assignee: {
                         type: Sequelize.STRING,
                     },
-                    // Context
-                    // json: {
-                    //     type: Sequelize.TEXT,
-                    // }
                 }
             );
     },

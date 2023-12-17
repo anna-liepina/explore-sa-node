@@ -1,5 +1,7 @@
 'use strict';
 
+const { postcode } = require('../utils/commonFields');
+
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.
@@ -26,7 +28,7 @@ module.exports = {
                     //     type: Sequelize.DATEONLY,
                     // },
                     postcode: {
-                        type: Sequelize.STRING(9),
+                        ...postcode(Sequelize).postcode,
                         allowNull: false,
                     },
                     // Property Type. D = Detached, S = Semi-Detached, T = Terraced, F = Flats/Maisonettes, O = Other
