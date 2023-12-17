@@ -154,7 +154,6 @@ if (!files.length) {
 
     performance.mark('lsoa-start');
     const lsoas: Map<string, PostcodeType[]> = await orm.Postcode.findAll({
-        // attributes: ['postcode', 'lat', 'lng', 'lsoa'],
         attributes: ['lsoa'],
         raw: true,
     })
@@ -187,30 +186,6 @@ if (!files.length) {
     const incidents = [];
     const markers = [];
     let processingFile = 0;
-    
-    // function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    //     const R = 6371; // Radius of the Earth in kilometers
-    //     const dLat = (lat2 - lat1) * (Math.PI / 180);
-    //     const dLon = (lon2 - lon1) * (Math.PI / 180);
-    //     const a =
-    //         Math.pow(Math.sin(dLat / 2), 2) +
-    //         Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.pow(Math.sin(dLon / 2), 2);
-    //     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    //     const distance = R * c;
-    //     return distance;
-    // }
-    
-    // function findClosestPostcode(lat: number, lng: number, postcodes: PostcodeType[], threshold: number): string {
-    //     return postcodes.reduce((closestPostcode, postcode) => {
-    //         const distance = calculateDistance(lat, lng, postcode.lat, postcode.lng);
-        
-    //         if (distance < threshold || distance < closestPostcode.distance) {
-    //             return { postcode: postcode.postcode, distance };
-    //         }
-        
-    //         return closestPostcode;
-    //     }, { postcode: postcodes[0].postcode, distance: Infinity }).postcode;
-    // }
 
     for await (const file of files) {
         processingFile++;
@@ -251,7 +226,6 @@ if (!files.length) {
             const obj: Partial<IncidentType> = {
                 // guid,
                 date,
-                // postcode,
                 lat,
                 lng,
                 type,
