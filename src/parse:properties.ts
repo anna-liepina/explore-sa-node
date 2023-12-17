@@ -110,7 +110,7 @@ if (!fs.existsSync(file)) {
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
-    const ifFalsyUndefined = <T>(v: T): T | undefined => !v ? undefined : v;
+    const ifFalsyUndefined = <T>(v: T): T | undefined => v || undefined;
 
     if (!dryRun && !update) {
         await executeMigrations(MigrationsDirection.down);
