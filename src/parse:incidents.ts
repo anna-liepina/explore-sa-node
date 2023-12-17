@@ -202,11 +202,9 @@ if (!files.length) {
                 // 'Falls within': assignee,
                 Longitude: lng,
                 Latitude: lat,
-                // Location: location,
                 'LSOA code': lsoa,
                 'Crime type': type,
                 'Last outcome category': outcome,
-                // Context: context
             } = row;
 
             if (
@@ -221,7 +219,6 @@ if (!files.length) {
                 continue;
             }
 
-            // const postcode = findClosestPostcode(lat, lng, lsoas.get(lsoa), Infinity)
             const obj: Partial<IncidentType> = {
                 date,
                 lat,
