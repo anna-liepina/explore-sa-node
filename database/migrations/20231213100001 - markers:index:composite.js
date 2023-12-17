@@ -3,6 +3,7 @@
 module.exports = {
     /** @see parse:properties.js */
     'parse:markers': true,
+    'parse:properties': true,
 
     up: (queryInterface, Sequelize) => {
         return queryInterface.addIndex('markers', ['lat', 'lng']);
