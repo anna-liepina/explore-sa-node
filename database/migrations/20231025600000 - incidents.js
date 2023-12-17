@@ -17,7 +17,7 @@ module.exports = {
                     guid: {
                         type: Sequelize.STRING,
                         // unique: true,
-                        allowNull: false,
+                        // allowNull: false,
                     },
                     // Month
                     date: {

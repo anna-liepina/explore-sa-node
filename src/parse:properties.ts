@@ -13,6 +13,8 @@ import orm from './orm';
 import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver2 } from './parse:utils';
 import type { PropertyType } from './models/property';
 import type { TransactionType } from './models/transaction';
+import type { MarkerType } from './models/marker';
+import type { PostcodeType } from './models/postcode';
 
 const executeMigrations = composeOperation(OperationMarker.properties, orm);
 
@@ -118,22 +120,32 @@ if (!fs.existsSync(file)) {
         ];
     }
 
+    const queue = new PQueue({ concurrency: os.cpus().length });
+
+    const markers: Partial<MarkerType>[] = [];
     const properties: Partial<PropertyType>[] = [];
     const transactions: Partial<TransactionType>[] = [];
 
-    const propertiesGUIDMap: Set<string> = new Set();
+    const postcodes: Map<string, Partial<PostcodeType>> = new Map();
+    const markersStore: Set<string> = new Set();
+    const propertiesStore: Set<string> = new Set();
 
-    await orm.Property.findAll({
-        attributes: ['guid'],
-        raw: true,
-    }).then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesGUIDMap.add(v.guid)));
+    await Promise.all([
+        orm.Postcode.findAll({
+            attributes: ['postcode', 'lat', 'lng'],
+            raw: true,
+        })
+            .then((data) => (data as Partial<PostcodeType>[]).forEach((v) => postcodes.set(v.postcode, v))),
+        orm.Property.findAll({
+            attributes: ['guid'],
+            raw: true,
+        })
+            .then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesStore.add(v.guid))),
+    ]);
 
-    let i = 0;
+    let processedInvalidRecords = 0;
+    let processedRecords = 0;
     let iter = 0;
-    let corrupted = 0;
-
-    const concurrency = os.cpus().length;
-    const queue = new PQueue({ concurrency });
 
     performance.mark(`iter-${iter}`);
 
@@ -142,25 +154,24 @@ if (!fs.existsSync(file)) {
         .pipe(csv());
         
     const out = (final?: boolean) => 
-        output.processingInfo(i, corrupted, transactions.length, queue, final);
+        output.processingInfo(processedRecords, processedInvalidRecords, transactions.length, queue, final);
 
     for await (const row of parser) {
-        const date = row[2].split(' ')[0];
-        const price = parseInt(row[1], 10);
         const postcode = row[3];
         /** some records do not contain postcode */
-        if (postcode.indexOf(' ') < 1) {
-            corrupted++;
-            i++;
+        if (postcode.indexOf(' ') < 1 || !postcodes.has(postcode)) {
+            processedInvalidRecords++;
+            processedRecords++;
 
             continue;
         }
 
+        const date = row[2].split(' ')[0];
+        const price = parseInt(row[1], 10);
+
         const obj: Partial<PropertyType> = {
-            // uuid: row[0],
             postcode,
             propertyType: row[4],
-            // purchaseType: row[5],
             propertyForm: row[6],
             paon: ifFalsyUndefined(row[7]),
             saon: ifFalsyUndefined(row[8]),
@@ -176,23 +187,37 @@ if (!fs.existsSync(file)) {
             date,
         });
 
-        if (!propertiesGUIDMap.has(obj.guid)) {
-            propertiesGUIDMap.add(obj.guid);
+        if (!propertiesStore.has(obj.guid)) {
+            propertiesStore.add(obj.guid);
 
             properties.push(obj);
+
+            if (!markersStore.has(obj.postcode)) {
+                markersStore.add(obj.guid);
+
+                const { lat, lng } = postcodes.get(obj.postcode);
+
+                markers.push({
+                    lat,
+                    lng,
+                    type: 'property'
+                });
+            }
         }
 
         if (transactions.length === limit) {
-            i += transactions.length;
+            iter++;
+            processedRecords += transactions.length;
 
+            queue.add(persist(orm.Marker, [...markers]));
             queue.add(persist(orm.Property, [...properties]));
             queue.add(persist(orm.Transaction, [...transactions]));
 
             output.sections[1] = out();
 
-            transactions.length = 0;
+            markers.length = 0;
             properties.length = 0;
-            iter++;
+            transactions.length = 0;
 
             performance.mark(`iter-${iter}`);
             performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
@@ -211,10 +236,11 @@ if (!fs.existsSync(file)) {
         }
     }
 
+    queue.add(persist(orm.Marker, markers));
     queue.add(persist(orm.Property, properties));
     queue.add(persist(orm.Transaction, transactions));
 
-    i += transactions.length;
+    processedRecords += transactions.length;
 
     if (!dryRun) {
         output.sections.push([

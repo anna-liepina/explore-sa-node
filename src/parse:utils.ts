@@ -14,6 +14,7 @@ export enum OperationMarker {
     postcodes = "parse:postcodes",
     timeline = "parse:timeline",
     incidents = "parse:incidents",
+    markers = "parse:markers",
 }
 
 // export const finalBatch = async (dryRun: boolean, update: boolean, queue: PQueue, migration?: Function) => {

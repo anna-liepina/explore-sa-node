@@ -7,6 +7,7 @@ import property from './property';
 import timeline from './timeline';
 import transaction from './transaction';
 import incidents from './incidents';
+import markers from './marker';
 
 export const typeDefs = gql`
     type Query
@@ -27,6 +28,7 @@ export const typeDefs = gql`
     ${timeline.typeDefs}
     ${transaction.typeDefs}
     ${incidents.typeDefs}
+    ${markers.typeDefs}
 `;
 
 export const resolvers = merge(
@@ -36,4 +38,5 @@ export const resolvers = merge(
     timeline.resolvers,
     transaction.resolvers,
     incidents.resolvers,
+    markers.resolvers,
 );

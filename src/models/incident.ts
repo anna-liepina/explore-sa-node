@@ -28,7 +28,7 @@ export default (sequelize: Sequelize) => {
                 // unique: true,
                 allowNull: false,
             },
-            /// Month
+            // Month
             date: {
                 type: DataTypes.DATEONLY,
             },
@@ -52,26 +52,14 @@ export default (sequelize: Sequelize) => {
             outcome: {
                 type: DataTypes.STRING,
             },
-            // LSOA code
-            // lsoa: {
-            //     type: DataTypes.STRING,
-            // },
-            // LSOA name
-            // area: {
-            //     type: DataTypes.STRING,
-            // },
             // Reported By
             creator: {
                 type: DataTypes.STRING,
             },
-            // Reported by	Falls within
+            // Reported by
             assignee: {
                 type: DataTypes.STRING,
             },
-            // // Context
-            // json: {
-            //     type: DataTypes.TEXT,
-            // }
         },
         {
             tableName: 'incidents',

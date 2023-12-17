@@ -11,12 +11,11 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
+import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver, perfObserver2 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 import type { IncidentType } from './models/incident';
 
 const executeMigrations = composeOperation(OperationMarker.incidents, orm);
-perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
 //@ts-ignore
 const { path: _path, sql: logging, dry: dryRun, limit, update } = yargs
@@ -42,13 +41,15 @@ const { path: _path, sql: logging, dry: dryRun, limit, update } = yargs
     .help()
     .argv;
 
+const output = new Output(`processing ${_path}`);
+perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
+
 console.log(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
 
 name\t\tdescription
 --path\t\tabsolute path to csv file to parse
---areaPath\tabsolute path to csv file to parse
 --limit\t\tamount of records in one bulk SQL qeuery
 --sql\t\tprint out SQL queries
 --dry\t\tdry run do not execute SQL
@@ -70,18 +71,18 @@ function scanDirectory(directoryPath: string): string[] {
     const result: string[] = [];
   
     function scanDirRecursive(dir: string): void {
-      const files = fs.readdirSync(dir);
+        const files = fs.readdirSync(dir);
   
-      files.forEach((file) => {
-        const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
+        files.forEach((file) => {
+            const filePath = path.join(dir, file);
+            const stat = fs.statSync(filePath);
   
-        if (stat.isDirectory()) {
-          scanDirRecursive(filePath);
-        } else {
-          result.push(filePath);
-        }
-      });
+            if (stat.isDirectory()) {
+                scanDirRecursive(filePath);
+            } else {
+                result.push(filePath);
+            }
+        });
     }
   
     scanDirRecursive(directoryPath);
@@ -139,27 +140,29 @@ if (!files.length) {
 
     if (!dryRun && !update) {
         await executeMigrations(MigrationsDirection.down);
+
+        output.sections[0] = [
+            '✅ dropping table\'s indexes ...',
+        ];
     }
 
-    let total = 0;
+    let processedInvalidRecords = 0;
+    let processedRecords = 0;
     let iter = 0;
-    let corrupted = 0;
-    let postcodes = 0;
 
-    const concurrency = os.cpus().length;
-    const queue = new PQueue({ concurrency });
+    const queue = new PQueue({ concurrency: os.cpus().length });
 
     performance.mark('lsoa-start');
     const lsoas: Map<string, PostcodeType[]> = await orm.Postcode.findAll({
-        attributes: ['postcode', 'lat', 'lng', 'lsoa'],
+        // attributes: ['postcode', 'lat', 'lng', 'lsoa'],
+        attributes: ['lsoa'],
         raw: true,
     })
         .then((v) => {
-            postcodes = v.length;
             const store = new Map();
 
             v.forEach((v) => {
-                const lsoa = (v as unknown as PostcodeType).lsoa;
+                const lsoa = (v as Partial<PostcodeType>).lsoa;
 
                 if (lsoa) {
                     if (!store.has(lsoa)) {
@@ -177,56 +180,52 @@ if (!files.length) {
     performance.measure('lsoa', 'lsoa-start', 'lsoa-end');
     performance.mark(`iter-${iter}`);
 
-    console.log(`
-------------------------------------
->>> LSOA (Lower Super Output Areas)
->>> total LSOAs: ${lsoas.size.toLocaleString()}
->>> total POSTCODES: ${postcodes.toLocaleString()}
-`);
+    const out = (final?: boolean) => 
+        output.processingInfo(processedRecords, processedInvalidRecords, incidents.length, queue, final);
 
+    const markersStore: Set<string> = new Set();
     const incidents = [];
+    const markers = [];
     let processingFile = 0;
     
-    function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-        const R = 6371; // Radius of the Earth in kilometers
-        const dLat = (lat2 - lat1) * (Math.PI / 180);
-        const dLon = (lon2 - lon1) * (Math.PI / 180);
-        const a =
-            Math.pow(Math.sin(dLat / 2), 2) +
-            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.pow(Math.sin(dLon / 2), 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c;
-        return distance;
-    }
+    // function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    //     const R = 6371; // Radius of the Earth in kilometers
+    //     const dLat = (lat2 - lat1) * (Math.PI / 180);
+    //     const dLon = (lon2 - lon1) * (Math.PI / 180);
+    //     const a =
+    //         Math.pow(Math.sin(dLat / 2), 2) +
+    //         Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.pow(Math.sin(dLon / 2), 2);
+    //     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    //     const distance = R * c;
+    //     return distance;
+    // }
     
-    function findClosestPostcode(lat: number, lng: number, postcodes: PostcodeType[], threshold: number): string {
-        return postcodes.reduce((closestPostcode, postcode) => {
-            const distance = calculateDistance(lat, lng, postcode.lat, postcode.lng);
+    // function findClosestPostcode(lat: number, lng: number, postcodes: PostcodeType[], threshold: number): string {
+    //     return postcodes.reduce((closestPostcode, postcode) => {
+    //         const distance = calculateDistance(lat, lng, postcode.lat, postcode.lng);
         
-            if (distance < threshold || distance < closestPostcode.distance) {
-                return { postcode: postcode.postcode, distance };
-            }
+    //         if (distance < threshold || distance < closestPostcode.distance) {
+    //             return { postcode: postcode.postcode, distance };
+    //         }
         
-            return closestPostcode;
-        }, { postcode: postcodes[0].postcode, distance: Infinity }).postcode;
-    }
-    
+    //         return closestPostcode;
+    //     }, { postcode: postcodes[0].postcode, distance: Infinity }).postcode;
+    // }
+
     for await (const file of files) {
         processingFile++;
         const parser = fs
             .createReadStream(file)
             .pipe(csv({ columns: true }));
 
-            console.log(`
-------------------------------------
->>> processing: ${file}
->>> ${processingFile} of ${files.length}`);
+        output.title = `processing: ${file} ${processingFile} of ${files.length}`; 
+
         for await (const row of parser) {
             const { 
-                'Crime ID': guid,
+                // 'Crime ID': guid,
                 Month: date,
-                'Reported by': creator,
-                'Falls within': assignee,
+                // 'Reported by': creator,
+                // 'Falls within': assignee,
                 Longitude: lng,
                 Latitude: lat,
                 // Location: location,
@@ -236,95 +235,97 @@ if (!files.length) {
                 // Context: context
             } = row;
 
-            if (!date || (date as string).indexOf('-') === -1 || lat === undefined || lng === undefined || !lsoa) {
-                corrupted++;
+            if (
+                !date
+                || (date as string).indexOf('-') === -1
+                || lat === undefined
+                || lng === undefined
+                || !lsoa
+                || !lsoas.get(lsoa)
+            ) {
+                processedInvalidRecords++;
                 continue;
             }
 
-            if (!lsoas.get(lsoa)) {
-                corrupted++;
-                continue;
-            }
-
-            const postcode = findClosestPostcode(lat, lng, lsoas.get(lsoa), Infinity)
+            // const postcode = findClosestPostcode(lat, lng, lsoas.get(lsoa), Infinity)
             const obj: Partial<IncidentType> = {
-                guid,
+                // guid,
                 date,
-                postcode,
+                // postcode,
                 lat,
                 lng,
                 type,
                 outcome,
-                creator,
-                assignee,
+                // creator,
+                // assignee,
             };
 
             incidents.push(obj);
+            const markerIndex = `${lat}|${lng}`;
+
+            if (!markersStore.has(markerIndex)) {
+                markersStore.add(markerIndex);
+
+                markers.push({
+                    lat,
+                    lng,
+                    type: 'police'
+                });
+            }
 
             if (incidents.length === limit) {
-                total += incidents.length;
+                iter++;
+                processedRecords += incidents.length;
 
+                queue.add(persist(orm.Marker, [...markers]));
                 queue.add(persist(orm.Incident, [...incidents]));
 
-                console.log(`
-------------------------------------
->>> processed incidents: ${total.toLocaleString()}
->>> corrupted records so far: ${corrupted.toLocaleString()}
->>> unique incidents in batch: ${incidents.length.toLocaleString()}
->>> unique incidents so far: ${'guidMap.size'.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}
->>> SQL workers used ${queue.pending} of ${queue.concurrency}`);
+                output.sections[1] = out();
 
+                markers.length = 0;
                 incidents.length = 0;
-                iter++;
 
                 performance.mark(`iter-${iter}`);
                 performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
                 if (queue.size > queue.concurrency) {
-                    console.log(`
-------------------------------------
->>> catching up with SQL queue ...
-------------------------------------`);
-
+                    output.sections.push([
+                        '',
+                        '⏱️ catching up with SQL queue ...',
+                    ]);
+    
                     // await queue.onSizeLessThan(concurrency);
                     await queue.onEmpty();
+    
+                    output.sections.length = 2;
                 }
             }
         }        
     }
 
-
-    await queue.onEmpty();
-
+    processedRecords += incidents.length;
+    queue.add(persist(orm.Marker, markers));
     queue.add(persist(orm.Incident, incidents));
+    output.sections[1] = out(true);
 
-    total += incidents.length;
+    if (!dryRun) {
+        output.sections.push([
+            Output.line,
+            '✅ await queued SQL ...',
+        ]);
 
-    console.log(`
-------------------------------------
->>> execute remaining SQL queue ...
-------------------------------------`);
-
-    if (!dryRun && !update) {
         await queue.onEmpty();
 
-        console.log(`
-------------------------------------
->>> restoring database indexes ...
-------------------------------------`);
-        await executeMigrations(MigrationsDirection.up);
+        if (!update) {
+            output.sections.push([
+                Output.line,
+                '✅ restore table\'s indexes ...',
+            ]);
+    
+            await executeMigrations(MigrationsDirection.up);
+        }
     }
 
-    console.log(`
-------------------------------------
-FINAL BATCH
-------------------------------------
->>> >> processed incidents: ${total.toLocaleString()}
->>> >> corrupted records: ${corrupted.toLocaleString()}
->>> >> unique incidents in batch: ${incidents.length.toLocaleString()}
->>> >> unique incidents: ${'guidMap.size'.toLocaleString()}
-------------------------------------`);
     performance.mark('end');
-    performance.measure('total', 'init', 'end');
+    performance.measure('processedRecords', 'init', 'end');
 })()
