@@ -197,7 +197,6 @@ if (!files.length) {
 
         for await (const row of parser) {
             const { 
-                // 'Crime ID': guid,
                 Month: date,
                 // 'Reported by': creator,
                 // 'Falls within': assignee,
@@ -224,7 +223,6 @@ if (!files.length) {
 
             // const postcode = findClosestPostcode(lat, lng, lsoas.get(lsoa), Infinity)
             const obj: Partial<IncidentType> = {
-                // guid,
                 date,
                 lat,
                 lng,
