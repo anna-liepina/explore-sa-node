@@ -12,7 +12,6 @@ import csv from 'csv-parse';
 import PQueue from 'p-queue';
 import orm from './orm';
 import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver, perfObserver2 } from './parse:utils';
-import type { PostcodeType } from './models/postcode';
 import type { IncidentType } from './models/incident';
 
 const executeMigrations = composeOperation(OperationMarker.incidents, orm);
@@ -201,8 +200,8 @@ if (!files.length) {
 
             if (
                 !date
-                || lat === undefined
-                || lng === undefined
+                || isNaN(lat) || lat === ''
+                || isNaN(lng) || lng === ''
             ) {
                 processedInvalidRecords++;
                 continue;

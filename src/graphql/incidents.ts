@@ -1,5 +1,4 @@
 import type { IncidentType } from "../models/incident";
-import type { PostcodeType } from "../models/postcode";
 import { coordinatesWithinRange } from "./utils";
 
 export default {
@@ -15,10 +14,8 @@ export default {
         }
 
         type Incident {
-            postcode: Postcode
             lat: Float
             lng: Float
-            lsoa: String
             date: String
             type: String
             outcome: String
@@ -46,11 +43,6 @@ export default {
                     raw: true,
                 });
             },
-        },
-        Incident: {
-            postcode: (entity: IncidentType, args, { dataloader }): Promise<PostcodeType> => {
-                return dataloader.getPostcode.load(entity.postcode);
-            }
         }
     },
 }
