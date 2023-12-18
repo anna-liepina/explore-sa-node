@@ -161,10 +161,6 @@ if (!files.length) {
     const markers = [];
     let processingFile = 0;
 
-    const log = fs.createWriteStream(`${_path}/log.log`, {
-        flags: 'a' // 'a' means appending (old data will be preserved)
-    })
-    
     const resolveDate = (row) => {
         const d = new Date(row.Month || row.Date);
         if (isNaN(+d)) {
@@ -207,9 +203,6 @@ if (!files.length) {
                 || isNaN(lat) || lat === ''
                 || isNaN(lng) || lng === ''
             ) {
-                //@ts-ignore
-                log.write(JSON.stringify(row, '', 4)) // append string to your file
-                
                 processedInvalidRecords++;
                 continue;
             }
