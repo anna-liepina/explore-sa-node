@@ -204,8 +204,8 @@ if (!files.length) {
 
             if (
                 !date
-                || lat === undefined
-                || lng === undefined
+                || isNaN(lat) || lat === ''
+                || isNaN(lng) || lng === ''
             ) {
                 //@ts-ignore
                 log.write(JSON.stringify(row, '', 4)) // append string to your file
