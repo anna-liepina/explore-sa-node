@@ -216,8 +216,8 @@ if (!files.length) {
                 lng,
                 type,
                 outcome,
-                creator,
-                assignee,
+                // creator,
+                // assignee,
             };
 
             incidents.push(obj);
