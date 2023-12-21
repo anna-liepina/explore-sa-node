@@ -49,10 +49,8 @@
     "parse:area": "tsc && node -r dotenv/config ./build/parse:area",
     "parse:timeline": "tsc && node -r dotenv/config ./build/parse:timeline",
     "build": "tsc",
-    "start:watch": "tsc-watch --onSuccess \"node -r dotenv/config ./build/app.js\"",
-    "start": "node -r dotenv/config ./build/app.js",
     "start:serve": "node -r dotenv/config ./build/app.js",
-    "start:debug": "node -r dotenv/config ./build/app.js --inspect=0.0.0.0",
+    "start": "tsc-watch --onSuccess \"node -r dotenv/config --inspect=0.0.0.0 ./build/app.js\"",
     "test": "node -r dotenv/config ./node_modules/.bin/jest"
   }
 }

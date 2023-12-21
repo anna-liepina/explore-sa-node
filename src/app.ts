@@ -44,6 +44,7 @@ app.use(
 
 apollo.applyMiddleware({
   app,
+  path: '/',
 });
 
 const { SSL_KEY, SSL_CERT, PORT } = process.env;

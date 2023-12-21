@@ -14,10 +14,10 @@ import Transaction from './models/transaction';
 import Incident from './models/incident';
 import Marker from './models/marker';
 
-const c = conf[process.env.NODE_ENV];
+const sequelizeConfig = conf[process.env.NODE_ENV];
 
 // @ts-ignore
-const s = new Sequelize(c.database, c.username, c.password, c);
+const sequelize = new Sequelize(sequelizeConfig);
 
 // const orm = fs
 //     .readdirSync(`${__dirname}/models`)
@@ -46,12 +46,15 @@ const orm: Partial<ORM> = [
     Incident
 ].reduce(
     (acc, construct) => {
-        const model = construct(s);
+        const model = construct(sequelize);
         acc[model.name] = model;
 
         return acc;
     },
-    {}
+    {
+        sequelize,
+        Sequelize: Sequelize as unknown as SequelizeType
+    }
 );
 
 for (const name in orm) {
@@ -61,8 +64,5 @@ for (const name in orm) {
         model.associate(orm);
     }
 }
-
-orm.sequelize = s;
-orm.Sequelize = Sequelize as unknown as SequelizeType;
 
 export default orm as ORM;
