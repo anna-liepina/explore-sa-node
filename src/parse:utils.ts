@@ -94,7 +94,7 @@ export const createQueue = () => new PQueue({ concurrency: os.cpus().length });
 // export const persist = (model: ModelStatic<Model>, entities: Object[], options: BulkCreateOptions = {}) => model.bulkCreate(entities, { ...options, hooks: false });
 
 export class Output {
-    static line = '------------------------------------';
+    static line = '-'.repeat(50);
     constructor(public title: string, public sections = [], public debugInfo = []) {}
 
     performanceHeaders(durationInSec: number, usedMemoryInMB: number) {
