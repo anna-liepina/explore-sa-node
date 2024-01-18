@@ -127,7 +127,7 @@ if (!fs.existsSync(file)) {
     const properties: Partial<PropertyType>[] = [];
     const transactions: Partial<TransactionType>[] = [];
 
-    const postcodes: Map<string, Partial<PostcodeType>> = new Map();
+    const postcodes = new Map<string, Partial<PostcodeType>>();
     const markersStore = new Set<string>();
     const propertiesStore = new Map<string, Set<string>>();
 
