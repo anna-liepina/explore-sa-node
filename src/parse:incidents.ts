@@ -197,10 +197,13 @@ if (!files.length) {
             const { 
                 Longitude: lng,
                 Latitude: lat,
+                // 'LSOA code': lsoa,
+                // 'LSOA name': lsoa,
+                Location: label,
 
                 /** will be used later on to generate reports */
-                'Reported by': creator,
-                'Falls within': assignee,
+                // 'Reported by': creator,
+                // 'Falls within': assignee,
             } = row;
 
             const date = resolveDate(row);
@@ -237,6 +240,7 @@ if (!files.length) {
                     lat,
                     lng,
                     type: MarkerTypeEnum.police,
+                    label
                 });
             }
 
