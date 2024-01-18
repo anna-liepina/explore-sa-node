@@ -14,6 +14,11 @@ export const enum MarkerTypeEnum {
     property = 'property'
 }
 
+export const enum MarkerTypeEnum {
+    police = 'police',
+    property = 'property'
+}
+
 export default (sequelize: Sequelize) => {
     const model = sequelize.define(
         'Marker',
