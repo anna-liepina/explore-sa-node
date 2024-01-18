@@ -6,12 +6,10 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 import { performance } from 'perf_hooks';
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver, perfObserver2 } from './parse:utils';
+import { MigrationsDirection, OperationMarker, Output, composeOperation, createQueue, perfObserver2 } from './parse:utils';
 import type { IncidentType } from './models/incident';
 import { MarkerTypeEnum } from './models/marker';
 
@@ -150,7 +148,7 @@ if (!files.length) {
     let processedRecords = 0;
     let iter = 0;
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
 
     performance.mark(`iter-${iter}`);
 

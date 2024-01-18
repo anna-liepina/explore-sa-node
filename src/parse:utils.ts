@@ -1,7 +1,8 @@
 import fs from "fs";
+import os from "os";
 import { PerformanceObserver } from "perf_hooks";
 import type { ORM } from "./orm.types";
-import type PQueue from "p-queue";
+import PQueue from "p-queue";
 
 export enum MigrationsDirection {
     up = "up",
@@ -63,6 +64,8 @@ export const updateConsoleLog = (lines: string[]) => {
     process.stdout.write(lines.join('\n'));
 }
 
+export const createQueue = () => new PQueue({ concurrency: os.cpus().length });
+
 /**
  * Create and insert multiple instances in bulk.
  *
@@ -91,7 +94,7 @@ export const updateConsoleLog = (lines: string[]) => {
 // export const persist = (model: ModelStatic<Model>, entities: Object[], options: BulkCreateOptions = {}) => model.bulkCreate(entities, { ...options, hooks: false });
 
 export class Output {
-    static line = '------------------------------------';
+    static line = '-'.repeat(50);
     constructor(public title: string, public sections = [], public debugInfo = []) {}
 
     performanceHeaders(durationInSec: number, usedMemoryInMB: number) {
