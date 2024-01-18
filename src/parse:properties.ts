@@ -5,12 +5,10 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
-import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver2 } from './parse:utils';
+import { MigrationsDirection, OperationMarker, Output, composeOperation, createQueue, perfObserver2 } from './parse:utils';
 import type { PropertyType } from './models/property';
 import type { TransactionType } from './models/transaction';
 import type { MarkerType } from './models/marker';
@@ -121,13 +119,13 @@ if (!fs.existsSync(file)) {
         ];
     }
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
 
     const markers: Partial<MarkerType>[] = [];
     const properties: Partial<PropertyType>[] = [];
     const transactions: Partial<TransactionType>[] = [];
 
-    const postcodes: Map<string, Partial<PostcodeType>> = new Map();
+    const postcodes = new Map<string, Partial<PostcodeType>>();
     const markersStore = new Set<string>();
     const propertiesStore = new Map<string, Set<string>>();
 

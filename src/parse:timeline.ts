@@ -4,11 +4,9 @@ require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
-import os from 'os';
 import yargs from 'yargs';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeOperation, perfObserver } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeOperation, createQueue, perfObserver } from './parse:utils';
 import type { TransactionType } from './models/transaction';
 
 const executeMigrations = composeOperation(OperationMarker.timeline, orm);
@@ -130,7 +128,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
     let i = 0;
     let iter = 0;
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
     performance.mark(`iter-${iter}`);
 
     for (const row of areas) {

@@ -5,12 +5,10 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
-import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeOperation, perfObserver2, Output } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeOperation, perfObserver2, Output, createQueue } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
 const executeMigrations = composeOperation(OperationMarker.postcodes, orm);
@@ -118,7 +116,7 @@ if (!fs.existsSync(file)) {
         ];
     }
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
 
     const parser = fs
         .createReadStream(file)
