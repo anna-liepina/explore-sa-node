@@ -202,6 +202,7 @@ if (!fs.existsSync(file)) {
                     lat,
                     lng,
                     type: MarkerTypeEnum.property,
+                    label: postcode
                 });
             }
         }
