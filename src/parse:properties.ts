@@ -194,7 +194,7 @@ if (!fs.existsSync(file)) {
             properties.push(obj);
 
             if (!markersStore.has(obj.postcode)) {
-                markersStore.add(obj.guid);
+                markersStore.add(postcode);
 
                 const { lat, lng } = postcodes.get(obj.postcode);
 
