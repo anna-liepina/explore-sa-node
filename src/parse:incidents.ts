@@ -172,7 +172,13 @@ if (!files.length) {
     }
 
     const resolveOutcome = (row) => {
-        return row['Last outcome category'];
+        const result = row['Last outcome category'];
+
+        if (!result || String(result).toLowerCase() === 'status update unavailable') {
+            return undefined;
+        }
+
+        return result;
     }
 
     const resolveType = (row) => {
