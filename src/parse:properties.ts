@@ -14,6 +14,7 @@ import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObs
 import type { PropertyType } from './models/property';
 import type { TransactionType } from './models/transaction';
 import type { MarkerType } from './models/marker';
+import { MarkerTypeEnum } from './models/marker';
 import type { PostcodeType } from './models/postcode';
 
 const executeMigrations = composeOperation(OperationMarker.properties, orm);
@@ -200,7 +201,7 @@ if (!fs.existsSync(file)) {
                 markers.push({
                     lat,
                     lng,
-                    type: 'property'
+                    type: MarkerTypeEnum.property,
                 });
             }
         }

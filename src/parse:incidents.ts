@@ -13,6 +13,7 @@ import PQueue from 'p-queue';
 import orm from './orm';
 import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver, perfObserver2 } from './parse:utils';
 import type { IncidentType } from './models/incident';
+import { MarkerTypeEnum } from './models/marker';
 
 const executeMigrations = composeOperation(OperationMarker.incidents, orm);
 
@@ -229,7 +230,7 @@ if (!files.length) {
                 markers.push({
                     lat,
                     lng,
-                    type: 'police'
+                    type: MarkerTypeEnum.police,
                 });
             }
 
