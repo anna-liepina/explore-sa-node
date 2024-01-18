@@ -128,24 +128,25 @@ if (!fs.existsSync(file)) {
     const transactions: Partial<TransactionType>[] = [];
 
     const postcodes: Map<string, Partial<PostcodeType>> = new Map();
-    const markersStore: Set<string> = new Set();
-    const propertiesStore: Set<string> = new Set();
+    const markersStore = new Set<string>();
+    const propertiesStore = new Map<string, Set<string>>();
 
     await Promise.all([
         orm.Postcode.findAll({
             attributes: ['postcode', 'lat', 'lng'],
             raw: true,
         })
-            .then((data) => (data as Partial<PostcodeType>[]).forEach((v) => postcodes.set(v.postcode, v))),
+            .then((data) => (data as Partial<PostcodeType>[]).forEach(({ postcode, ...v }) => postcodes.set(postcode, v))),
         orm.Property.findAll({
             attributes: ['guid'],
             raw: true,
         })
-            .then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesStore.add(v.guid))),
+            .then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesStore.set(v.guid, new Set))),
     ]);
 
     let processedInvalidRecords = 0;
     let processedRecords = 0;
+    let duplicateTransactions = 0;
     let iter = 0;
 
     performance.mark(`iter-${iter}`);
@@ -154,8 +155,22 @@ if (!fs.existsSync(file)) {
         .createReadStream(file)
         .pipe(csv());
         
-    const out = (final?: boolean) => 
-        output.processingInfo(processedRecords, processedInvalidRecords, transactions.length, queue, final);
+    const outputProcessingInfo = (final?: boolean) => {
+        output.sections[1] = output.processingInfo(processedRecords, processedInvalidRecords, transactions.length, queue, final);
+    }
+
+    const outputDuplicateTransactions = () => {
+        output.sections[2] = [
+            Output.line,
+            ' extra information',
+            Output.line,
+            ` duplicate transactions (only 1st will be recorded)`,
+            `  same address/date/price: ${duplicateTransactions.toLocaleString()}`,
+        ];
+    }
+
+    outputProcessingInfo();
+    outputDuplicateTransactions();
 
     for await (const row of parser) {
         const postcode = row[3];
@@ -180,23 +195,18 @@ if (!fs.existsSync(file)) {
             city: ifFalsyUndefined(row[11]),
         };
 
-        obj.guid = `${obj.postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`.toUpperCase();
+        const guid = `${postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`.toUpperCase();
+        obj.guid = guid;
 
-        transactions.push({
-            guid: obj.guid,
-            price,
-            date,
-        });
-
-        if (!propertiesStore.has(obj.guid)) {
-            propertiesStore.add(obj.guid);
+        if (!propertiesStore.has(guid)) {
+            propertiesStore.set(guid, new Set);
 
             properties.push(obj);
 
-            if (!markersStore.has(obj.postcode)) {
+            if (!markersStore.has(postcode)) {
                 markersStore.add(postcode);
 
-                const { lat, lng } = postcodes.get(obj.postcode);
+                const { lat, lng } = postcodes.get(postcode);
 
                 markers.push({
                     lat,
@@ -207,6 +217,20 @@ if (!fs.existsSync(file)) {
             }
         }
 
+        const transactionHash = `${price}|${date}`;
+
+        if (!propertiesStore.get(guid).has(transactionHash)) {
+            propertiesStore.get(guid).add(transactionHash);
+
+            transactions.push({
+                guid,
+                price,
+                date,
+            });
+        } else {
+            duplicateTransactions++;
+        }
+
         if (transactions.length === limit) {
             iter++;
             processedRecords += transactions.length;
@@ -215,7 +239,8 @@ if (!fs.existsSync(file)) {
             queue.add(persist(orm.Property, [...properties]));
             queue.add(persist(orm.Transaction, [...transactions]));
 
-            output.sections[1] = out();
+            outputProcessingInfo();
+            outputDuplicateTransactions();
 
             markers.length = 0;
             properties.length = 0;
@@ -233,7 +258,7 @@ if (!fs.existsSync(file)) {
                 // await queue.onSizeLessThan(concurrency);
                 await queue.onEmpty();
 
-                output.sections.length = 2;
+                output.sections.length = 3;
             }
         }
     }
@@ -242,7 +267,8 @@ if (!fs.existsSync(file)) {
     queue.add(persist(orm.Marker, markers));
     queue.add(persist(orm.Property, properties));
     queue.add(persist(orm.Transaction, transactions));
-    output.sections[1] = out(true);
+    outputProcessingInfo(true);
+    outputDuplicateTransactions();
 
     if (!dryRun) {
         output.sections.push([
