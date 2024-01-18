@@ -1,7 +1,8 @@
 import fs from "fs";
+import os from "os";
 import { PerformanceObserver } from "perf_hooks";
 import type { ORM } from "./orm.types";
-import type PQueue from "p-queue";
+import PQueue from "p-queue";
 
 export enum MigrationsDirection {
     up = "up",
@@ -62,6 +63,8 @@ export const updateConsoleLog = (lines: string[]) => {
     process.stdout.write('\x1Bc');
     process.stdout.write(lines.join('\n'));
 }
+
+export const createQueue = () => new PQueue({ concurrency: os.cpus().length });
 
 /**
  * Create and insert multiple instances in bulk.

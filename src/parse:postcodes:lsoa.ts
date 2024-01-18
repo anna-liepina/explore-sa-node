@@ -5,12 +5,10 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
-import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { Output, perfObserver2 } from './parse:utils';
+import { Output, createQueue, perfObserver2 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
 //@ts-ignore
@@ -105,7 +103,7 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
     let total = 0;
     let missingPostcodes = 0;
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
 
     const postcodes = await orm.Postcode.findAll({
         attributes: ['postcode', 'lat', 'lng', 'lsoa'],
