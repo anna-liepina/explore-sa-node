@@ -4,11 +4,9 @@ require('dotenv');
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
-import os from 'os';
 import yargs from 'yargs';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { Output, perfObserver2 } from './parse:utils';
+import { Output, createQueue, perfObserver2 } from './parse:utils';
 import type { MarkerType } from './models/marker';
 import { documentClient } from './odm';
 import { MarkerTypeEnum } from './models/marker';
@@ -37,8 +35,10 @@ const { sql: logging, dry: dryRun, limit } = yargs
     .help()
     .argv;
 
-const output = new Output(`processing AWS`);
-perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
+const output = new Output(`processing NoSQL`);
+perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });\
+
+const queue = createQueue();
     
 console.log(`
 --------------------------------------------------
@@ -102,8 +102,6 @@ dialect: \t${process.env.DB_DIALECT}
     let processedInvalidRecords = 0;
     let processedRecords = 0;
     let recordsInBatch = 0;
-
-    const queue = new PQueue({ concurrency: 3 });
 
     performance.mark(`iter-${iter}`);
 
