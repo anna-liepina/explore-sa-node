@@ -6,6 +6,12 @@ export type MarkerType = {
     lat: number,
     lng: number,
     type: string,
+    label: string,
+}
+
+export const enum MarkerTypeEnum {
+    police = 'police',
+    property = 'property'
 }
 
 export default (sequelize: Sequelize) => {
@@ -24,6 +30,9 @@ export default (sequelize: Sequelize) => {
                 type: DataTypes.DECIMAL(12, 9),
             },
             type: {
+                type: DataTypes.STRING,
+            },
+            label: {
                 type: DataTypes.STRING,
             },
         },

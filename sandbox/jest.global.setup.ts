@@ -1,4 +1,3 @@
-//@ts-nocheck
 import fs from 'fs';
 import orm from '../src/orm';
 
@@ -13,11 +12,11 @@ export default async () => {
             console.log(`execute: ${path.split("/").slice(-2).join("/")}`);
 
             try {
-                await up(orm.sequelize.queryInterface, orm.Sequelize);
+                await up(orm.sequelize.getQueryInterface(), orm.Sequelize);
             } catch (e) {
                 // for some reason this is a fix
-                await down(orm.sequelize.queryInterface, orm.Sequelize);
-                await up(orm.sequelize.queryInterface, orm.Sequelize);
+                await down(orm.sequelize.getQueryInterface(), orm.Sequelize);
+                await up(orm.sequelize.getQueryInterface(), orm.Sequelize);
             }
         }
     }

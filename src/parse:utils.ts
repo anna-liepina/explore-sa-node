@@ -92,7 +92,7 @@ export const updateConsoleLog = (lines: string[]) => {
 
 export class Output {
     static line = '------------------------------------';
-    constructor(public title: string, public sections = []) {}
+    constructor(public title: string, public sections = [], public debugInfo = []) {}
 
     performanceHeaders(durationInSec: number, usedMemoryInMB: number) {
         return [
@@ -102,6 +102,19 @@ export class Output {
             `between updates: ${durationInSec.toFixed(2)}s`,
             `used memory (heapsize): ${usedMemoryInMB.toFixed(2)} MB`
         ]
+    }
+
+    debugInformation() {
+        if (this.debugInfo.length === 0) {
+            return [];
+        }
+
+        return [
+            Output.line,
+            ' DEBUG INFORMATION',
+            Output.line,
+            ...this.debugInfo,
+        ];
     }
 
     processingInfo(
@@ -131,6 +144,7 @@ export class Output {
             Output.line,
             ...this.sections.reduce((acc, v) => acc.concat(v), []),
             ...this.performanceHeaders(durationInSec, usedMemoryInMB),
+            ...this.debugInformation(),
             ''
         ]
     }
