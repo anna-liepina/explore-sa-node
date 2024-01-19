@@ -1,7 +1,17 @@
-import AWS from 'aws-sdk';
+import { MongoClient } from 'mongodb';
 
-AWS.config.update({ region: process.env.AWS_REGION });
+const {
+    DB_MONGODB_PROTOCOL: protocol,
+    DB_MONGODB_HOSTNAME: hostname,
+    DB_MONGODB_USERNAME: username,
+    DB_MONGODB_PASSWORD: password,
+    DB_MONGODB_NAME: db,
+    DB_MONGODB_PORT: port,
+} = process.env;
 
-export const dynamodb = new AWS.DynamoDB();
+const url = `${protocol}://${username}:${password}@${hostname}${port ? `:${port}` : ''}/${db}`;
+const client = new MongoClient(url);
 
-export const documentClient = new AWS.DynamoDB.DocumentClient();
+client.connect();
+
+export const mongo = client.db(db);

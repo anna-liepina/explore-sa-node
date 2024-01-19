@@ -8,13 +8,15 @@ import yargs from 'yargs';
 import orm from './orm';
 import { Output, createQueue, perfObserver2 } from './parse:utils';
 import type { MarkerType } from './models/marker';
-import { documentClient } from './odm';
+import { mongo } from './odm';
 import { MarkerTypeEnum } from './models/marker';
 
 import { ApolloServer } from 'apollo-server-express';
 import { createTestClient } from 'apollo-server-testing';
 import compose from './dataloader';
 import { typeDefs, resolvers } from './graphql/schema';
+
+import { Collection } from 'mongodb';
 
 //@ts-ignore
 const { sql: logging, dry: dryRun, limit } = yargs
@@ -36,7 +38,7 @@ const { sql: logging, dry: dryRun, limit } = yargs
     .argv;
 
 const output = new Output(`processing NoSQL`);
-perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });\
+perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
 
 const queue = createQueue();
     
@@ -73,23 +75,24 @@ dialect: \t${process.env.DB_DIALECT}
 
     const { query } = createTestClient(server);
 
-    // const persistODM = (TableName: string, Items: any[]) => async () => 
-    //     !dryRun && 
-    //     Promise.all(Items.map(Item => documentClient.put({ TableName, Item }).promise()));
-    // Inside the persistODM function
-    const persistODM = (TableName: string, Items: any[]) => async () => {
+    const persistODM = (collection: Collection<any>, items: any[]) => async () => {
         if (!dryRun) {
             let retries = 5;
+
             while (retries > 0) {
                 try {
-                    await Promise.all(Items.map(Item => documentClient.put({ TableName, Item }).promise()));
-                    break;
+                    const result = await collection.insertMany(items);
+                    
+                    if (result.acknowledged) {
+                        break;
+                    }
+
+                    throw new Error('Insertion failed');
                 } catch (error) {
-                    if (error.retryable) {
-                    // if (error.code === 'ProvisionedThroughputExceededException') {
-                        console.warn(`Error: ${error.code} Retrying...`);
+                    if (error.code === 11000) {
+                        console.warn('Duplicate key error. Retrying...');
                         retries--;
-                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        await new Promise(resolve => setTimeout(resolve, 1000));
                     } else {
                         throw error;
                     }
@@ -189,7 +192,7 @@ dialect: \t${process.env.DB_DIALECT}
                 recordsInBatch += recordPerMarker;
                 processedRecords += recordPerMarker;
 
-                queue.add(persistODM('properties', items));
+                queue.add(persistODM(mongo.collection('properties'), items));
             }
 
             if (marker.type === MarkerTypeEnum.police) {
@@ -230,7 +233,7 @@ dialect: \t${process.env.DB_DIALECT}
                     coordinates,
                     records: cache[coordinates]
                 }));
-                queue.add(persistODM('incidents', items));
+                queue.add(persistODM(mongo.collection('incidents'), items));
             }
         }
 

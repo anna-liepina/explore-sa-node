@@ -7,8 +7,8 @@
     "node": ">=16"
   },
   "dependencies": {
+    "@types/mongodb": "^4.0.7",
     "apollo-server-express": "^2.19.2",
-    "aws-sdk": "^2.1536.0",
     "cors": "^2.8.5",
     "csv-parse": "^4.15.0",
     "dataloader": "^2.0.0",
@@ -19,13 +19,13 @@
     "mysql2": "^2.2.5",
     "p-queue": "^6.6.2",
     "sequelize": "^6.5.0",
-    "tedious": "^16.4.1",
     "yargs": "^16.2.0"
   },
   "optionalDependencies": {
     "pg": "^8.5.0",
     "pg-hstore": "^2.3.3",
-    "sqlite3": "^5.0.0"
+    "sqlite3": "^5.0.0",
+    "tedious": "^16.4.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.0",
@@ -34,6 +34,7 @@
     "@babel/preset-env": "^7.22.00",
     "@types/jest": "^29.5.5",
     "@types/lodash": "^4.14.199",
+    "@types/node": "^20.11.5",
     "apollo-server-testing": "^2.6.7",
     "jest": "^29.7.0",
     "sequelize-cli": "^6.2.0",
@@ -50,7 +51,7 @@
     "parse:incidents": "tsc && node -r dotenv/config ./build/parse:incidents",
     "parse:area": "tsc && node -r dotenv/config ./build/parse:area",
     "parse:timeline": "tsc && node -r dotenv/config ./build/parse:timeline",
-    "parse:aws": "tsc && node -r dotenv/config ./build/parse:aws",
+    "parse:mongo": "tsc && node -r dotenv/config ./build/parse:mongo",
     "build": "tsc",
     "start:serve": "node -r dotenv/config ./build/app.js",
     "start": "tsc-watch --onSuccess \"node -r dotenv/config --inspect=0.0.0.0 ./build/app.js\"",
