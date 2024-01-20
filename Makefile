@@ -6,7 +6,8 @@ DOCKER_IMAGE_PROD	:= $(DOCKER_IMAGE_ALIAS)-graphql-production
 
 .PORT 			:= 8081
 .PORT_DEBUG		:= 9229
-.DB_HOSTNAME	:= host.docker.internal
+.DB_HOSTNAME	:= $(shell hostname -I | cut -d ' ' -f 1)
+# .DB_HOSTNAME	:= host.docker.internal
 .DB_USERNAME	:= root
 .DB_PASSWORD	:= password
 .DB_NAME		:= explore
@@ -23,14 +24,15 @@ DB_PORT		:= $(.DB_PORT)
 DB_DIALECT	:= $(.DB_DIALECT)
 
 .SHARED_VOLUMES := \
+	-v $(PWD)/build:/www/build \
 	-v $(PWD)/config:/www/config \
 	-v $(PWD)/database:/www/database \
+	-v $(PWD)/sandbox:/www/sandbox \
 	-v $(PWD)/src:/www/src \
 	-v $(PWD)/var:/www/var \
-	-v $(PWD)/build:/www/build \
 	-v $(PWD)/.env:/www/.env \
-	-v $(PWD)/.jest.config.js:/www/.jest.config.js \
 	-v $(PWD)/.sequelizerc:/www/.sequelizerc \
+	-v $(PWD)/jest.config.js:/www/jest.config.js \
 	-v $(PWD)/tsconfig.json:/www/tsconfig.json
 
 .ENV_VARIABLES := \
@@ -95,10 +97,9 @@ build: image-local
 test: image-local
 	docker run \
 		--rm \
-		--name $(DOCKER_IMAGE_ALIAS)-test \
 		-it \
 		$(.SHARED_VOLUMES) \
-		$(.ENV_VARIABLES) \	
+		$(.ENV_VARIABLES) \
 		--entrypoint=npm \
 		$(DOCKER_IMAGE_LOCAL) run test
 
