@@ -1,35 +1,37 @@
-.DEFAULT_GOAL := interactive
-.DEV_IMAGE := data-explorer-sa
-.SERVE_IMAGE := data-explorer-serve
+.DEFAULT_GOAL		:= interactive
 
-.PORT := 8081
-.PORT_DEBUG := 9229
-.DB_HOSTNAME := host.docker.internal
-.DB_USERNAME := root
-.DB_PASSWORD := password
-.DB_NAME := explore
-.DB_PORT := 3306
-.DB_DIALECT := mysql
+DOCKER_IMAGE_ALIAS	:= exploreme
+DOCKER_IMAGE_LOCAL	:= $(DOCKER_IMAGE_ALIAS)-graphql
+DOCKER_IMAGE_PROD	:= $(DOCKER_IMAGE_ALIAS)-graphql-production
 
-PORT := $(.PORT)
-PORT_DEBUG := $(.PORT_DEBUG)
-DB_HOSTNAME := $(.DB_HOSTNAME)
-DB_USERNAME := $(.DB_USERNAME)
-DB_PASSWORD := $(.DB_PASSWORD)
-DB_NAME := $(.DB_NAME)
-DB_PORT := $(.DB_PORT)
-DB_DIALECT := $(.DB_DIALECT)
+.PORT 			:= 8081
+.PORT_DEBUG		:= 9229
+.DB_HOSTNAME	:= host.docker.internal
+.DB_USERNAME	:= root
+.DB_PASSWORD	:= password
+.DB_NAME		:= explore
+.DB_PORT		:= 3306
+.DB_DIALECT		:= mysql
+
+PORT		:= $(.PORT)
+PORT_DEBUG	:= $(.PORT_DEBUG)
+DB_HOSTNAME	:= $(.DB_HOSTNAME)
+DB_USERNAME	:= $(.DB_USERNAME)
+DB_PASSWORD	:= $(.DB_PASSWORD)
+DB_NAME		:= $(.DB_NAME)
+DB_PORT		:= $(.DB_PORT)
+DB_DIALECT	:= $(.DB_DIALECT)
 
 .SHARED_VOLUMES := \
 	-v $(PWD)/config:/www/config \
 	-v $(PWD)/database:/www/database \
 	-v $(PWD)/src:/www/src \
 	-v $(PWD)/var:/www/var \
-	-v $(PWD)/.babelrc:/www/.babelrc \
+	-v $(PWD)/build:/www/build \
 	-v $(PWD)/.env:/www/.env \
+	-v $(PWD)/.jest.config.js:/www/.jest.config.js \
 	-v $(PWD)/.sequelizerc:/www/.sequelizerc \
-	-v $(PWD)/tsconfig.json:/www/tsconfig.json \
-	-v $(PWD)/nodemon.json:/www/nodemon.json
+	-v $(PWD)/tsconfig.json:/www/tsconfig.json
 
 .ENV_VARIABLES := \
 	-e PORT=$(PORT) \
@@ -42,20 +44,20 @@ DB_DIALECT := $(.DB_DIALECT)
 
 help:
 	@echo ""
-	@echo "------------------------------------------------"
-	@echo "------- 'Data Explorer' GraphQL back-end -------"
-	@echo "------------------------------------------------"
+	@echo "-------------------------------------------------"
+	@echo "--------- 'Explore Me' GraphQL back-end ---------"
+	@echo "-------------------------------------------------"
 	@echo ""
 	@echo " make help\t\tdisplay help"
 	@echo ""
 	@echo "-- DOCKER IMAGE PREPARATION"
-	@echo " make dev-image\t\tbuild [$(.DEV_IMAGE)] image, with encapsulate dependencies"
-	@echo " make serve-image\tbuild [$(.SERVE_IMAGE)] image of node + apline [no NPM]"
+	@echo " make dev-image\t\tbuild [$(DOCKER_IMAGE_LOCAL)] image, with encapsulate dependencies"
+	@echo " make serve-image\tbuild [$(DOCKER_IMAGE_PROD)] image of node + apline [no NPM]"
 	@echo ""
 	@echo "-- COMMANDS"
 	@echo " make\t\t\talias for 'make $(.DEFAULT_GOAL)'"
-	@echo " make interactive\trun [$(.DEV_IMAGE)] image, content become available on http://localhost:$(PORT) with debugger on $(PORT) port"
-	@echo " make serve\t\trun [$(.SERVE_IMAGE)] image, content become available on http://localhost:$(PORT)"
+	@echo " make interactive\trun [$(DOCKER_IMAGE_LOCAL)] image, content become available on http://localhost:$(PORT) with debugger on $(PORT) port"
+	@echo " make serve\t\trun [$(DOCKER_IMAGE_PROD)] image, content become available on http://localhost:$(PORT)"
 	@echo " make test\t\texecute unit and functional tests"
 	@echo " make build\t\tgenerate static assets in './build' directory"
 	@echo ""
@@ -71,37 +73,39 @@ help:
 	@echo " DB_DIALECT:\t\t$(.DB_DIALECT)"
 	@echo ""
 
-dev-image:
-	docker build -t $(.DEV_IMAGE) .
+image-base:
+	docker build .
 
-serve-image:
-	docker build -t $(.SERVE_IMAGE) . -f serve.Dockerfile
+image-local: image-base
+	docker build -t $(DOCKER_IMAGE_LOCAL) . -f env.local.Dockerfile
 
-build: dev-image
+image-prod: image-base
+	docker build -t $(DOCKER_IMAGE_PROD) . -f env.prod.Dockerfile
+
+build: image-local
 	mkdir -p $(PWD)/build
 	docker run \
 		--rm \
 		-it \
-		-v $(PWD)/build:/www/build \
 		$(.SHARED_VOLUMES) \
 		$(.ENV_VARIABLES) \
 		--entrypoint=npm \
-		$(.DEV_IMAGE) run build
+		$(DOCKER_IMAGE_LOCAL) run build
 
-test: dev-image
+test: image-local
 	docker run \
 		--rm \
-		--name sa-test \
+		--name $(DOCKER_IMAGE_ALIAS)-test \
 		-it \
 		$(.SHARED_VOLUMES) \
-		$(.ENV_VARIABLES) \
+		$(.ENV_VARIABLES) \	
 		--entrypoint=npm \
-		$(.DEV_IMAGE) run test
+		$(DOCKER_IMAGE_LOCAL) run test
 
-interactive: dev-image
+interactive: image-local
 	docker run \
 		--rm \
-		--name sa-$(PORT) \
+		--name $(DOCKER_IMAGE_ALIAS)-$(PORT) \
 		-it \
 		$(.SHARED_VOLUMES) \
 		$(.ENV_VARIABLES) \
@@ -109,15 +113,15 @@ interactive: dev-image
 		-p $(PORT):$(PORT) \
 		-p $(PORT_DEBUG):$(PORT_DEBUG) \
 		--entrypoint=npm \
-		$(.DEV_IMAGE) run start:debug
+		$(DOCKER_IMAGE_LOCAL) run start
 
-serve: build serve-image
+serve: build image-prod
 	docker run \
 		--rm \
-		--name sa-serve-$(PORT) \
+		--name $(DOCKER_IMAGE_ALIAS)-serve-$(PORT) \
 		-it \
 		-v $(PWD)/build:/www/build \
 		$(.ENV_VARIABLES) \
 		-p $(PORT):$(PORT) \
 		--entrypoint=node \
-		$(.SERVE_IMAGE) /www/build/app.js
+		$(DOCKER_IMAGE_PROD) /www/build/app.js
