@@ -102,7 +102,6 @@ dialect: \t${process.env.DB_DIALECT}
             ` SQL workers used ${queue.pending.toLocaleString()} of ${queue.concurrency.toLocaleString()} ( queue: ${queue.size.toLocaleString()} )`,
         ];
     }
-        // output.processingInfo(processedRecords, processedInvalidRecords, recordsInBatch, queue, final);
 
     while (!Array.isArray(markers) || markers.length) {
         recordsInBatch = 0;
