@@ -75,31 +75,7 @@ dialect: \t${process.env.DB_DIALECT}
 
     const { query } = createTestClient(server);
 
-    const persistODM = (collection: Collection<any>, items: any[]) => async () => {
-        if (!dryRun) {
-            let retries = 5;
-
-            while (retries > 0) {
-                try {
-                    const result = await collection.insertMany(items);
-                    
-                    if (result.acknowledged) {
-                        break;
-                    }
-
-                    throw new Error('Insertion failed');
-                } catch (error) {
-                    if (error.code === 11000) {
-                        console.warn('Duplicate key error. Retrying...');
-                        retries--;
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    } else {
-                        throw error;
-                    }
-                }
-            }
-        }
-    };
+    const persistODM = (collection: Collection<any>, items: any[]) => async () => !dryRun && collection.insertMany(items);
 
     let iter = 0;
     let processedInvalidRecords = 0;
@@ -110,19 +86,22 @@ dialect: \t${process.env.DB_DIALECT}
 
     let markers: MarkerType[];
 
-    const out = (final?: boolean) => 
-     [
-        Output.line,
-        `${final ? '✅' : '⏱️ '} data processing ...`,
-        Output.line,
-        ` total records processed`,
-        `   valid: ${processedRecords.toLocaleString()}`,
-        `   corrupred or invalid: ${processedInvalidRecords.toLocaleString()}`,
-        ``,
-        ` valid records in the last batch: ${recordsInBatch.toLocaleString()}`,
-        ` iteration ${iter}`,
-        ` SQL workers used ${queue.pending.toLocaleString()} of ${queue.concurrency.toLocaleString()} ( queue: ${queue.size.toLocaleString()} )`,
-    ];
+    const resolveKey = (obj: { lat: number, lng: number }) => `${obj.lat}|${obj.lng}`;
+    const processingInfo = (final?: boolean) => {
+        output.sections[1] = [
+            Output.line,
+            `${final ? '✅' : '⏱️ '} data processing ...`,
+            Output.line,
+            ` total records processed`,
+            `   valid: ${processedRecords.toLocaleString()}`,
+            `   corrupred or invalid: ${processedInvalidRecords.toLocaleString()}`,
+            ``,
+            ` valid records in the last batch: ${recordsInBatch.toLocaleString()}`,
+            ` iteration ${iter}`,
+            `  up to ${limit} Markers per iteration`,
+            ` SQL workers used ${queue.pending.toLocaleString()} of ${queue.concurrency.toLocaleString()} ( queue: ${queue.size.toLocaleString()} )`,
+        ];
+    }
         // output.processingInfo(processedRecords, processedInvalidRecords, recordsInBatch, queue, final);
 
     while (!Array.isArray(markers) || markers.length) {
@@ -179,11 +158,11 @@ dialect: \t${process.env.DB_DIALECT}
                         recordPerMarker += p.transactions.length;
 
                         acc.push({
-                            coordinates: `${p.postcode.lat},${p.postcode.lng}`,
+                            coordinates: resolveKey(p.postcode),
                             address: [ p.postcode.postcode, p.street, p.paon, p.saon ].filter(Boolean).join(', '),
                             city: p.city,
                             ...p.postcode,
-                            transactions: p.transactions.map((t) => [ t.date, t.price ])
+                            transactions: p.transactions
                         })
 
                         return acc;
@@ -214,6 +193,22 @@ dialect: \t${process.env.DB_DIALECT}
                         }
                     }`
                 });
+                // const incidents = await orm.Incident.findAll({
+                //     attributes: [
+                //         `lat`,
+                //         `lng`,
+                //         `date`,
+                //         `type`,
+                //         `outcome`
+                //     ],
+                //     where: {
+                //         lat: marker.lat,
+                //         lng: marker.lng,
+                //     },
+                //     limit,
+                //     offset: limit * iter
+                //     raw: true,
+                // }) as unknown as IncidentType[];
 
                 recordsInBatch += incidents.length;
                 processedRecords += incidents.length;
@@ -221,17 +216,17 @@ dialect: \t${process.env.DB_DIALECT}
                 const cache = incidents.reduce((acc, incident) => {
                     const { lat, lng, ...i } = incident;
 
-                    const key = `${lat},${lng}`;
+                    const key = resolveKey(incident);
 
                     acc[key] ||= [];
-                    acc[key].push([ i.date, i.type, i.outcome ].filter(Boolean));
+                    acc[key].push(i);
 
                     return acc;
                 }, {});
 
                 const items = Object.keys(cache).map((coordinates) => ({
                     coordinates,
-                    records: cache[coordinates]
+                    incidents: cache[coordinates]
                 }));
                 queue.add(persistODM(mongo.collection('incidents'), items));
             }
@@ -241,7 +236,7 @@ dialect: \t${process.env.DB_DIALECT}
         performance.mark(`iter-${iter}`);
         performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
-        output.sections[1] = out();
+        processingInfo();
 
         if (queue.size > queue.concurrency) {
             output.sections.push([
@@ -258,7 +253,7 @@ dialect: \t${process.env.DB_DIALECT}
 
     performance.mark(`iter-${iter}`);
 
-    output.sections[1] = out(true);
+    processingInfo(true);
 
     if (!dryRun) {
         output.sections.push([
