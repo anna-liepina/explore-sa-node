@@ -9,8 +9,9 @@ const {
     DB_MONGODB_PORT: port,
 } = process.env;
 
-const url = `${protocol}://${username}:${password}@${hostname}${port ? `:${port}` : ''}/${db}`;
-const client = new MongoClient(url);
+const credentials = [username, password].filter(Boolean).join(':');
+const connectionString = `${protocol}://${[credentials, hostname].filter(Boolean).join('@')}${port ? `:${port}` : ''}/${db}`;
+const client = new MongoClient(connectionString);
 
 client.connect();
 
