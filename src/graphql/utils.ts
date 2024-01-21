@@ -15,10 +15,10 @@ export const coordinatesWithinRange = (
     range: number,
     rangeUnit?: RangeUnit
 ): CoordinateRange => {
-    const coefficient: number = rangeUnit === RangeUnit.ml ? 1.60934 : 1;
+    const unitCoefficient: number = rangeUnit === RangeUnit.ml ? 1.60934 : 1;
 
-    const latDelta: number = (range / 111) * coefficient;
-    const lngDelta: number = (range / (111 * Math.cos(lat * (Math.PI / 180)))) * coefficient;
+    const latDelta: number = (range / 111) * unitCoefficient;
+    const lngDelta: number = (range / (111 * Math.cos(lat * (Math.PI / 180)))) * unitCoefficient;
 
     return {
         latitudeRange: [lat - latDelta, lat + latDelta],
