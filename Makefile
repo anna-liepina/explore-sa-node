@@ -6,8 +6,9 @@ DOCKER_IMAGE_PROD	:= $(DOCKER_IMAGE_ALIAS)-graphql-production
 
 .PORT 			:= 8081
 .PORT_DEBUG		:= 9229
+
 ifeq ($(shell uname), Darwin)
-    # macOS
+    # MacOS
     .DB_HOSTNAME := host.docker.internal
 else ifeq ($(shell uname), Linux)
     # Linux
@@ -16,6 +17,7 @@ else
     # Default for other systems (assuming Windows)
     .DB_HOSTNAME := host.docker.internal
 endif
+
 .DB_USERNAME	:= root
 .DB_PASSWORD	:= password
 .DB_NAME		:= explore
