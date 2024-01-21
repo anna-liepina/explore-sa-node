@@ -23,5 +23,5 @@ export const coordinatesWithinRange = (
     return {
         latitudeRange: [lat - latDelta, lat + latDelta],
         longitudeRange: [lng - lngDelta, lng + lngDelta],
-    }
-}
+    };
+};
