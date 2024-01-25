@@ -1,8 +1,4 @@
-import {
-    coordinateRanges,
-    CoordinateRange,
-    RangeUnit,
-} from "./utils";
+import { coordinateRanges, RangeUnit } from "./utils";
 
 describe("coordinateRanges", () => {
     test.each`
@@ -22,7 +18,7 @@ describe("coordinateRanges", () => {
             expectedLatitudeRange,
             expectedLongitudeRange,
         }) => {
-            const result: CoordinateRange = coordinateRanges(
+            const result = coordinateRanges(
                 lat,
                 lng,
                 range,
