@@ -165,7 +165,6 @@ if (!fs.existsSync(file)) {
     }
 
     outputProcessingInfo();
-    outputDuplicateTransactions();
 
     for await (const row of parser) {
         const postcode = row[3];
