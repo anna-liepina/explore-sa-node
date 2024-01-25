@@ -114,10 +114,10 @@ dialect: \t${process.env.DB_DIALECT}
 
         for await (const marker of markers) {
             if (marker.type === MarkerTypeEnum.property) {
-                let { data: { propertySearchWithInRange: properties } } = await query({
+                let { data: { propertySearchInRange: properties } } = await query({
                     query: `
                     {
-                        propertySearchWithInRange(
+                        propertySearchInRange(
                             pos: { lat: ${marker.lat}, lng: ${marker.lng} }
                             range: 0
                             perPage: 10000000
@@ -174,10 +174,10 @@ dialect: \t${process.env.DB_DIALECT}
             }
 
             if (marker.type === MarkerTypeEnum.police) {
-                let { data: { incidentSearchWithInRange: incidents } } = await query({
+                let { data: { incidentSearchInRange: incidents } } = await query({
                     query: `
                     {
-                        incidentSearchWithInRange(
+                        incidentSearchInRange(
                             pos: { lat: ${marker.lat}, lng: ${marker.lng} }
                             range: 0
                             perPage: 10000000
