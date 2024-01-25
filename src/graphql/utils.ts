@@ -14,7 +14,7 @@ export const coordinateRanges = (
     lng: number,
     range: number,
     rangeUnit?: RangeUnit
-): CoordinateRange => {
+): CoordinateRanges => {
     const unitCoefficient: number = rangeUnit === RangeUnit.ml ? 1.60934 : 1;
 
     const latDelta: number = (range / 111) * unitCoefficient;
