@@ -9,7 +9,6 @@ describe('GraphQL: Postcode', () => {
                         postcode
                         lat
                         lng
-                        url
                     }
                 }`
             });
@@ -26,7 +25,6 @@ describe('GraphQL: Postcode', () => {
                         postcode
                         lat
                         lng
-                        url
                     }
                 }`
             });
@@ -42,7 +40,6 @@ describe('GraphQL: Postcode', () => {
                         postcode
                         lat
                         lng
-                        url
                     }
                 }`
             });
