@@ -1,7 +1,7 @@
 import type { PostcodeType } from "../models/postcode";
 import type { PropertyType } from "../models/property";
 import type { TransactionType } from "../models/transaction";
-import { coordinatesWithinRange } from "./utils";
+import { coordinateRanges } from "./utils";
 
 export default {
     typeDefs: `
@@ -56,7 +56,7 @@ export default {
                 });
             },
             propertySearchInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<PropertyType>[]> => {
-                const { latitudeRange, longitudeRange } = coordinatesWithinRange(pos.lat, pos.lng, range, rangeUnit);
+                const { latitudeRange, longitudeRange } = coordinateRanges(pos.lat, pos.lng, range, rangeUnit);
                 const offset: number = (page - 1) * limit;
 
                 return orm.Property.findAll({

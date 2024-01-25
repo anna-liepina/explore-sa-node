@@ -9,7 +9,7 @@ export type CoordinateRange = {
     longitudeRange: Range;
 }
 
-export const coordinatesWithinRange = (
+export const coordinatesInRange = (
     lat: number,
     lng: number,
     range: number,

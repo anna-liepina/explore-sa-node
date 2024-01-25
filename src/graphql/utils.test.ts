@@ -1,10 +1,10 @@
 import {
-    coordinatesWithinRange,
+    coordinateRanges,
     CoordinateRange,
     RangeUnit,
 } from "./utils";
 
-describe("coordinatesWithinRange", () => {
+describe("coordinateRanges", () => {
     test.each`
         lat    | lng    | range  | rangeUnit       | expectedLatitudeRange                         | expectedLongitudeRange
         ${0}   | ${0}   | ${100} | ${undefined}    | ${[-0.9009009009009009, 0.9009009009009009]}  | ${[-0.9009009009009009, 0.9009009009009009]}
@@ -22,7 +22,7 @@ describe("coordinatesWithinRange", () => {
             expectedLatitudeRange,
             expectedLongitudeRange,
         }) => {
-            const result: CoordinateRange = coordinatesWithinRange(
+            const result: CoordinateRange = coordinateRanges(
                 lat,
                 lng,
                 range,
