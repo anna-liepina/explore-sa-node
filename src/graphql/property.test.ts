@@ -44,12 +44,12 @@ describe('GraphQL: Property', () => {
         });
     });
 
-    describe('propertySearchWithInRange [presets: perPage 2]', () => {
+    describe('propertySearchInRange [presets: perPage 2]', () => {
         it(`by coordinates, in kilometers`, async () => {
-            const { data: { propertySearchWithInRange: data } } = await query({
+            const { data: { propertySearchInRange: data } } = await query({
                 query: `
                 {
-                    propertySearchWithInRange(
+                    propertySearchInRange(
                         pos: {
                             lat: 51.547915089,
                             lng: -0.00743124
@@ -76,10 +76,10 @@ describe('GraphQL: Property', () => {
         });
 
         it(`by coordinates, in miles`, async () => {
-            const { data: { propertySearchWithInRange: data } } = await query({
+            const { data: { propertySearchInRange: data } } = await query({
                 query: `
                 {
-                    propertySearchWithInRange(
+                    propertySearchInRange(
                         pos: {
                             lat: 51.547915089,
                             lng: -0.00743124
@@ -107,10 +107,10 @@ describe('GraphQL: Property', () => {
         });
 
         it(`by coordinates, in miles: 2nd page`, async () => {
-            const { data: { propertySearchWithInRange: data } } = await query({
+            const { data: { propertySearchInRange: data } } = await query({
                 query: `
                 {
-                    propertySearchWithInRange(
+                    propertySearchInRange(
                         pos: {
                             lat: 51.547915089,
                             lng: -0.00743124

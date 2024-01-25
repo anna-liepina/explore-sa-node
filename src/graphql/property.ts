@@ -11,7 +11,7 @@ export default {
                 perPage: Int = 100
                 page: Int = 1
             ): [Property]
-            propertySearchWithInRange(
+            propertySearchInRange(
                 pos: Point!
                 range: Float = 1
                 rangeUnit: GeoUnit = km
@@ -55,7 +55,7 @@ export default {
                     raw: true,
                 });
             },
-            propertySearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<PropertyType>[]> => {
+            propertySearchInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<PropertyType>[]> => {
                 const { latitudeRange, longitudeRange } = coordinatesWithinRange(pos.lat, pos.lng, range, rangeUnit);
                 const offset: number = (page - 1) * limit;
 

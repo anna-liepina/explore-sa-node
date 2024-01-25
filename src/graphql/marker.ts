@@ -4,7 +4,7 @@ import { coordinatesWithinRange } from "./utils";
 export default {
     typeDefs: `
         extend type Query {
-            markerSearchWithInRange(
+            markerSearchInRange(
                 pos: Point!
                 range: Float = 1
                 rangeUnit: GeoUnit = km
@@ -22,7 +22,7 @@ export default {
     `,
     resolvers: {
         Query: {
-            markerSearchWithInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<MarkerType>[]> => {
+            markerSearchInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<MarkerType>[]> => {
                 const { latitudeRange, longitudeRange } = coordinatesWithinRange(pos.lat, pos.lng, range, rangeUnit);
                 const offset: number = (page - 1) * limit;
 
