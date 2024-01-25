@@ -1,5 +1,5 @@
 import type { IncidentType } from "../models/incident";
-import { coordinatesWithinRange } from "./utils";
+import { coordinateRanges } from "./utils";
 
 export default {
     typeDefs: `
@@ -26,7 +26,7 @@ export default {
     resolvers: {
         Query: {
             incidentSearchInRange: (entity, { pos, range, rangeUnit, perPage: limit, page }, { orm }): Promise<Partial<IncidentType>[]> => {
-                const { latitudeRange, longitudeRange } = coordinatesWithinRange(pos.lat, pos.lng, range, rangeUnit);
+                const { latitudeRange, longitudeRange } = coordinateRanges(pos.lat, pos.lng, range, rangeUnit);
                 const offset: number = (page - 1) * limit;
 
                 return orm.Incident.findAll({
