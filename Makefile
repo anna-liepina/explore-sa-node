@@ -4,7 +4,7 @@ DOCKER_IMAGE_ALIAS	:= exploreme
 DOCKER_IMAGE_LOCAL	:= $(DOCKER_IMAGE_ALIAS)-graphql
 DOCKER_IMAGE_PROD	:= $(DOCKER_IMAGE_ALIAS)-graphql-production
 
-.PORT 			:= 8081
+.PORT			:= 8081
 .PORT_DEBUG		:= 9229
 
 ifeq ($(shell uname), Darwin)
@@ -24,14 +24,14 @@ endif
 .DB_PORT		:= 3306
 .DB_DIALECT		:= mysql
 
-PORT		:= $(.PORT)
-PORT_DEBUG	:= $(.PORT_DEBUG)
-DB_HOSTNAME	:= $(.DB_HOSTNAME)
-DB_USERNAME	:= $(.DB_USERNAME)
-DB_PASSWORD	:= $(.DB_PASSWORD)
-DB_NAME		:= $(.DB_NAME)
-DB_PORT		:= $(.DB_PORT)
-DB_DIALECT	:= $(.DB_DIALECT)
+PORT			:= $(.PORT)
+PORT_DEBUG		:= $(.PORT_DEBUG)
+DB_HOSTNAME		:= $(.DB_HOSTNAME)
+DB_USERNAME		:= $(.DB_USERNAME)
+DB_PASSWORD		:= $(.DB_PASSWORD)
+DB_PORT			:= $(.DB_PORT)
+DB_NAME			:= $(.DB_NAME)
+DB_DIALECT		:= $(.DB_DIALECT)
 
 .SHARED_VOLUMES := \
 	-v $(PWD)/build:/www/build \
@@ -63,8 +63,8 @@ help:
 	@echo " make help\t\tdisplay help"
 	@echo ""
 	@echo "-- DOCKER IMAGE PREPARATION"
-	@echo " make dev-image\t\tbuild [$(DOCKER_IMAGE_LOCAL)] image, with encapsulate dependencies"
-	@echo " make serve-image\tbuild [$(DOCKER_IMAGE_PROD)] image of node + apline [no NPM]"
+	@echo " make image-local\t\tbuild [$(DOCKER_IMAGE_LOCAL)] image, with encapsulate dependencies"
+	@echo " make image-prod\tbuild [$(DOCKER_IMAGE_PROD)] image of node + apline [no NPM]"
 	@echo ""
 	@echo "-- COMMANDS"
 	@echo " make\t\t\talias for 'make $(.DEFAULT_GOAL)'"
