@@ -155,9 +155,6 @@ if (!fs.existsSync(file)) {
         
     const outputProcessingInfo = (final?: boolean) => {
         output.sections[1] = output.processingInfo(processedRecords, processedInvalidRecords, transactions.length, queue, final);
-    }
-
-    const outputDuplicateTransactions = () => {
         output.sections[2] = [
             Output.line,
             ' extra information',
@@ -215,15 +212,14 @@ if (!fs.existsSync(file)) {
             }
         }
 
-        const transactionHash = `${price}|${date}`;
-
+        const transactionHash = `${date}|${price}`;
         if (!propertiesStore.get(guid).has(transactionHash)) {
             propertiesStore.get(guid).add(transactionHash);
 
             transactions.push({
                 guid,
-                price,
                 date,
+                price,
             });
         } else {
             duplicateTransactions++;
@@ -238,7 +234,6 @@ if (!fs.existsSync(file)) {
             queue.add(persist(orm.Transaction, [...transactions]));
 
             outputProcessingInfo();
-            outputDuplicateTransactions();
 
             markers.length = 0;
             properties.length = 0;
@@ -266,7 +261,6 @@ if (!fs.existsSync(file)) {
     queue.add(persist(orm.Property, properties));
     queue.add(persist(orm.Transaction, transactions));
     outputProcessingInfo(true);
-    outputDuplicateTransactions();
 
     if (!dryRun) {
         output.sections.push([
