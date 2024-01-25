@@ -4,12 +4,12 @@ export enum RangeUnit {
     km = 'km'
 }
 
-export type CoordinateRange = {
+type CoordinateRanges = {
     latitudeRange: Range;
     longitudeRange: Range;
 }
 
-export const coordinatesWithinRange = (
+export const coordinateRanges = (
     lat: number,
     lng: number,
     range: number,

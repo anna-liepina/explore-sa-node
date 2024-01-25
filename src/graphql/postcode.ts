@@ -14,7 +14,6 @@ export default {
             postcode: String
             lat: Float
             lng: Float
-            url: String
             lsoa: String
         }
     `,
@@ -34,9 +33,6 @@ export default {
                     raw: true,
                 });
             },
-        },
-        Postcode: {
-            url: (entity: PostcodeType): string => `https://www.google.com/maps/search/?api=1&query=${entity.lat},${entity.lng}`,
         }
     },
 }
