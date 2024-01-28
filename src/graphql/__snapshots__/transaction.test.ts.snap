@@ -3,17 +3,17 @@
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcode range: 1st page 1`] = `
 [
   {
-    "date": "2019-04-26",
-    "id": "2",
-    "price": 545000,
+    "date": "2019-03-25",
+    "id": "3",
+    "price": 341250,
     "property": {
       "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
-      "saon": "1b762366cdf7cc97e2764e932f60c0edc61b5e86",
+      "saon": "fe78fa628e2a410375cb37144fbdff5a766fcee3",
       "street": "PRIZE WALK",
     },
   },
   {
-    "date": "2019-04-26",
+    "date": "2019-04-25",
     "id": "1",
     "price": 375000,
     "property": {
@@ -23,12 +23,12 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postco
     },
   },
   {
-    "date": "2019-03-25",
-    "id": "3",
-    "price": 341250,
+    "date": "2019-04-26",
+    "id": "2",
+    "price": 545000,
     "property": {
       "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
-      "saon": "fe78fa628e2a410375cb37144fbdff5a766fcee3",
+      "saon": "1b762366cdf7cc97e2764e932f60c0edc61b5e86",
       "street": "PRIZE WALK",
     },
   },
@@ -40,19 +40,19 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postco
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date range 1`] = `
 [
   {
-    "date": "2019-04-26",
-    "id": "2",
-    "price": 545000,
+    "date": "2013-10-23",
+    "id": "65",
+    "price": 100000,
   },
   {
-    "date": "2019-04-26",
-    "id": "1",
-    "price": 375000,
+    "date": "2013-12-03",
+    "id": "67",
+    "price": 130000,
   },
   {
-    "date": "2019-03-25",
-    "id": "3",
-    "price": 341250,
+    "date": "2013-12-18",
+    "id": "18",
+    "price": 125000,
   },
 ]
 `;
@@ -60,19 +60,19 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date range: 2nd page 1`] = `
 [
   {
-    "date": "2017-11-10",
-    "id": "4",
-    "price": 38000000,
+    "date": "2015-10-15",
+    "id": "455",
+    "price": 765000,
   },
   {
-    "date": "2018-05-09",
-    "id": "6",
-    "price": 246000,
+    "date": "2015-10-30",
+    "id": "431",
+    "price": 757055,
   },
   {
-    "date": "2017-11-28",
-    "id": "5",
-    "price": 326600,
+    "date": "2015-10-30",
+    "id": "453",
+    "price": 745000,
   },
 ]
 `;
@@ -80,19 +80,19 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] without criteria 1`] = `
 [
   {
-    "date": "2019-04-26",
-    "id": "2",
-    "price": 545000,
+    "date": "2007-08-22",
+    "id": "36",
+    "price": 229400,
   },
   {
-    "date": "2019-04-26",
-    "id": "1",
-    "price": 375000,
+    "date": "2013-10-23",
+    "id": "65",
+    "price": 100000,
   },
   {
-    "date": "2019-03-25",
-    "id": "3",
-    "price": 341250,
+    "date": "2013-12-03",
+    "id": "67",
+    "price": 130000,
   },
 ]
 `;
