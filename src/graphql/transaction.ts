@@ -6,9 +6,9 @@ export default {
     typeDefs: `
         extend type Query {
             transactionSearch(
-                postcode: String
-                from: String
-                to: String
+                postcodePattern: String
+                dateFrom: String
+                dateTo: String
                 perPage: Int = 100
                 page: Int = 1
             ): [Transaction]
@@ -23,32 +23,24 @@ export default {
     `,
     resolvers: {
         Query: {
-            transactionSearch: (entity, { postcode, from, to, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
+            transactionSearch: (entity, { postcodePattern, from, to, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {};
 
-                if (postcode) {
+                if (postcodePattern) {
                     where.guid = {
-                        [orm.Sequelize.Op.like]: `${postcode}%`,
+                        [orm.Sequelize.Op.like]: `${postcodePattern}%`,
                     }
                 }
 
-                if (from) {
-                    where.date = {
-                        [orm.Sequelize.Op.gte]: from,
-                    };
+                if (dateFrom) {
+                    where.date ||= {};
+                    where.date[orm.Sequelize.Op.gte] = dateFrom;
                 }
 
-                if (to) {
-                    where.date = {
-                        [orm.Sequelize.Op.lte]: to,
-                    };
-                }
-
-                if (from && to) {
-                    where.date = {
-                        [orm.Sequelize.Op.between]: [from, to],
-                    };
+                if (dateTo) {
+                    where.date ||= {};
+                    where.date[orm.Sequelize.Op.lte] = dateTo;
                 }
 
                 return orm.Transaction.findAll({
@@ -56,7 +48,6 @@ export default {
                     offset,
                     limit,
                     order: [
-                        ['guid', 'ASC'],
                         ['date', 'ASC'],
                     ],
                     raw: true,

@@ -5,10 +5,10 @@ export default {
     typeDefs: `
         extend type Query {
             timelineSearch(
-                pattern: String
+                postcodePattern: String
                 postcodes: [String]
-                from: String
-                to: String
+                dateFrom: String
+                dateTo: String
                 perPage: Int = 100
                 page: Int = 1
             ): [Timeline]
@@ -23,7 +23,7 @@ export default {
     `,
     resolvers: {
         Query: {
-            timelineSearch: (entity, { postcodes, pattern, from, to, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
+            timelineSearch: (entity, { postcodePattern, postcodes, from, to, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {
                     postcode: {
@@ -31,43 +31,34 @@ export default {
                     },
                 };
 
+                if (postcodePattern) {
+                    where.postcode[orm.Sequelize.Op.or].push({
+                        [orm.Sequelize.Op.like]: `${postcodePattern}%`
+                    });
+                }
+
                 if (postcodes) {
                     where.postcode[orm.Sequelize.Op.or].push({
                         [orm.Sequelize.Op.in]: postcodes
                     });
-                    // where.postcode[orm.Sequelize.Op.in] = postcodes;
                 }
 
-                if (pattern) {
-                    where.postcode[orm.Sequelize.Op.or].push({
-                        [orm.Sequelize.Op.like]: `${pattern}%`
-                    });
-
-                    // where.postcode[orm.Sequelize.Op.like] = `${pattern}%`;
+                if (dateFrom) {
+                    where.date ||= {};
+                    where.date[orm.Sequelize.Op.gte] = dateFrom;
                 }
 
-                if (from) {
-                    where.date = {
-                        [orm.Sequelize.Op.gte]: from,
-                    }
-
-                }
-                if (to) {
-                    where.date = {
-                        [orm.Sequelize.Op.lte]: to,
-                    }
-                }
-
-                if (from && to) {
-                    where.date = {
-                        [orm.Sequelize.Op.between]: [from, to],
-                    }
+                if (dateTo) {
+                    where.date ||= {};
+                    where.date[orm.Sequelize.Op.lte] = dateTo;
                 }
 
                 return orm.Timeline.findAll({
                     where,
                     offset,
-                    order: [['date', 'ASC']],
+                    order: [
+                        ['date', 'ASC']
+                    ],
                     limit,
                     raw: true,
                 });
