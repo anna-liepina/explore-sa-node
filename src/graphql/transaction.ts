@@ -7,8 +7,8 @@ export default {
         extend type Query {
             transactionSearch(
                 postcodePattern: String
-                from: String
-                to: String
+                dateFrom: String
+                dateTo: String
                 perPage: Int = 100
                 page: Int = 1
             ): [Transaction]
@@ -33,14 +33,14 @@ export default {
                     }
                 }
 
-                if (from) {
+                if (dateFrom) {
                     where.date ||= {};
-                    where.date[orm.Sequelize.Op.gte] = from;
+                    where.date[orm.Sequelize.Op.gte] = dateFrom;
                 }
 
-                if (to) {
+                if (dateTo) {
                     where.date ||= {};
-                    where.date[orm.Sequelize.Op.lte] = to;
+                    where.date[orm.Sequelize.Op.lte] = dateTo;
                 }
 
                 return orm.Transaction.findAll({

@@ -20,7 +20,7 @@ describe('GraphQL: Transaction', () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
                 {
-                    transactionSearch(from: "2010-01-01", to: "2021-01-01", perPage: 3) {
+                    transactionSearch(dateFrom: "2010-01-01", dateTo: "2021-01-01", perPage: 3) {
                         id
                         price
                         date
@@ -35,7 +35,7 @@ describe('GraphQL: Transaction', () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
                 {
-                    transactionSearch(from: "2010-01-01", to: "2021-01-01", perPage: 3, page: 2) {
+                    transactionSearch(dateFrom: "2010-01-01", dateTo: "2021-01-01", perPage: 3, page: 2) {
                         id
                         price
                         date
