@@ -13,7 +13,7 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postco
     },
   },
   {
-    "date": "2019-04-26",
+    "date": "2019-04-25",
     "id": "1",
     "price": 375000,
     "property": {
