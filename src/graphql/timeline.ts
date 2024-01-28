@@ -59,7 +59,9 @@ export default {
                 return orm.Timeline.findAll({
                     where,
                     offset,
-                    order: [['date', 'ASC']],
+                    order: [
+                        ['date', 'ASC']
+                    ],
                     limit,
                     raw: true,
                 });
