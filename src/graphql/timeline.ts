@@ -7,8 +7,8 @@ export default {
             timelineSearch(
                 postcodePattern: String
                 postcodes: [String]
-                from: String
-                to: String
+                dateFrom: String
+                dateTo: String
                 perPage: Int = 100
                 page: Int = 1
             ): [Timeline]
@@ -23,7 +23,7 @@ export default {
     `,
     resolvers: {
         Query: {
-            timelineSearch: (entity, { postcodePattern, postcodes, from, to, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
+            timelineSearch: (entity, { postcodePattern, postcodes, dateFrom, dateTo, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {
                     postcode: {
@@ -43,14 +43,14 @@ export default {
                     });
                 }
 
-                if (from) {
+                if (dateFrom) {
                     where.date ||= {};
-                    where.date[orm.Sequelize.Op.gte] = from;
+                    where.date[orm.Sequelize.Op.gte] = dateFrom;
                 }
 
-                if (to) {
+                if (dateTo) {
                     where.date ||= {};
-                    where.date[orm.Sequelize.Op.lte] = to;
+                    where.date[orm.Sequelize.Op.lte] = dateTo;
                 }
 
                 return orm.Timeline.findAll({
