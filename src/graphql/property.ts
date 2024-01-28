@@ -7,7 +7,7 @@ export default {
     typeDefs: `
         extend type Query {
             propertySearch(
-                postcode: String!
+                postcodePattern: String!
                 perPage: Int = 100
                 page: Int = 1
             ): [Property]
@@ -41,13 +41,13 @@ export default {
     `,
     resolvers: {
         Query: {
-            propertySearch: (entity, { postcode, perPage: limit, page }, { orm }): Promise<PropertyType[]>  => {
+            propertySearch: (entity, { postcodePattern, perPage: limit, page }, { orm }): Promise<PropertyType[]>  => {
                 const offset: number = (page - 1) * limit;
 
                 return orm.Property.findAll({
                     where: {
                         postcode: {
-                            [orm.Sequelize.Op.like]: `${postcode}%`,
+                            [orm.Sequelize.Op.like]: `${postcodePattern}%`,
                         },
                     },
                     offset,

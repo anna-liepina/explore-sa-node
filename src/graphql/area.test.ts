@@ -33,7 +33,7 @@ describe('GraphQL: Area', () => {
             const { data: { areaSearch: data } } = await query({
                 query: `
                 {
-                    areaSearch(pattern: "E20", perPage: 3) {
+                    areaSearch(postcodePattern: "E20", perPage: 3) {
                         area
                         city
                     }

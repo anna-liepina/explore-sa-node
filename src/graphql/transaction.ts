@@ -6,7 +6,7 @@ export default {
     typeDefs: `
         extend type Query {
             transactionSearch(
-                postcode: String
+                postcodePattern: String
                 from: String
                 to: String
                 perPage: Int = 100
@@ -23,13 +23,13 @@ export default {
     `,
     resolvers: {
         Query: {
-            transactionSearch: (entity, { postcode, from, to, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
+            transactionSearch: (entity, { postcodePattern, from, to, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {};
 
-                if (postcode) {
+                if (postcodePattern) {
                     where.guid = {
-                        [orm.Sequelize.Op.like]: `${postcode}%`,
+                        [orm.Sequelize.Op.like]: `${postcodePattern}%`,
                     }
                 }
 
