@@ -27,12 +27,8 @@ export default (sequelize: Sequelize) => {
                 type: DataTypes.DATEONLY,
                 primaryKey: true,
             },
-            avg: {
-                type: DataTypes.INTEGER,
-            },
-            count: {
-                type: DataTypes.INTEGER,
-            },
+            avg: DataTypes.INTEGER,
+            count: DataTypes.INTEGER,
         },
         {
             tableName: 'timelines',
