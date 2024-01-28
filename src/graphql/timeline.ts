@@ -23,7 +23,7 @@ export default {
     `,
     resolvers: {
         Query: {
-            timelineSearch: (entity, { postcodes, postcodePattern, dateFrom, dateTo, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
+            timelineSearch: (entity, { postcodePattern, postcodes, dateFrom, dateTo, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {
                     postcode: {
@@ -31,19 +31,19 @@ export default {
                     },
                 };
 
-                if (postcodes) {
-                    where.postcode[orm.Sequelize.Op.or].push({
-                        [orm.Sequelize.Op.in]: postcodes
-                    });
-                    // where.postcode[orm.Sequelize.Op.in] = postcodes;
-                }
-
                 if (postcodePattern) {
                     where.postcode[orm.Sequelize.Op.or].push({
                         [orm.Sequelize.Op.like]: `${postcodePattern}%`
                     });
 
                     // where.postcode[orm.Sequelize.Op.like] = `${pattern}%`;
+                }
+
+                if (postcodes) {
+                    where.postcode[orm.Sequelize.Op.or].push({
+                        [orm.Sequelize.Op.in]: postcodes
+                    });
+                    // where.postcode[orm.Sequelize.Op.in] = postcodes;
                 }
 
                 if (from) {

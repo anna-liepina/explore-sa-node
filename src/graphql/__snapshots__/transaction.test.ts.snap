@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcode range: 1st page 1`] = `
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcodePattern range: 1st page 1`] = `
 [
   {
     "date": "2019-03-25",
@@ -35,7 +35,7 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postco
 ]
 `;
 
-exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcode range: 2nd page 1`] = `[]`;
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcodePattern range: 2nd page 1`] = `[]`;
 
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date range 1`] = `
 [

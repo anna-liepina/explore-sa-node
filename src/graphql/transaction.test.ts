@@ -47,11 +47,11 @@ describe('GraphQL: Transaction', () => {
         });
 
         /** there are only 3 results with this postcode, which should fall on 1st page */
-        it(`with postcode range: 1st page`, async () => {
+        it(`with postcodePattern range: 1st page`, async () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
                 {
-                    transactionSearch(postcode: "E20 1AB", perPage: 3) {
+                    transactionSearch(postcodePattern: "E20 1AB", perPage: 3) {
                         id
                         price
                         date
@@ -68,11 +68,11 @@ describe('GraphQL: Transaction', () => {
         });
 
         /** there are only 3 results with this postcode, which should fall on 1st page */
-        it(`with postcode range: 2nd page`, async () => {
+        it(`with postcodePattern range: 2nd page`, async () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
                 {
-                    transactionSearch(postcode: "E20 1AB", perPage: 3, page: 2) {
+                    transactionSearch(postcodePattern: "E20 1AB", perPage: 3, page: 2) {
                         id
                         price
                         date
