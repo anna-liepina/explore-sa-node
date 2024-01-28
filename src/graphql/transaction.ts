@@ -23,7 +23,7 @@ export default {
     `,
     resolvers: {
         Query: {
-            transactionSearch: (entity, { postcodePattern, dateFrom, dateTo, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
+            transactionSearch: (entity, { postcodePattern, from, to, perPage: limit, page }, { orm }): Promise<TransactionType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {};
 
