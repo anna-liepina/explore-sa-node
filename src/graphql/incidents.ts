@@ -19,8 +19,6 @@ export default {
             date: String
             type: String
             outcome: String
-            creator: String
-            assignee: String
         }
     `,
     resolvers: {
