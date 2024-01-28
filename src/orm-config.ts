@@ -2,13 +2,26 @@
 
 import type { Dialect, Options } from "sequelize";
 
+const {
+    DB_HOSTNAME: host,
+    DB_USERNAME: username,
+    DB_PASSWORD: password,
+    DB_PORT: port,
+    DB_NAME: database,
+    DB_DIALECT: dialect,
+
+    DB_REPLICA_HOSTNAME: replicaHost,
+    DB_REPLICA_USERNAME: replicaUsername,
+    DB_REPLICA_PASSWORD: replicaPassword
+} = process.env;
+
 const orm: Options = {
-    host: process.env.DB_HOSTNAME,
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: parseInt(process.env.DB_PORT, 10),
-    dialect: process.env.DB_DIALECT as Dialect,
+    host,
+    username,
+    password,
+    port: parseInt(port, 10),
+    database,
+    dialect: dialect as Dialect,
     pool: {
         acquire: 60000,
         idle: 10000,
@@ -17,19 +30,19 @@ const orm: Options = {
     }
 };
 
-if (process.env.DB_REPLICA_HOSTNAME && process.env.DB_REPLICA_USERNAME && process.env.DB_REPLICA_PASSWORD) {
+if (replicaHost && replicaUsername && replicaPassword) {
     orm.replication = {
         read: [
             {
-                host: process.env.DB_REPLICA_HOSTNAME,
-                username: process.env.DB_REPLICA_USERNAME,
-                password: process.env.DB_REPLICA_PASSWORD,
+                host: replicaHost,
+                username: replicaUsername,
+                password: replicaPassword,
             },
         ],
         write: {
-            host: process.env.DB_HOSTNAME,
-            username: process.env.DB_USERNAME,
-            password: process.env.DB_PASSWORD,
+            host,
+            username,
+            password,
         },
     };
 }
