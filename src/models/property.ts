@@ -32,29 +32,17 @@ export default (sequelize: Sequelize) => {
                 allowNull: false,
             },
             // Property Type. D = Detached, S = Semi-Detached, T = Terraced, F = Flats/Maisonettes, O = Other
-            propertyType: {
-                type: DataTypes.STRING(1),
-            },
+            propertyType: DataTypes.STRING(1),
             // Duration	Relates to the tenure: F = Freehold, L= Leasehold etc.
             // Note that HM Land Registry does not record leases of 7 years or less in the Price Paid Dataset.
-            propertyForm: {
-                type: DataTypes.STRING(1),
-            },
+            propertyForm: DataTypes.STRING(1),
             // PAON	Primary Addressable Object Name. Typically the house number or name.
-            paon: {
-                type: DataTypes.STRING,
-            },
+            paon: DataTypes.STRING,
             // SAON	Secondary Addressable Object Name. Where a property has been divided into separate units (for example, flats),
             // the PAON (above) will identify the building and a SAON will be specified that identifies the separate unit/flat.
-            saon: {
-                type: DataTypes.STRING,
-            },
-            street: {
-                type: DataTypes.STRING,
-            },
-            city: {
-                type: DataTypes.STRING,
-            }
+            saon: DataTypes.STRING,
+            street: DataTypes.STRING,
+            city: DataTypes.STRING,
         },
         {
             tableName: 'properties',
