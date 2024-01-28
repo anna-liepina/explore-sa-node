@@ -8,10 +8,7 @@ module.exports = {
             createTable(
                 'postcodes',
                 {
-                    postcode: {
-                        ...postcode(Sequelize).postcode,
-                        primaryKey: true,
-                    },
+                    ...postcode(Sequelize, { primaryKey: true }),
                     ...coordinates(Sequelize)
                 }
             );
