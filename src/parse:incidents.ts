@@ -223,9 +223,7 @@ if (!files.length) {
                 lat,
                 lng,
                 type,
-                outcome,
-                // creator,
-                // assignee,
+                outcome
             };
 
             incidents.push(obj);

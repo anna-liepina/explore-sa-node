@@ -9,8 +9,6 @@ export type IncidentType = {
     lng: number,
     type: string,
     outcome: string,
-    creator: string,
-    assignee: string,
 }
 
 export default (sequelize: Sequelize) => {
