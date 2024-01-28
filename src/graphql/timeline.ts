@@ -5,7 +5,7 @@ export default {
     typeDefs: `
         extend type Query {
             timelineSearch(
-                pattern: String
+                postcodePattern: String
                 postcodes: [String]
                 from: String
                 to: String
@@ -23,7 +23,7 @@ export default {
     `,
     resolvers: {
         Query: {
-            timelineSearch: (entity, { postcodes, pattern, from, to, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
+            timelineSearch: (entity, { postcodes, postcodePattern, dateFrom, dateTo, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {
                     postcode: {
@@ -38,9 +38,9 @@ export default {
                     // where.postcode[orm.Sequelize.Op.in] = postcodes;
                 }
 
-                if (pattern) {
+                if (postcodePattern) {
                     where.postcode[orm.Sequelize.Op.or].push({
-                        [orm.Sequelize.Op.like]: `${pattern}%`
+                        [orm.Sequelize.Op.like]: `${postcodePattern}%`
                     });
 
                     // where.postcode[orm.Sequelize.Op.like] = `${pattern}%`;
