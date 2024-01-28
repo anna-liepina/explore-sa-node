@@ -13,22 +13,12 @@ module.exports = {
                         primaryKey: true,
                         autoIncrement: true,
                     },
-                    date: {
-                        type: Sequelize.DATEONLY,
-                    },
+                    date: Sequelize.DATEONLY,
                     ...coordinates(Sequelize),
-                    type: {
-                        type: Sequelize.STRING,
-                    },
-                    outcome: {
-                        type: Sequelize.STRING,
-                    },
-                    creator: {
-                        type: Sequelize.STRING,
-                    },
-                    assignee: {
-                        type: Sequelize.STRING,
-                    },
+                    type: Sequelize.STRING,
+                    outcome: Sequelize.STRING,
+                    creator: Sequelize.STRING,
+                    assignee: Sequelize.STRING,
                 }
             );
     },
