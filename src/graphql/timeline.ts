@@ -35,15 +35,12 @@ export default {
                     where.postcode[orm.Sequelize.Op.or].push({
                         [orm.Sequelize.Op.like]: `${postcodePattern}%`
                     });
-
-                    // where.postcode[orm.Sequelize.Op.like] = `${pattern}%`;
                 }
 
                 if (postcodes) {
                     where.postcode[orm.Sequelize.Op.or].push({
                         [orm.Sequelize.Op.in]: postcodes
                     });
-                    // where.postcode[orm.Sequelize.Op.in] = postcodes;
                 }
 
                 if (from) {
