@@ -23,7 +23,7 @@ export default {
     `,
     resolvers: {
         Query: {
-            timelineSearch: (entity, { postcodePattern, postcodes, from, to, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
+            timelineSearch: (entity, { postcodePattern, postcodes, dateFrom, dateTo, perPage: limit, page }, { orm }): Promise<TimelineType[]> => {
                 const offset: number = (page - 1) * limit;
                 const where: WhereAttributeHash = {
                     postcode: {
