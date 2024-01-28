@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 require('dotenv');
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import yargs from 'yargs';
