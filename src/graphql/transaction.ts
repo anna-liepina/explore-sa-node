@@ -34,21 +34,13 @@ export default {
                 }
 
                 if (from) {
-                    where.date = {
-                        [orm.Sequelize.Op.gte]: from,
-                    };
+                    where.date ||= {};
+                    where.date[orm.Sequelize.Op.gte] = from;
                 }
 
                 if (to) {
-                    where.date = {
-                        [orm.Sequelize.Op.lte]: to,
-                    };
-                }
-
-                if (from && to) {
-                    where.date = {
-                        [orm.Sequelize.Op.between]: [from, to],
-                    };
+                    where.date ||= {};
+                    where.date[orm.Sequelize.Op.lte] = to;
                 }
 
                 return orm.Transaction.findAll({
@@ -56,7 +48,6 @@ export default {
                     offset,
                     limit,
                     order: [
-                        ['guid', 'ASC'],
                         ['date', 'ASC'],
                     ],
                     raw: true,

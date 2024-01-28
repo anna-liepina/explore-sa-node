@@ -11,7 +11,7 @@ exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildc
     "street": "PRIZE WALK",
     "transactions": [
       {
-        "date": "2019-04-26",
+        "date": "2019-04-25",
       },
     ],
   },
