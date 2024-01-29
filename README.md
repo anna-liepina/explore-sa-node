@@ -22,9 +22,9 @@ the aim is to build a scalable GraphQL backend, which can quickly return request
 to demonstrate complex cases of GraphQL use, such as N+1 problem, scaling where more than one database is required [write/read nodes]
 complex automated QA, anonymized data seeding for QA purposes, and some limits of JavaScript, where for example by default objects in V8 object can have ~8.4mil of fields, but Map can handle way more. Queue system for data processing.
 
-* GraphQL live [demo](https://api.data-explorer.co.uk/graphql) [currently unavailable]
+* GraphQL live [demo](https://graphql.exploreme.co.uk/) [currently unavailable]
 * Web Application [example](https://github.com/anna-liepina/explore-cwa-react) of how data can be consumed
-  * Web Application live [demo](https://www.data-explorer.co.uk) [currently unavailable]
+  * Web Application live [demo](https://exploreme.co.uk/) [currently unavailable]
 
 ### software requirements
 
