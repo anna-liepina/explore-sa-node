@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 require('dotenv');
 
 import { performance } from 'perf_hooks';
