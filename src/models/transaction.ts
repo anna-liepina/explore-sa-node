@@ -49,15 +49,9 @@ export default (sequelize: Sequelize) => {
                 primaryKey: true,
                 autoIncrement: true,
             },
-            guid: {
-                type: DataTypes.STRING,
-            },
-            price: {
-                type: DataTypes.INTEGER,
-            },
-            date: {
-                type: DataTypes.DATEONLY,
-            },
+            guid: DataTypes.STRING,
+            price: DataTypes.INTEGER,
+            date: DataTypes.DATEONLY,
         },
         {
             tableName: 'transactions',

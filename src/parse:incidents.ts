@@ -1,7 +1,4 @@
-#!/usr/bin/env node
-
 require('dotenv');
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
@@ -223,9 +220,7 @@ if (!files.length) {
                 lat,
                 lng,
                 type,
-                outcome,
-                // creator,
-                // assignee,
+                outcome
             };
 
             incidents.push(obj);

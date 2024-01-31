@@ -1,5 +1,6 @@
 import type { Sequelize } from 'sequelize';
 import { DataTypes } from 'sequelize';
+import { coordinateFields } from './utils';
 
 export type IncidentType = {
     id: number,
@@ -8,8 +9,6 @@ export type IncidentType = {
     lng: number,
     type: string,
     outcome: string,
-    creator: string,
-    assignee: string,
 }
 
 export default (sequelize: Sequelize) => {
@@ -21,33 +20,12 @@ export default (sequelize: Sequelize) => {
                 primaryKey: true,
                 autoIncrement: true,
             },
-            date: {
-                type: DataTypes.DATEONLY,
-            },
-            // Latitude
-            lat: {
-                type: DataTypes.DECIMAL(12, 9),
-            },
-            // Longitude
-            lng: {
-                type: DataTypes.DECIMAL(12, 9),
-            },
-            // Crime type
-            type: {
-                type: DataTypes.STRING,
-            },
-            // Last outcome category
-            outcome: {
-                type: DataTypes.STRING,
-            },
-            // Reported By
-            creator: {
-                type: DataTypes.STRING,
-            },
-            // Reported by
-            assignee: {
-                type: DataTypes.STRING,
-            },
+            date: DataTypes.DATEONLY,
+            ...coordinateFields(),
+            type: DataTypes.STRING,
+            outcome: DataTypes.STRING,
+            creator: DataTypes.STRING,
+            assignee: DataTypes.STRING,
         },
         {
             tableName: 'incidents',

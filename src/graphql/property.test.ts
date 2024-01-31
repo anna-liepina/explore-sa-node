@@ -5,7 +5,7 @@ describe('GraphQL: Property', () => {
             const { data: { propertySearch: data } } = await query({
                 query: `
                 {
-                    propertySearch(postcode: "E20", perPage: 3) {
+                    propertySearch(postcodePattern: "E20", perPage: 3) {
                         saon
                         paon
                         street
@@ -26,7 +26,7 @@ describe('GraphQL: Property', () => {
             const { data: { propertySearch: data } } = await query({
                 query: `
                 {
-                    propertySearch(postcode: "E20", perPage: 3, page: 2) {
+                    propertySearch(postcodePattern: "E20", perPage: 3, page: 2) {
                         saon
                         paon
                         street

@@ -5,7 +5,7 @@ export default {
     typeDefs: `
         extend type Query {
             areaSearch(
-                pattern: String
+                postcodePattern: String
                 perPage: Int = 100
                 page: Int = 1
             ): [Area]
@@ -18,20 +18,20 @@ export default {
     `,
     resolvers: {
         Query: {
-            areaSearch: (entity, { pattern, perPage: limit, page }, { orm }): Promise<AreaType[]> => {
+            areaSearch: (entity, { postcodePattern, perPage: limit, page }, { orm }): Promise<AreaType[]> => {
                 const where: WhereAttributeHash = {};
                 const offset: number = (page - 1) * limit;
 
-                if (pattern) {
+                if (postcodePattern) {
                     where[orm.Sequelize.Op.or] = [
                         {
                             area: {
-                                [orm.Sequelize.Op.like]: `${pattern}%`,
+                                [orm.Sequelize.Op.like]: `${postcodePattern}%`,
                             },
                         },
                         {
                             city: {
-                                [orm.Sequelize.Op.like]: `${pattern}%`,
+                                [orm.Sequelize.Op.like]: `${postcodePattern}%`,
                             },
                         }
                     ];
