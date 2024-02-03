@@ -227,8 +227,7 @@ if (!fs.existsSync(file)) {
             }
         }
 
-        const transactionHash = `${date}|${price}`;
-        const transactionStore = propertiesStore.get(guid);
+        const transactionHash = `${guid}|${date}|${price}`;
         if (!transactionStore.has(transactionHash)) {
             transactionStore.add(transactionHash);
 
