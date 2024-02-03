@@ -209,7 +209,6 @@ if (!fs.existsSync(file)) {
             }
         }
 
-        const transactionHash = generateSyncHash(`${guid}|${date}|${price}`);
         const transactionHash = `${guid}|${date}|${price}`;
         if (!transactionStore.has(transactionHash)) {
             transactionStore.add(transactionHash);
