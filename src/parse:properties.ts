@@ -166,7 +166,7 @@ if (!fs.existsSync(file)) {
     for await (const row of parser) {
         const postcode = row[3];
         /** some records do not contain postcode */
-        if (postcode.indexOf(' ') < 1 || !postcodes.has(postcode)) {
+        if (!postcodes.has(postcode)) {
             processedInvalidRecords++;
             processedRecords++;
 
@@ -176,7 +176,7 @@ if (!fs.existsSync(file)) {
         const date = row[2].split(' ')[0];
         const price = parseInt(row[1], 10);
 
-        const obj: Partial<PropertyType> = {
+        const property: Partial<PropertyType> = {
             postcode,
             propertyType: row[4],
             propertyForm: row[6],
@@ -186,13 +186,14 @@ if (!fs.existsSync(file)) {
             city: ifFalsyUndefined(row[11]),
         };
 
-        const guid = `${postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`.toUpperCase();
-        obj.guid = guid;
+        const guid = [postcode, property.street, property.paon, property.saon].filter(Boolean).join(',').toUpperCase();
+
+        property.guid = guid;
 
         if (!propertiesStore.has(guid)) {
             propertiesStore.set(guid, new Set);
 
-            properties.push(obj);
+            properties.push(property);
 
             if (!markersStore.has(postcode)) {
                 markersStore.add(postcode);
@@ -208,9 +209,10 @@ if (!fs.existsSync(file)) {
             }
         }
 
-        const transactionHash = `${date}|${price}`;
-        if (!propertiesStore.get(guid).has(transactionHash)) {
-            propertiesStore.get(guid).add(transactionHash);
+        const transactionHash = generateSyncHash(`${guid}|${date}|${price}`);
+        const transactionHash = `${guid}|${date}|${price}`;
+        if (!transactionStore.has(transactionHash)) {
+            transactionStore.add(transactionHash);
 
             transactions.push({
                 guid,
