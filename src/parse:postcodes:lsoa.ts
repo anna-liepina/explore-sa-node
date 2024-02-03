@@ -122,8 +122,9 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
     performance.mark(`iter-${iter}`);
 
     const verifiedPostcodes = [];
-    const out = (final?: boolean) => 
-        output.processingInfo(total, missingPostcodes, verifiedPostcodes.length, queue, final);
+    const outputProcessingInfo = (final?: boolean) => {
+        output.sections[1] = output.processingInfo(total, missingPostcodes, verifiedPostcodes.length, queue, final);
+    }
     
     const parser = fs
         .createReadStream(file)
@@ -146,7 +147,7 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
 
         if (verifiedPostcodes.length === limit) {
             queue.add(persist(orm.Postcode, [...verifiedPostcodes]));
-            output.sections[1] = out();
+            outputProcessingInfo();
 
             verifiedPostcodes.length = 0;
             iter++;
@@ -168,7 +169,7 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
     }
 
     queue.add(persist(orm.Postcode, verifiedPostcodes));
-    output.sections[1] = out(true);
+    outputProcessingInfo(true);
 
     if (!dryRun) {
         output.sections.push([

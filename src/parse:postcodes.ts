@@ -127,8 +127,9 @@ if (!fs.existsSync(file)) {
 
     performance.mark(`iter-${iter}`);
 
-    const out = (final?: boolean) => 
-        output.processingInfo(postcodeMap.size, count - postcodeMap.size, postcodes.length, queue, final);
+    const outputProcessingInfo = (final?: boolean) => {
+        output.sections[1] = output.processingInfo(postcodeMap.size, count - postcodeMap.size, postcodes.length, queue, final);
+    }
 
     for await (const row of parser) {
         const [postcode, _1, _2, _3, _4, _5, _6, lat, lng] = row;
@@ -152,7 +153,7 @@ if (!fs.existsSync(file)) {
         if (postcodes.length === limit) {
             const job = queue.add(persist(orm.Postcode, [...postcodes]));
 
-            output.sections[1] = out();
+            outputProcessingInfo();
 
             postcodes.length = 0;
             iter++;
@@ -174,7 +175,7 @@ if (!fs.existsSync(file)) {
     }
 
     queue.add(persist(orm.Postcode, postcodes));
-    output.sections[1] = out(true);
+    outputProcessingInfo(true);
 
     if (!dryRun) {
         output.sections.push([
