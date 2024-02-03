@@ -6,11 +6,11 @@ import yargs from 'yargs';
 import csv from 'csv-parse';
 import orm from './orm';
 import { MigrationsDirection, OperationMarker, Output, composeOperation, createQueue, perfObserver2 } from './parse:utils';
-import type { PropertyType } from './models/property';
-import type { TransactionType } from './models/transaction';
 import type { MarkerType } from './models/marker';
 import { MarkerTypeEnum } from './models/marker';
 import type { PostcodeType } from './models/postcode';
+import type { PropertyType } from './models/property';
+import type { TransactionType } from './models/transaction';
 
 const executeMigrations = composeOperation(OperationMarker.properties, orm);
 
@@ -132,11 +132,28 @@ if (!fs.existsSync(file)) {
             raw: true,
         })
             .then((data) => (data as Partial<PostcodeType>[]).forEach(({ postcode, ...v }) => postcodes.set(postcode, v))),
-        orm.Property.findAll({
-            attributes: ['guid'],
+        orm.Marker.findAll({
+            attributes: ['label'],
+            where: {
+                type: {
+                    //@ts-ignore
+                    [orm.Sequelize.Op.eq]: MarkerTypeEnum.property
+                }
+            },
             raw: true,
         })
-            .then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesStore.set(v.guid, new Set))),
+            .then((data) => (data as Partial<MarkerType>[]).forEach((v) => markersStore.add(v.label))),
+        orm.Transaction.findAll({
+            attributes: ['guid', 'date', 'price'],
+            raw: true,
+        })
+            .then((data) => (data as Partial<TransactionType>[]).forEach(({ guid, date, price }) => {
+                if (!propertiesStore.has(guid)) {
+                    propertiesStore.set(guid, new Set);
+                }
+
+                propertiesStore.get(guid).add(`${date}|${price}`);
+            })),
     ]);
 
     let processedInvalidRecords = 0;
