@@ -143,17 +143,16 @@ if (!fs.existsSync(file)) {
             raw: true,
         })
             .then((data) => (data as Partial<MarkerType>[]).forEach((v) => markersStore.add(v.label))),
-        orm.Property.findAll({
-            attributes: ['guid'],
-            raw: true,
-        })
-            .then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesStore.set(v.guid, new Set))),
         orm.Transaction.findAll({
             attributes: ['guid', 'date', 'price'],
             raw: true,
         })
             .then((data) => (data as Partial<TransactionType>[]).forEach(({ guid, date, price }) => {
-                propertiesStore.get(guid)?.add(`${date}|${price}`);
+                if (!propertiesStore.has(guid)) {
+                    propertiesStore.set(guid, new Set);
+                }
+
+                propertiesStore.get(guid).add(`${date}|${price}`);
             })),
     ]);
 
