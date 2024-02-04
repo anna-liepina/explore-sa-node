@@ -1,5 +1,3 @@
-require('dotenv');
-
 import fs from 'fs';
 import yargs from 'yargs';
 import orm from './orm';
@@ -140,7 +138,6 @@ const performance = new Performance(output);
             if (queue.size > queue.concurrency) {
                 output.messageCatchUpWithSQLQueue(!dryRun);
 
-                // await queue.onSizeLessThan(concurrency);
                 await job;
 
                 output.sections.length = 2;
