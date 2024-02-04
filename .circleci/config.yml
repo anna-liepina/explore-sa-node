@@ -21,6 +21,9 @@ jobs:
             - ~/.npm
             - ~/.cache
       - run:
+          name: compile typescript
+          command: npm run build
+      - run:
           name: waiting for MySQL to be ready
           command: |
             for i in `seq 1 10`;
