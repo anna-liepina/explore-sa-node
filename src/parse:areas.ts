@@ -155,7 +155,7 @@ const performance = new Performance(output);
 
     output.messageAwaitQueuedSQL(!dryRun);
     await queue.onEmpty();
-    
+
     performance.mark(0);
     process.exit(0);
 })()
