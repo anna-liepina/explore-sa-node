@@ -1,17 +1,18 @@
 module.exports = {
     coordinates: (Sequelize) => ({
-        // Latitude
-        lat: {
-            type: Sequelize.DECIMAL(12, 9),
-        },
-        // Longitude
-        lng: {
-            type: Sequelize.DECIMAL(12, 9),
-        },
+        lat: Sequelize.DECIMAL(12, 9),
+        lng: Sequelize.DECIMAL(12, 9),
     }),
-    postcode: (Sequelize) => ({
+    postcode: (Sequelize, config) => ({
         postcode: {
             type: Sequelize.STRING(9),
+            ...config
         },
+    }),
+    guid: (Sequelize) => ({
+        guid: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        }
     })
 }

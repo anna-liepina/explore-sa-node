@@ -1,5 +1,6 @@
 {
-  "name": "node-data-explorer-sa",
+  "name": "explore-sa",
+  "description": "A robust GraphQL server built with Apollo Server and Node.js for seamless data querying and manipulation.",
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
@@ -47,7 +48,7 @@
     "parse:postcodes:lsoa": "tsc && node -r dotenv/config ./build/parse:postcodes:lsoa",
     "parse:properties": "tsc && node -r dotenv/config ./build/parse:properties.js",
     "parse:incidents": "tsc && node -r dotenv/config ./build/parse:incidents",
-    "parse:area": "tsc && node -r dotenv/config ./build/parse:area",
+    "parse:areas": "tsc && node -r dotenv/config ./build/parse:areas",
     "parse:timeline": "tsc && node -r dotenv/config ./build/parse:timeline",
     "parse:aws": "tsc && node -r dotenv/config ./build/parse:aws",
     "build": "tsc",

@@ -11,7 +11,7 @@ exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildc
     "street": "PRIZE WALK",
     "transactions": [
       {
-        "date": "2019-04-26",
+        "date": "2019-04-25",
       },
     ],
   },
@@ -88,7 +88,7 @@ exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildc
 ]
 `;
 
-exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 2] by coordinates, in kilometers 1`] = `
+exports[`GraphQL: Property propertySearchInRange [presets: perPage 2] by coordinates, in kilometers 1`] = `
 [
   {
     "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
@@ -138,7 +138,7 @@ exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 2] by coo
 ]
 `;
 
-exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 2] by coordinates, in miles 1`] = `
+exports[`GraphQL: Property propertySearchInRange [presets: perPage 2] by coordinates, in miles 1`] = `
 [
   {
     "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
@@ -173,7 +173,7 @@ exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 2] by coo
 ]
 `;
 
-exports[`GraphQL: Property propertySearchWithInRange [presets: perPage 2] by coordinates, in miles: 2nd page 1`] = `
+exports[`GraphQL: Property propertySearchInRange [presets: perPage 2] by coordinates, in miles: 2nd page 1`] = `
 [
   {
     "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",

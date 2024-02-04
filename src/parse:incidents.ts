@@ -1,7 +1,4 @@
-#!/usr/bin/env node
-
 require('dotenv');
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
@@ -152,24 +149,23 @@ if (!files.length) {
 
     performance.mark(`iter-${iter}`);
 
-    const out = (final?: boolean) => 
-        output.processingInfo(processedRecords, processedInvalidRecords, incidents.length, queue, final);
+    const outputProcessingInfo = (final?: boolean) => {
+        output.sections[1] = output.processingInfo(processedRecords, processedInvalidRecords, incidents.length, queue, final);
+    }
 
     const markersStore: Set<string> = new Set();
     const incidents = [];
     const markers = [];
     let processingFile = 0;
 
-    const resolveDate = (row) => {
-        const d = new Date(row.Month || row.Date);
-        if (isNaN(+d)) {
-            return false;
-        }
-
-        return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    const resolveDate = (row: Record<string, string>) => {
+        const dateString = row.Month || row.Date;
+        const isValidDate = !isNaN(Date.parse(dateString));
+    
+        return isValidDate ? new Date(dateString).toISOString().split('T')[0] : false;
     }
 
-    const resolveOutcome = (row) => {
+    const resolveOutcome = (row: Record<string, string>) => {
         const result = row['Last outcome category'];
 
         if (!result || String(result).toLowerCase() === 'status update unavailable') {
@@ -179,7 +175,7 @@ if (!files.length) {
         return result;
     }
 
-    const resolveType = (row) => {
+    const resolveType = (row: Record<string, string>) => {
         return row['Crime type'] || [row.Type, row["Object of search"]].filter(Boolean).join(' ');
     }
 
@@ -223,9 +219,7 @@ if (!files.length) {
                 lat,
                 lng,
                 type,
-                outcome,
-                // creator,
-                // assignee,
+                outcome
             };
 
             incidents.push(obj);
@@ -249,7 +243,7 @@ if (!files.length) {
                 queue.add(persist(orm.Marker, [...markers]));
                 queue.add(persist(orm.Incident, [...incidents]));
 
-                output.sections[1] = out();
+                outputProcessingInfo();
 
                 markers.length = 0;
                 incidents.length = 0;
@@ -275,7 +269,7 @@ if (!files.length) {
     processedRecords += incidents.length;
     queue.add(persist(orm.Marker, markers));
     queue.add(persist(orm.Incident, incidents));
-    output.sections[1] = out(true);
+    outputProcessingInfo(true);
 
     if (!dryRun) {
         output.sections.push([

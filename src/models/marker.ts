@@ -1,5 +1,6 @@
 import type { Sequelize } from 'sequelize';
 import { DataTypes } from 'sequelize';
+import { coordinateFields } from './utils';
 
 export type MarkerType = {
     id: number,
@@ -23,18 +24,9 @@ export default (sequelize: Sequelize) => {
                 primaryKey: true,
                 autoIncrement: true,
             },
-            lat: {
-                type: DataTypes.DECIMAL(12, 9),
-            },
-            lng: {
-                type: DataTypes.DECIMAL(12, 9),
-            },
-            type: {
-                type: DataTypes.STRING,
-            },
-            label: {
-                type: DataTypes.STRING,
-            },
+            ...coordinateFields(),
+            type: DataTypes.STRING,
+            label: DataTypes.STRING,
         },
         {
             tableName: 'markers',

@@ -14,10 +14,7 @@ module.exports = {
                         autoIncrement: true,
                     },
                     ...coordinates(Sequelize),
-                    // Marker type e.g. property, incident etc
-                    type: {
-                        type: Sequelize.STRING,
-                    },
+                    type: Sequelize.STRING,
                 }
             );
     },
