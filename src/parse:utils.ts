@@ -191,3 +191,30 @@ heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
         });
     });
 export const composeOperation = composeMigrationRunner;
+
+const updateConsoleLog = (lines: string[]) => {
+    process.stdout.write('\x1Bc');
+    process.stdout.write(lines.join('\n'));
+}
+export const perfObserver2 = (output: Output) =>
+    new PerformanceObserver((items) => {
+        items.getEntries().forEach((o) => {
+            const durationInSec = o.duration / 1000;
+            const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
+
+            updateConsoleLog(output.out(durationInSec, usedMemoryInMB));
+        });
+    });
+
+export const perfObserver = () =>
+    new PerformanceObserver((items) => {
+        items.getEntries().forEach((o) => {
+            const durationInSec = o.duration / 1000;
+            const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
+
+            console.log(`
+PERFORMANCE OBSERVER METRICS
+duration: ${durationInSec.toFixed(2)}s      
+heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
+        });
+    });
