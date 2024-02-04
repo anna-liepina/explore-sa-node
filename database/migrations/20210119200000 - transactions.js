@@ -1,5 +1,7 @@
 'use strict';
 
+const { guid } = require('../utils/commonFields');
+
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.
@@ -12,16 +14,9 @@ module.exports = {
                         autoIncrement: true,
                     },
                     /** @see orm.Property.guid */
-                    guid: {
-                        type: Sequelize.STRING,
-                        allowNull: false,
-                    },
-                    price: {
-                        type: Sequelize.INTEGER,
-                    },
-                    date: {
-                        type: Sequelize.DATEONLY,
-                    },
+                    ...guid(Sequelize),
+                    price: Sequelize.INTEGER,
+                    date: Sequelize.DATEONLY,
                 }
             );
     },

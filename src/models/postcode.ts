@@ -1,5 +1,6 @@
 import type { Sequelize } from 'sequelize';
 import { DataTypes } from 'sequelize';
+import { coordinateFields } from './utils';
 
 export type PostcodeType = {
     postcode: string,
@@ -16,15 +17,8 @@ export default (sequelize: Sequelize) => {
                 type: DataTypes.STRING(9),
                 primaryKey: true,
             },
-            lsoa: {
-                type: DataTypes.STRING,
-            },
-            lat: {
-                type: DataTypes.DECIMAL(12, 9),
-            },
-            lng: {
-                type: DataTypes.DECIMAL(12, 9),
-            },
+            lsoa: DataTypes.STRING,
+            ...coordinateFields()
         },
         {
             tableName: 'postcodes',

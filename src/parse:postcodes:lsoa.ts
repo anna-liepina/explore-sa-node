@@ -1,16 +1,11 @@
-#!/usr/bin/env node
-
 require('dotenv');
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
-import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { Output, perfObserver2 } from './parse:utils';
+import { Output, createQueue, perfObserver2 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
 //@ts-ignore
@@ -105,7 +100,7 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
     let total = 0;
     let missingPostcodes = 0;
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
 
     const postcodes = await orm.Postcode.findAll({
         attributes: ['postcode', 'lat', 'lng', 'lsoa'],
@@ -127,8 +122,9 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
     performance.mark(`iter-${iter}`);
 
     const verifiedPostcodes = [];
-    const out = (final?: boolean) => 
-        output.processingInfo(total, missingPostcodes, verifiedPostcodes.length, queue, final);
+    const outputProcessingInfo = (final?: boolean) => {
+        output.sections[1] = output.processingInfo(total, missingPostcodes, verifiedPostcodes.length, queue, final);
+    }
     
     const parser = fs
         .createReadStream(file)
@@ -151,7 +147,7 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
 
         if (verifiedPostcodes.length === limit) {
             queue.add(persist(orm.Postcode, [...verifiedPostcodes]));
-            output.sections[1] = out();
+            outputProcessingInfo();
 
             verifiedPostcodes.length = 0;
             iter++;
@@ -173,7 +169,7 @@ perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
     }
 
     queue.add(persist(orm.Postcode, verifiedPostcodes));
-    output.sections[1] = out(true);
+    outputProcessingInfo(true);
 
     if (!dryRun) {
         output.sections.push([

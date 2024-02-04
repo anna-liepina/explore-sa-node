@@ -13,18 +13,19 @@
 | __tests__     | [![tests][ci.tests-master-badge]][ci.tests-master]            | [![tests][ci.tests-heroku-badge]][ci.tests-heroku]
 | __coverage__  | [![coverage][ci.coverage-master-badge]][ci.coverage-master]   | [![coverage][ci.coverage-heroku-badge]][ci.coverage-heroku]
 
-# 'Data Explorer' GraphQL back-end
+# 'Explore Me SA GraphqQL' [server applicaion]
 
-This project is done to demonstrate my knowledge, which I learned recently as I try to get into the software development industry, I had a mentor to help me out.
-The project aims to parse UK government data on property sales, and perform statistical analysis, as well as link it with geology data, like addresses and latitude and longitude.
+This project is centered around parsing various datasets, including UK government data on property sales, police reporting data, and post code data. The goal is to harness geographical information to establish connections between postcodes using latitude and longitude.
 
-the aim is to build a scalable GraphQL backend, which can quickly return requested results
-to demonstrate complex cases of GraphQL use, such as N+1 problem, scaling where more than one database is required [write/read nodes]
-complex automated QA, anonymized data seeding for QA purposes, and some limits of JavaScript, where for example by default objects in V8 object can have ~8.4mil of fields, but Map can handle way more. Queue system for data processing.
+The primary objective is to develop a scalable GraphQL backend capable of swiftly delivering requested results. This endeavor seeks to illuminate intricate aspects of GraphQL use, addressing challenges like the N+1 problem and scaling scenarios where more than one database is required for both write and read nodes.
 
-* GraphQL live [demo](https://api.data-explorer.co.uk/graphql) [currently unavailable]
+Key features of the project include a robust automated Quality Assurance (QA) system, incorporating anonymized data seeding for comprehensive QA testing. The project also explores the flexibility of JavaScript, pushing the boundaries of the language. Notably, it delves into the constraints of default V8 object fields, which are capped at around ~8.4 million, while highlighting the superior handling capacity of the Map data structure.
+
+Additionally, the project incorporates a queue system to enhance the efficiency of data processing. In essence, project serves as a practical demonstration of diverse and advanced aspects of software development, reflecting a commitment to excellence and innovation.
+
+* GraphQL live [demo](https://graphql.exploreme.co.uk/) [currently unavailable]
 * Web Application [example](https://github.com/anna-liepina/explore-cwa-react) of how data can be consumed
-  * Web Application live [demo](https://www.data-explorer.co.uk) [currently unavailable]
+  * Web Application live [demo](https://exploreme.co.uk/) [currently unavailable]
 
 ### software requirements
 

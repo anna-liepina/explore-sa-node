@@ -13,19 +13,10 @@ module.exports = {
                         primaryKey: true,
                         autoIncrement: true,
                     },
-                    postcode: {
-                        ...postcode(Sequelize).postcode,
-                        allowNull: false,
-                    },
-                    date: {
-                        type: Sequelize.DATEONLY,
-                    },
-                    avg: {
-                        type: Sequelize.INTEGER,
-                    },
-                    count: {
-                        type: Sequelize.INTEGER,
-                    },
+                    ...postcode(Sequelize, { allowNull: false }),
+                    date: Sequelize.DATEONLY,
+                    avg: Sequelize.INTEGER,
+                    count: Sequelize.INTEGER,
                 }
             );
     },

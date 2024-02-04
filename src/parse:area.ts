@@ -1,15 +1,10 @@
-#!/usr/bin/env node
-
 require('dotenv');
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
-import os from 'os';
 import yargs from 'yargs';
-import PQueue from 'p-queue';
 import orm from './orm';
 
-import { perfObserver } from './parse:utils';
+import { createQueue, perfObserver } from './parse:utils';
 perfObserver().observe({ entryTypes: ['measure'], buffered: true });
 
 //@ts-ignore
@@ -107,7 +102,8 @@ dialect: \t${process.env.DB_DIALECT}
     let iter = 0;
     let data = [];
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
+
     performance.mark(`iter-${iter}`);
 
     let collisions = 0;

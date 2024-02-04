@@ -1,21 +1,16 @@
-#!/usr/bin/env node
-
 require('dotenv');
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
-import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, Output, composeOperation, perfObserver2 } from './parse:utils';
-import type { PropertyType } from './models/property';
-import type { TransactionType } from './models/transaction';
+import { MigrationsDirection, OperationMarker, Output, composeOperation, createQueue, perfObserver2 } from './parse:utils';
 import type { MarkerType } from './models/marker';
 import { MarkerTypeEnum } from './models/marker';
 import type { PostcodeType } from './models/postcode';
+import type { PropertyType } from './models/property';
+import type { TransactionType } from './models/transaction';
 
 const executeMigrations = composeOperation(OperationMarker.properties, orm);
 
@@ -121,7 +116,7 @@ if (!fs.existsSync(file)) {
         ];
     }
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
 
     const markers: Partial<MarkerType>[] = [];
     const properties: Partial<PropertyType>[] = [];
@@ -137,11 +132,28 @@ if (!fs.existsSync(file)) {
             raw: true,
         })
             .then((data) => (data as Partial<PostcodeType>[]).forEach(({ postcode, ...v }) => postcodes.set(postcode, v))),
-        orm.Property.findAll({
-            attributes: ['guid'],
+        orm.Marker.findAll({
+            attributes: ['label'],
+            where: {
+                type: {
+                    //@ts-ignore
+                    [orm.Sequelize.Op.eq]: MarkerTypeEnum.property
+                }
+            },
             raw: true,
         })
-            .then((data) => (data as Partial<PropertyType>[]).forEach((v) => propertiesStore.set(v.guid, new Set))),
+            .then((data) => (data as Partial<MarkerType>[]).forEach((v) => markersStore.add(v.label))),
+        orm.Transaction.findAll({
+            attributes: ['guid', 'date', 'price'],
+            raw: true,
+        })
+            .then((data) => (data as Partial<TransactionType>[]).forEach(({ guid, date, price }) => {
+                if (!propertiesStore.has(guid)) {
+                    propertiesStore.set(guid, new Set);
+                }
+
+                propertiesStore.get(guid).add(`${date}|${price}`);
+            })),
     ]);
 
     let processedInvalidRecords = 0;
@@ -157,9 +169,6 @@ if (!fs.existsSync(file)) {
         
     const outputProcessingInfo = (final?: boolean) => {
         output.sections[1] = output.processingInfo(processedRecords, processedInvalidRecords, transactions.length, queue, final);
-    }
-
-    const outputDuplicateTransactions = () => {
         output.sections[2] = [
             Output.line,
             ' extra information',
@@ -170,12 +179,11 @@ if (!fs.existsSync(file)) {
     }
 
     outputProcessingInfo();
-    outputDuplicateTransactions();
 
     for await (const row of parser) {
         const postcode = row[3];
         /** some records do not contain postcode */
-        if (postcode.indexOf(' ') < 1 || !postcodes.has(postcode)) {
+        if (!postcodes.has(postcode)) {
             processedInvalidRecords++;
             processedRecords++;
 
@@ -185,7 +193,7 @@ if (!fs.existsSync(file)) {
         const date = row[2].split(' ')[0];
         const price = parseInt(row[1], 10);
 
-        const obj: Partial<PropertyType> = {
+        const property: Partial<PropertyType> = {
             postcode,
             propertyType: row[4],
             propertyForm: row[6],
@@ -195,13 +203,14 @@ if (!fs.existsSync(file)) {
             city: ifFalsyUndefined(row[11]),
         };
 
-        const guid = `${postcode}-${obj.street || ''}${obj.paon ? ` ${obj.paon}` : ''}${obj.saon ? `-${obj.saon}` : ''}`.toUpperCase();
-        obj.guid = guid;
+        const guid = [postcode, property.street, property.paon, property.saon].filter(Boolean).join(',').toUpperCase();
+
+        property.guid = guid;
 
         if (!propertiesStore.has(guid)) {
             propertiesStore.set(guid, new Set);
 
-            properties.push(obj);
+            properties.push(property);
 
             if (!markersStore.has(postcode)) {
                 markersStore.add(postcode);
@@ -217,15 +226,14 @@ if (!fs.existsSync(file)) {
             }
         }
 
-        const transactionHash = `${price}|${date}`;
-
-        if (!propertiesStore.get(guid).has(transactionHash)) {
-            propertiesStore.get(guid).add(transactionHash);
+        const transactionHash = `${guid}|${date}|${price}`;
+        if (!transactionStore.has(transactionHash)) {
+            transactionStore.add(transactionHash);
 
             transactions.push({
                 guid,
-                price,
                 date,
+                price,
             });
         } else {
             duplicateTransactions++;
@@ -240,7 +248,6 @@ if (!fs.existsSync(file)) {
             queue.add(persist(orm.Transaction, [...transactions]));
 
             outputProcessingInfo();
-            outputDuplicateTransactions();
 
             markers.length = 0;
             properties.length = 0;
@@ -268,7 +275,6 @@ if (!fs.existsSync(file)) {
     queue.add(persist(orm.Property, properties));
     queue.add(persist(orm.Transaction, transactions));
     outputProcessingInfo(true);
-    outputDuplicateTransactions();
 
     if (!dryRun) {
         output.sections.push([

@@ -1,16 +1,11 @@
-#!/usr/bin/env node
-
 require('dotenv');
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 import { performance } from 'perf_hooks';
 import fs from 'fs';
-import os from 'os';
 import yargs from 'yargs';
 import csv from 'csv-parse';
-import PQueue from 'p-queue';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeOperation, perfObserver2, Output } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeOperation, perfObserver2, Output, createQueue } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
 const executeMigrations = composeOperation(OperationMarker.postcodes, orm);
@@ -118,7 +113,7 @@ if (!fs.existsSync(file)) {
         ];
     }
 
-    const queue = new PQueue({ concurrency: os.cpus().length });
+    const queue = createQueue();
 
     const parser = fs
         .createReadStream(file)
@@ -132,8 +127,9 @@ if (!fs.existsSync(file)) {
 
     performance.mark(`iter-${iter}`);
 
-    const out = (final?: boolean) => 
-        output.processingInfo(postcodeMap.size, count - postcodeMap.size, postcodes.length, queue, final);
+    const outputProcessingInfo = (final?: boolean) => {
+        output.sections[1] = output.processingInfo(postcodeMap.size, count - postcodeMap.size, postcodes.length, queue, final);
+    }
 
     for await (const row of parser) {
         const [postcode, _1, _2, _3, _4, _5, _6, lat, lng] = row;
@@ -157,7 +153,7 @@ if (!fs.existsSync(file)) {
         if (postcodes.length === limit) {
             const job = queue.add(persist(orm.Postcode, [...postcodes]));
 
-            output.sections[1] = out();
+            outputProcessingInfo();
 
             postcodes.length = 0;
             iter++;
@@ -179,7 +175,7 @@ if (!fs.existsSync(file)) {
     }
 
     queue.add(persist(orm.Postcode, postcodes));
-    output.sections[1] = out(true);
+    outputProcessingInfo(true);
 
     if (!dryRun) {
         output.sections.push([
