@@ -189,3 +189,4 @@ duration: ${durationInSec.toFixed(2)}s
 heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
         });
     });
+export const composeOperation = composeMigrationRunner;
