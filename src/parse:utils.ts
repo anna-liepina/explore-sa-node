@@ -163,6 +163,7 @@ export class Output {
     static resolveMessage = (msg: string, executed?: boolean) => `${!executed ? ' [SKIPPED] ': ''} ${msg}`;
 }
 
+/** TO BE REMOVED */
 const updateConsoleLog = (lines: string[]) => {
     process.stdout.write('\x1Bc');
     process.stdout.write(lines.join('\n'));
