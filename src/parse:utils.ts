@@ -145,10 +145,66 @@ export class Output {
             Output.line,
             this.title,
             Output.line,
-            ...this.sections.reduce((acc, v) => acc.concat(v), []),
+            ...this.sections.reduce((acc, section) => acc.concat(section), []),
             ...this.performanceHeaders(durationInSec, usedMemoryInMB),
             ...this.debugInformation(),
             ''
         ]
     }
+
+    messageIndexDrop(executed?: boolean): void {
+        this.sections.push([
+            Output.resolveMessage('✅ dropping table\'s indexes ...', executed),
+        ]);
+    }
+
+    messageIndexRestore(executed?: boolean): void {
+        this.sections.push([
+            Output.line,
+            Output.resolveMessage('✅ restore table\'s indexes ...', executed),
+        ]);
+    }
+
+    messageCatchUpWithSQLQueue(executed?: boolean): void {
+        this.sections.push([
+            '',
+            Output.resolveMessage('⏱️ catching up with SQL queue ...', executed),
+        ]);
+    }
+
+    messageAwaitQueuedSQL(executed?: boolean): void {
+        this.sections.push([
+            Output.line,
+            Output.resolveMessage('✅ await queued SQL ...', executed),
+        ]);
+    }
+
+    static resolveMessage = (msg: string, executed?: boolean) => `${!executed ? ' [SKIPPED] ': ''} ${msg}`;
 }
+
+const updateConsoleLog = (lines: string[]) => {
+    process.stdout.write('\x1Bc');
+    process.stdout.write(lines.join('\n'));
+}
+export const perfObserver2 = (output: Output) =>
+    new PerformanceObserver((items) => {
+        items.getEntries().forEach((o) => {
+            const durationInSec = o.duration / 1000;
+            const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
+
+            updateConsoleLog(output.out(durationInSec, usedMemoryInMB));
+        });
+    });
+
+export const perfObserver = () =>
+    new PerformanceObserver((items) => {
+        items.getEntries().forEach((o) => {
+            const durationInSec = o.duration / 1000;
+            const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
+
+            console.log(`
+PERFORMANCE OBSERVER METRICS
+duration: ${durationInSec.toFixed(2)}s      
+heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
+        });
+    });
