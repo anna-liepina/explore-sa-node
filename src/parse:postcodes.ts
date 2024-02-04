@@ -1,17 +1,26 @@
 require('dotenv');
 
-import { performance } from 'perf_hooks';
 import fs from 'fs';
 import yargs from 'yargs';
-import csv from 'csv-parse';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeOperation, perfObserver2, Output, createQueue } from './parse:utils';
+import {
+    MigrationsDirection,
+    OperationMarker,
+    Output,
+    createQueue,
+    createCSVParser,
+    composeMigrationRunner,
+    Performance,
+} from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
-const executeMigrations = composeOperation(OperationMarker.postcodes, orm);
+import type Model from "sequelize/types/model";
+import type { ModelStatic } from 'sequelize';
+
+const executeMigrations = composeMigrationRunner(OperationMarker.postcodes, orm);
 
 //@ts-ignore
-const { file, sql: logging, dry: dryRun, limit, update } = yargs
+const { file, sql, dry: dryRun, limit, update } = yargs
     .command('--file', 'absolute path to csv file to parse')
     .option('limit', {
         type: 'number',
@@ -21,7 +30,6 @@ const { file, sql: logging, dry: dryRun, limit, update } = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
-        default: false,
     })
     .option('dry', {
         type: 'boolean',
@@ -30,44 +38,11 @@ const { file, sql: logging, dry: dryRun, limit, update } = yargs
     .option('update', {
         type: 'boolean',
         description: 'flush update [do not drop/restore indexes, useful with small csv files]',
-        default: false
     })
     .help()
     .argv;
 
-
-/**
- * Create and insert multiple instances in bulk.
- *
- * The success handler is passed an array of instances, but please notice that these may not completely represent the state of the rows in the DB. This is because MySQL
- * and SQLite do not make it easy to obtain back automatically generated IDs and other default values in a way that can be mapped to multiple records.
- * To obtain Instances for the newly created values, you will need to query for them again.
- *
- * If validation fails, the promise is rejected with an array-like AggregateError
- *
- * @param  {Array}          records                          List of objects (key/value pairs) to create instances from
- * @param  {object}         [options]                        Bulk create options
- * @param  {Array}          [options.fields]                 Fields to insert (defaults to all fields)
- * @param  {boolean}        [options.validate=false]         Should each row be subject to validation before it is inserted. The whole insert will fail if one row fails validation
- * @param  {boolean}        [options.hooks=true]             Run before / after bulk create hooks?
- * @param  {boolean}        [options.individualHooks=false]  Run before / after create hooks for each individual Instance? BulkCreate hooks will still be run if options.hooks is true.
- * @param  {boolean}        [options.ignoreDuplicates=false] Ignore duplicate values for primary keys? (not supported by MSSQL or Postgres < 9.5)
- * @param  {Array}          [options.updateOnDuplicate]      Fields to update if row key already exists (on duplicate key update)? (only supported by MySQL, MariaDB, SQLite >= 3.24.0 & Postgres >= 9.5). By default, all fields are updated.
- * @param  {Transaction}    [options.transaction]            Transaction to run query under
- * @param  {Function}       [options.logging=false]          A function that gets executed while running the query to log the sql.
- * @param  {boolean}        [options.benchmark=false]        Pass query execution time in milliseconds as second argument to logging function (options.logging).
- * @param  {boolean|Array}  [options.returning=false]        If true, append RETURNING <model columns> to get back all defined values; if an array of column names, append RETURNING <columns> to get back specific columns (Postgres only)
- * @param  {string}         [options.searchPath=DEFAULT]     An optional parameter to specify the schema search_path (Postgres only)
- *
- * @returns {Promise<Array<Model>>}
- */
-const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
-
-const output = new Output(`processing ${file}`);
-output.sections = [[], []];
-perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
-    
-console.log(`
+console.info(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
 
@@ -87,61 +62,65 @@ dialect: \t${process.env.DB_DIALECT}
 
 --------------------------------------------------
 
-file to parse: ${file}
+files to parse: ${file}
 `);
 
-if (!file) {
-    console.log(`>>> NO FILE TO PARSE`);
+if (!file || !fs.existsSync(file)) {
+    console.error(`ERROR: NO FILE TO PARSE OR IT DO NOT EXISTS`);
+    console.error(`ensure that you pass file's absolute path using --file=%PATH%`);
+    console.error(`example: --file=/media/file.csv`);
 
     process.exit(0);
 }
 
-if (!fs.existsSync(file)) {
-    console.log(`>>> FILE DO NOT EXISTS`);
-
-    process.exit(0);
-}
+const logging = !!sql && console.log;
+const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
+    async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
+const output = new Output(` processing ${file}`);
+const performance = new Performance(output);
 
 (async () => {
-    performance.mark('init');
-    
-    if (!dryRun && !update) {
-        await executeMigrations(MigrationsDirection.down);
-
-        output.sections[0] = [
-            '✅ dropping table\'s indexes ...',
-        ];
-    }
+    performance.mark();
 
     const queue = createQueue();
+    const parser = createCSVParser(file);
 
-    const parser = fs
-        .createReadStream(file)
-        .pipe(csv());
-
-    let iter = 0;
-    let count = 0;
+    output.messageIndexDrop(!dryRun && !update);
+    (!dryRun && !update) && await executeMigrations(MigrationsDirection.down);
 
     const postcodes: Partial<PostcodeType>[] = [];
-    const postcodeMap: Set<string> = new Set();
+    const postcoreStore: Set<string> = new Set();
 
-    performance.mark(`iter-${iter}`);
+    performance.mark();
+
+    await Promise.all([
+        orm.Postcode.findAll({
+            attributes: ['postcode'],
+            raw: true,
+            logging,
+        })
+            .then((data) => (data as Partial<PostcodeType>[]).forEach(({ postcode }) => postcoreStore.add(postcode))),
+    ]);
+
+    performance.mark();
+
+    let processedInvalidRecords = 0;
 
     const outputProcessingInfo = (final?: boolean) => {
-        output.sections[1] = output.processingInfo(postcodeMap.size, count - postcodeMap.size, postcodes.length, queue, final);
+        output.sections[1] = output.processingInfo(parser.info.records, processedInvalidRecords, postcodes.length, queue, final);
     }
 
     for await (const row of parser) {
-        const [postcode, _1, _2, _3, _4, _5, _6, lat, lng] = row;
+        const [postcode, _status, _2, _3, _4, _5, _6, lat, lng] = row;
 
-        count++;
+        if (/*_status !== 'live' && **/ isNaN(lat) || isNaN(lng)) {
+            processedInvalidRecords++;
 
-        if (isNaN(lat) || isNaN(lng)) {
             continue;
         }
 
-        if (!postcodeMap.has(postcode)) {
-            postcodeMap.add(postcode);
+        if (!postcoreStore.has(postcode)) {
+            postcoreStore.add(postcode);
 
             postcodes.push({
                 postcode,
@@ -154,19 +133,14 @@ if (!fs.existsSync(file)) {
             const job = queue.add(persist(orm.Postcode, [...postcodes]));
 
             outputProcessingInfo();
+            performance.mark();
 
             postcodes.length = 0;
-            iter++;
-
-            performance.mark(`iter-${iter}`);
-            performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
             if (queue.size > queue.concurrency) {
-                output.sections.push([
-                    '',
-                    '⏱️ catching up with SQL queue ...',
-                ]);
+                output.messageCatchUpWithSQLQueue(!dryRun);
 
+                // await queue.onSizeLessThan(concurrency);
                 await job;
 
                 output.sections.length = 2;
@@ -175,26 +149,16 @@ if (!fs.existsSync(file)) {
     }
 
     queue.add(persist(orm.Postcode, postcodes));
+
     outputProcessingInfo(true);
+    performance.mark();
 
-    if (!dryRun) {
-        output.sections.push([
-            Output.line,
-            '✅ await queued SQL ...',
-        ]);
+    output.messageAwaitQueuedSQL(!dryRun);
+    await queue.onEmpty();
 
-        await queue.onEmpty();
+    output.messageIndexRestore(!dryRun && !update);
+    (!dryRun && !update) && await executeMigrations(MigrationsDirection.up);
 
-        if (!update) {
-            output.sections.push([
-                Output.line,
-                '✅ restore table\'s indexes ...',
-            ]);
-    
-            await executeMigrations(MigrationsDirection.up);
-        }
-    }
-
-    performance.mark('end');
-    performance.measure('total', 'init', 'end');
+    performance.mark(0);
+    process.exit(0);
 })()
