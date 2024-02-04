@@ -1,5 +1,5 @@
 {
-  "name": "explore-graphql-apollo",
+  "name": "explore-sa",
   "description": "A robust GraphQL server built with Apollo Server and Node.js for seamless data querying and manipulation.",
   "private": true,
   "version": "0.1.0",
