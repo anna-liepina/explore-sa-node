@@ -3,11 +3,10 @@ require('dotenv');
 import { performance } from 'perf_hooks';
 import yargs from 'yargs';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeOperation, createQueue, perfObserver } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeMigrationRunner, createQueue, perfObserver2, Output } from './parse:utils';
 import type { TransactionType } from './models/transaction';
 
-const executeMigrations = composeOperation(OperationMarker.timeline, orm);
-perfObserver().observe({ entryTypes: ['measure'], buffered: true });
+const executeMigrations = composeMigrationRunner(OperationMarker.timeline, orm);
 
 //@ts-ignore
 const { sql: logging, dry: dryRun, limit } = yargs
@@ -27,6 +26,9 @@ const { sql: logging, dry: dryRun, limit } = yargs
     })
     .help()
     .argv;
+
+const output = new Output(`processing timelines`);
+perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
 
 console.log(`
 --------------------------------------------------
@@ -77,9 +79,8 @@ dialect: \t${process.env.DB_DIALECT}
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
-    if (!dryRun) {
-        await executeMigrations(MigrationsDirection.down);
-    }
+    output.messageIndexDrop(!dryRun);
+    !dryRun && await executeMigrations(MigrationsDirection.down);
     /** fast but INCLUDE empty cycles ~2,978 */
     // SELECT
     //     SUBSTRING_INDEX(postcode, ' ', 1) AS area,
@@ -116,19 +117,38 @@ dialect: \t${process.env.DB_DIALECT}
         logging,
     }) as Partial<{ area: string }>[];
 
-    console.log(`
-------------------------------------
->>> areas to process: ${areas.length.toLocaleString()}
-memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
-------------------------------------`);
-
-    let i = 0;
     let iter = 0;
 
     const queue = createQueue();
     performance.mark(`iter-${iter}`);
 
+    let processedRecords = 0;
+    let processedUniqueSeries = 0;
+    let proccessedArea = '';
+
+    const outputProcessingInfo = (final?: boolean) => {
+        output.sections[0] = [
+            `proccess area ${proccessedArea}`
+        ];
+        output.sections[1] = [
+            Output.line,
+            `${final ? '✅' : '⏱️ '} data processing ...`,
+            Output.line,
+            ` total transactions processed`,
+            `   valid: ${processedRecords.toLocaleString()}`,
+            ` total data series processed`,
+            `   ${processedUniqueSeries.toLocaleString()}`,
+            ` total areas processed`,
+            `   ${iter.toLocaleString()} of ${areas.length.toLocaleString()}`,
+            ``,
+            ` SQL workers used ${queue.pending.toLocaleString()} of ${queue.concurrency.toLocaleString()} ( queue: ${queue.size.toLocaleString()} )`,
+        ];
+    }
+
     for (const row of areas) {
+        proccessedArea = row.area;
+        iter++;
+        const cache = {};
         /** slow. but should work without side function */
         // const transactions = await orm.Transaction.findAll({
         //     attributes: ['date', 'price'],
@@ -153,7 +173,7 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
             attributes: [
                 'date',
                 'price',
-                [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), '-', 1), 'postcode'],
+                [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), ',', 1), 'postcode'],
             ],
             where: {
                 guid: {
@@ -165,114 +185,114 @@ memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
             logging,
         }) as Partial<TransactionType & { postcode: string }>[];
 
-        iter++;
+        outputProcessingInfo();
 
-        const t = {};
-
-        console.log(`
-------------------------------------
->>> proccess area ${row.area}, (${iter.toLocaleString()} of ${areas.length.toLocaleString()})
->>> --------------------------------`);
-
+        processedRecords += transactions.length;
         for (const transaction of transactions) {
             const { postcode, price } = transaction;
-
-            const [year, month,] = transaction.date.split('-');
+            const [ year, month ] = transaction.date.split('-');
             const date = `${year}-${month}`;
 
-            if (!t[date]) {
-                t[date] = {};
-            }
+            cache[date] ||= {};
+            cache[date][postcode] ||= {
+                count: 0,
+                price: 0,
+            };
 
-            if (!t[date][postcode]) {
-                t[date][postcode] = {
-                    count: 0,
-                    price: 0,
-                };
-            }
-
-            t[date][postcode].price += price;
-            t[date][postcode].count++;
+            cache[date][postcode].price += price;
+            cache[date][postcode].count++;
         }
 
         const series = [];
-        let j = 0;
-        for (const date in t) {
-            const o = t[date];
+        for (const date in cache) {
+            const cursor = cache[date];
             let tCount = 0;
             let tPrice = 0;
 
-            for (const postcode in o) {
-                const { count, price } = o[postcode];
+            for (const postcode in cursor) {
+                const { count, price } = cursor[postcode];
 
                 tCount += count;
                 tPrice += price;
 
-                const avg = Math.round(price / count);
-
-                series.push({ date, postcode, count, avg });
+                series.push({
+                    date,
+                    postcode,
+                    count,
+                    avg: Math.round(price / count)
+                });
 
                 if (series.length === limit) {
-                    j += series.length;
+                    processedUniqueSeries += series.length;
 
-                    queue.add(persist(orm.Timeline, [...series]));
+                    const job = queue.add(persist(orm.Timeline, [...series]));
 
-                    console.log(`>>> queue ${series.length.toLocaleString()} records`);
                     series.length = 0;
+
+                    iter++;
+        
+                    performance.mark(`iter-${iter}`);
+                    performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
+
+                    if (queue.size > queue.concurrency) {
+                        output.messageAwaitQueuedSQL(!dryRun);
+        
+                        await job;
+                        output.sections.length = 2;
+                    }
                 }
+
+                // if (areas.length === limit) {
+                //     const job = queue.add(persist(orm.Area, [...areas]));
+        
+                //     outputProcessingInfo();
+        
+                //     areas.length = 0;
+                //     iter++;
+        
+                //     performance.mark(`iter-${iter}`);
+                //     performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
+        
+                //     if (queue.size > queue.concurrency) {
+                //         output.messageAwaitQueuedSQL(!dryRun);
+        
+                //         await job;
+                //         output.sections.length = 2;
+                //     }
+                // }
             }
 
-            const avg = Math.round(tPrice / tCount);
-
-            series.push({ date, postcode: row.area, count: tCount, avg });
+            series.push({
+                date,
+                postcode: proccessedArea,
+                count: tCount,
+                avg: Math.round(tPrice / tCount)
+            });
         }
 
-        j += series.length;
-        i += j;
+        processedUniqueSeries += series.length;
 
         const job = queue.add(persist(orm.Timeline, series));
-
-        console.log(`>>> queue ${series.length.toLocaleString()} records
->>> --------------------------------
->>> queued in total: ${j.toLocaleString()}
->>> SQL transactions in queue: ${queue.size.toLocaleString()}
->>> SQL workers used ${queue.pending} of ${queue.concurrency}`);
 
         performance.mark(`iter-${iter}`);
         performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
 
         if (queue.size > queue.concurrency) {
-            console.log(`
-------------------------------------
->>> catching up with SQL queue ...
-------------------------------------`);
+            output.messageCatchUpWithSQLQueue();
+
             await job;
+            output.sections.length = 2;
         }
     }
 
-    console.log(`
-------------------------------------
->>> execute remaining SQL queue ...
-------------------------------------`);
+    outputProcessingInfo(true);
 
-    if (!dryRun) {
-        await queue.onEmpty();
+    output.messageAwaitQueuedSQL();
+    await queue.onEmpty();
 
-        console.log(`
-------------------------------------
->>> restoring database indexes ...
-------------------------------------`);
+    output.messageIndexRestore(!dryRun);
+    !dryRun && await executeMigrations(MigrationsDirection.up);
 
-        await executeMigrations(MigrationsDirection.up);
-    }
-
-    console.log(`
-------------------------------------
-    FINAL BATCH
-------------------------------------
->>> >> recorded ${i.toLocaleString()}
->>> >> postcode areas proccessed: ${areas.length.toLocaleString()}
-------------------------------------`);
     performance.mark('end');
     performance.measure('total', 'init', 'end');
 })()
