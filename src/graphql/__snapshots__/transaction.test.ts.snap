@@ -4,7 +4,6 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postco
 [
   {
     "date": "2019-03-25",
-    "id": "3",
     "price": 341250,
     "property": {
       "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
@@ -14,7 +13,6 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postco
   },
   {
     "date": "2019-04-25",
-    "id": "1",
     "price": 375000,
     "property": {
       "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
@@ -24,7 +22,6 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postco
   },
   {
     "date": "2019-04-26",
-    "id": "2",
     "price": 545000,
     "property": {
       "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
@@ -41,17 +38,14 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date
 [
   {
     "date": "2013-10-23",
-    "id": "65",
     "price": 100000,
   },
   {
     "date": "2013-12-03",
-    "id": "67",
     "price": 130000,
   },
   {
     "date": "2013-12-18",
-    "id": "18",
     "price": 125000,
   },
 ]
@@ -61,17 +55,14 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date
 [
   {
     "date": "2015-10-15",
-    "id": "455",
     "price": 765000,
   },
   {
     "date": "2015-10-30",
-    "id": "431",
     "price": 757055,
   },
   {
     "date": "2015-10-30",
-    "id": "453",
     "price": 745000,
   },
 ]
@@ -81,17 +72,14 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] without cri
 [
   {
     "date": "2007-08-22",
-    "id": "36",
     "price": 229400,
   },
   {
     "date": "2013-10-23",
-    "id": "65",
     "price": 100000,
   },
   {
     "date": "2013-12-03",
-    "id": "67",
     "price": 130000,
   },
 ]
