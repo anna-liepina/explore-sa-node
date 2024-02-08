@@ -6,11 +6,11 @@ import path from 'path';
 import yargs from 'yargs';
 import csv from 'csv-parse';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, Output, composeOperation, createQueue, perfObserver2 } from './parse:utils';
+import { MigrationsDirection, OperationMarker, Output, composeMigrationRunner, createQueue, perfObserver2 } from './parse:utils';
 import type { IncidentType } from './models/incident';
 import { MarkerTypeEnum } from './models/marker';
 
-const executeMigrations = composeOperation(OperationMarker.incidents, orm);
+const executeMigrations = composeMigrationRunner(OperationMarker.incidents, orm);
 
 //@ts-ignore
 const { path: _path, sql: logging, dry: dryRun, limit, update } = yargs
@@ -23,7 +23,6 @@ const { path: _path, sql: logging, dry: dryRun, limit, update } = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
-        default: false,
     })
     .option('dry', {
         type: 'boolean',
@@ -133,13 +132,8 @@ if (!files.length) {
      */
     const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
-    if (!dryRun && !update) {
-        await executeMigrations(MigrationsDirection.down);
-
-        output.sections[0] = [
-            '✅ dropping table\'s indexes ...',
-        ];
-    }
+    output.messageIndexDrop(!dryRun && !update);
+    !dryRun && !update && await executeMigrations(MigrationsDirection.down);
 
     let processedInvalidRecords = 0;
     let processedRecords = 0;
@@ -266,28 +260,18 @@ if (!files.length) {
         }        
     }
 
-    processedRecords += incidents.length;
     queue.add(persist(orm.Marker, markers));
     queue.add(persist(orm.Incident, incidents));
+
+    processedRecords += incidents.length;
     outputProcessingInfo(true);
 
-    if (!dryRun) {
-        output.sections.push([
-            Output.line,
-            '✅ await queued SQL ...',
-        ]);
+    output.messageAwaitQueuedSQL(!dryRun);
+    await queue.onEmpty();
 
-        await queue.onEmpty();
+    output.messageIndexRestore(!dryRun && !update);
 
-        if (!update) {
-            output.sections.push([
-                Output.line,
-                '✅ restore table\'s indexes ...',
-            ]);
-    
-            await executeMigrations(MigrationsDirection.up);
-        }
-    }
+    !dryRun && !update && await executeMigrations(MigrationsDirection.up);
 
     performance.mark('end');
     performance.measure('processedRecords', 'init', 'end');

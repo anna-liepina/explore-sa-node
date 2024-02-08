@@ -45,7 +45,7 @@
     "parse:postcodes": "tsc && node -r dotenv/config ./build/parse:postcodes",
     "parse:postcodes:lsoa": "tsc && node -r dotenv/config ./build/parse:postcodes:lsoa",
     "parse:properties": "tsc && node -r dotenv/config ./build/parse:markers:and:properties.js",
-    "parse:incidents": "tsc && node -r dotenv/config ./build/parse:incidents",
+    "parse:incidents": "tsc && node -r dotenv/config ./build/parse:markers:and:incidents",
     "parse:areas": "tsc && node -r dotenv/config ./build/parse:areas",
     "parse:timeline": "tsc && node -r dotenv/config ./build/parse:timeline",
     "build": "tsc",
