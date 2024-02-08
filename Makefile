@@ -35,15 +35,14 @@ DB_DIALECT		:= $(.DB_DIALECT)
 
 .SHARED_VOLUMES := \
 	-v $(PWD)/build:/www/build \
-	-v $(PWD)/config:/www/config \
 	-v $(PWD)/database:/www/database \
 	-v $(PWD)/sandbox:/www/sandbox \
 	-v $(PWD)/src:/www/src \
 	-v $(PWD)/var:/www/var \
 	-v $(PWD)/.env:/www/.env \
 	-v $(PWD)/.sequelizerc:/www/.sequelizerc \
-	-v $(PWD)/jest.config.js:/www/jest.config.js \
-	-v $(PWD)/tsconfig.json:/www/tsconfig.json
+	-v $(PWD)/tsconfig.json:/www/tsconfig.json \
+	-v $(PWD)/jest.config.js:/www/jest.config.js
 
 .ENV_VARIABLES := \
 	-e PORT=$(PORT) \
@@ -85,13 +84,10 @@ help:
 	@echo " DB_DIALECT:\t\t$(.DB_DIALECT)"
 	@echo ""
 
-image-base:
-	docker build .
-
-image-local: image-base
+image-local:
 	docker build -t $(DOCKER_IMAGE_LOCAL) . -f env.local.Dockerfile
 
-image-prod: image-base
+image-prod:
 	docker build -t $(DOCKER_IMAGE_PROD) . -f env.prod.Dockerfile
 
 build: image-local

@@ -31,7 +31,7 @@ console.info(`
 --------------------- CONFIG ---------------------
 
 name\t\tdescription
---path\t\tabsolute path to csv file to parse
+--file\t\tabsolute path to csv file to parse
 --limit\t\tamount of records in one bulk SQL qeuery
 --sql\t\tprint out SQL queries
 --dry\t\tdry run do not execute SQL
@@ -71,6 +71,10 @@ const performance = new Performance(output);
     const postcodes: Partial<PostcodeType>[] = [];
     const postcoreStore: Set<string> = new Set();
 
+    output.sections[0] = [
+        ' ✅ fetch postcodes\' data ...',
+    ];
+
     await Promise.all([
         orm.Postcode.findAll({
             attributes: ['postcode'],
@@ -83,9 +87,6 @@ const performance = new Performance(output);
     let processedInvalidRecords = 0;
 
     const outputProcessingInfo = (final?: boolean) => {
-        output.sections[0] = [
-            ' ✅ fetch postcodes\' data ...',
-        ];
         output.sections[1] = output.processingInfo(parser.info.records, processedInvalidRecords, postcodes.length, queue, final);
     }
 
@@ -123,6 +124,7 @@ const performance = new Performance(output);
     }
 
     queue.add(persist(orm.Postcode, postcodes));
+
     outputProcessingInfo(true);
     performance.mark();
 
