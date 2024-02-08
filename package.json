@@ -45,7 +45,7 @@
     "sql": "node -r dotenv/config ./node_modules/.bin/sequelize --config ./build/orm-config.js",
     "parse:postcodes": "tsc && node -r dotenv/config ./build/parse:postcodes",
     "parse:postcodes:lsoa": "tsc && node -r dotenv/config ./build/parse:postcodes:lsoa",
-    "parse:properties": "tsc && node -r dotenv/config ./build/parse:properties.js",
+    "parse:properties": "tsc && node -r dotenv/config ./build/parse:markers:and:properties.js",
     "parse:incidents": "tsc && node -r dotenv/config ./build/parse:incidents",
     "parse:areas": "tsc && node -r dotenv/config ./build/parse:areas",
     "parse:timeline": "tsc && node -r dotenv/config ./build/parse:timeline",
