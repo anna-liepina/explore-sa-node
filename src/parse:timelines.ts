@@ -1,10 +1,12 @@
 require('dotenv');
 
-import { performance } from 'perf_hooks';
 import yargs from 'yargs';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeMigrationRunner, createQueue, perfObserver2, Output } from './parse:utils';
+import { MigrationsDirection, OperationMarker, composeMigrationRunner, createQueue, Performance, Output } from './parse:utils';
 import type { TransactionType } from './models/transaction';
+
+import type Model from "sequelize/types/model";
+import type { ModelStatic } from 'sequelize';
 
 const executeMigrations = composeMigrationRunner(OperationMarker.timeline, orm);
 
@@ -28,9 +30,11 @@ const { sql: logging, dry: dryRun, limit } = yargs
     .argv;
 
 const output = new Output(`processing timelines`);
-perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
+const performance = new Performance(output);
+const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
+    async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
-console.log(`
+console.info(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
 
@@ -39,7 +43,6 @@ name\t\tdescription
 --limit\t\tamount of records in one bulk SQL qeuery
 --sql\t\tprint out SQL queries
 --dry\t\tdry run do not execute SQL
---update\tflush update [do not drop/restore indexes, useful with small csv files]
 
 --------------------------------------------------
 database connection info:
@@ -50,37 +53,20 @@ dialect: \t${process.env.DB_DIALECT}
 `);
 
 (async () => {
-    performance.mark('init');
+    performance.mark();
 
-    /**
-     * Create and insert multiple instances in bulk.
-     *
-     * The success handler is passed an array of instances, but please notice that these may not completely represent the state of the rows in the DB. This is because MySQL
-     * and SQLite do not make it easy to obtain back automatically generated IDs and other default values in a way that can be mapped to multiple records.
-     * To obtain Instances for the newly created values, you will need to query for them again.
-     *
-     * If validation fails, the promise is rejected with an array-like AggregateError
-     *
-     * @param  {Array}          records                          List of objects (key/value pairs) to create instances from
-     * @param  {object}         [options]                        Bulk create options
-     * @param  {Array}          [options.fields]                 Fields to insert (defaults to all fields)
-     * @param  {boolean}        [options.validate=false]         Should each row be subject to validation before it is inserted. The whole insert will fail if one row fails validation
-     * @param  {boolean}        [options.hooks=true]             Run before / after bulk create hooks?
-     * @param  {boolean}        [options.individualHooks=false]  Run before / after create hooks for each individual Instance? BulkCreate hooks will still be run if options.hooks is true.
-     * @param  {boolean}        [options.ignoreDuplicates=false] Ignore duplicate values for primary keys? (not supported by MSSQL or Postgres < 9.5)
-     * @param  {Array}          [options.updateOnDuplicate]      Fields to update if row key already exists (on duplicate key update)? (only supported by MySQL, MariaDB, SQLite >= 3.24.0 & Postgres >= 9.5). By default, all fields are updated.
-     * @param  {Transaction}    [options.transaction]            Transaction to run query under
-     * @param  {Function}       [options.logging=false]          A function that gets executed while running the query to log the sql.
-     * @param  {boolean}        [options.benchmark=false]        Pass query execution time in milliseconds as second argument to logging function (options.logging).
-     * @param  {boolean|Array}  [options.returning=false]        If true, append RETURNING <model columns> to get back all defined values; if an array of column names, append RETURNING <columns> to get back specific columns (Postgres only)
-     * @param  {string}         [options.searchPath=DEFAULT]     An optional parameter to specify the schema search_path (Postgres only)
-     *
-     * @returns {Promise<Array<Model>>}
-     */
-    const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
     output.messageIndexDrop(!dryRun);
     !dryRun && await executeMigrations(MigrationsDirection.down);
+    performance.mark();
+
+    output.sections.push([
+        '',
+        Output.resolveMessage('⏱️ truncate areas table ...', !dryRun),
+    ]);
+    !dryRun && await orm.Timeline.truncate();
+
+    performance.mark();
     /** fast but INCLUDE empty cycles ~2,978 */
     // SELECT
     //     SUBSTRING_INDEX(postcode, ' ', 1) AS area,
@@ -120,11 +106,12 @@ dialect: \t${process.env.DB_DIALECT}
     let iter = 0;
 
     const queue = createQueue();
-    performance.mark(`iter-${iter}`);
+    performance.mark();
 
     let processedRecords = 0;
     let processedUniqueSeries = 0;
     let proccessedArea = '';
+    let proccessedFile = 1;
 
     const outputProcessingInfo = (final?: boolean) => {
         output.sections[0] = [
@@ -139,15 +126,16 @@ dialect: \t${process.env.DB_DIALECT}
             ` total data series processed`,
             `   ${processedUniqueSeries.toLocaleString()}`,
             ` total areas processed`,
-            `   ${iter.toLocaleString()} of ${areas.length.toLocaleString()}`,
+            `   ${proccessedFile.toLocaleString()} of ${areas.length.toLocaleString()}`,
             ``,
             ` SQL workers used ${queue.pending.toLocaleString()} of ${queue.concurrency.toLocaleString()} ( queue: ${queue.size.toLocaleString()} )`,
         ];
     }
 
-    for (const row of areas) {
+    for (const [index, row] of areas.entries()) {
         proccessedArea = row.area;
-        iter++;
+        proccessedFile = index + 1;
+
         const cache = {};
         /** slow. but should work without side function */
         // const transactions = await orm.Transaction.findAll({
@@ -186,6 +174,7 @@ dialect: \t${process.env.DB_DIALECT}
         }) as Partial<TransactionType & { postcode: string }>[];
 
         outputProcessingInfo();
+        performance.mark();
 
         processedRecords += transactions.length;
         for (const transaction of transactions) {
@@ -229,10 +218,7 @@ dialect: \t${process.env.DB_DIALECT}
 
                     series.length = 0;
 
-                    iter++;
-        
-                    performance.mark(`iter-${iter}`);
-                    performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
+                    performance.mark();
 
                     if (queue.size > queue.concurrency) {
                         output.messageAwaitQueuedSQL(!dryRun);
@@ -274,8 +260,7 @@ dialect: \t${process.env.DB_DIALECT}
 
         const job = queue.add(persist(orm.Timeline, series));
 
-        performance.mark(`iter-${iter}`);
-        performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
+        performance.mark();
 
         if (queue.size > queue.concurrency) {
             output.messageCatchUpWithSQLQueue();
@@ -286,13 +271,15 @@ dialect: \t${process.env.DB_DIALECT}
     }
 
     outputProcessingInfo(true);
+    performance.mark();
 
     output.messageAwaitQueuedSQL();
     await queue.onEmpty();
+    performance.mark();
 
     output.messageIndexRestore(!dryRun);
     !dryRun && await executeMigrations(MigrationsDirection.up);
 
-    performance.mark('end');
-    performance.measure('total', 'init', 'end');
+    performance.mark(0);
+    process.exit(0);
 })()
