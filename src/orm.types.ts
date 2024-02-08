@@ -15,13 +15,13 @@ export type ORM = {
     sequelize: SequelizeType;
     Sequelize: SequelizeType;
 
-    Area: ModelStatic<Model<AreaType>>,
-    Postcode: ModelStatic<Model<PostcodeType>>,
-    Property: ModelStatic<Model<PropertyType>>,
-    Timeline: ModelStatic<Model<TimelineType>>,
-    Transaction: ModelStatic<Model<TransactionType>>,
-    Incident: ModelStatic<Model<IncidentType>>,
-    Marker: ModelStatic<Model<MarkerType>>,
+    Area: ModelStatic<Model<AreaType, AreaType>>,
+    Postcode: ModelStatic<Model<PostcodeType, PostcodeType>>,
+    Property: ModelStatic<Model<PropertyType, PropertyType>>,
+    Timeline: ModelStatic<Model<TimelineType, TimelineType>>,
+    Transaction: ModelStatic<Model<TransactionType, TransactionType>>,
+    Incident: ModelStatic<Model<IncidentType, IncidentType>>,
+    Marker: ModelStatic<Model<MarkerType, MarkerType>>,
 };
 
 export type IdentifiedModel = {
