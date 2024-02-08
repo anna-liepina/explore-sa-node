@@ -102,13 +102,14 @@ const performance = new Performance(output);
             .then((data) => (data as Partial<PostcodeType>[]).forEach(({ postcode }) => postcoreStore.add(postcode))),
     ]);
 
+    performance.mark();
+
     let processedInvalidRecords = 0;
 
     const outputProcessingInfo = (final?: boolean) => {
         output.sections[1] = output.processingInfo(parser.info.records, processedInvalidRecords, postcodes.length, queue, final);
     }
 
-    performance.mark();
     for await (const row of parser) {
         const [postcode, _status, _2, _3, _4, _5, _6, lat, lng] = row;
 
