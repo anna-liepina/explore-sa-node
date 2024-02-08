@@ -1,19 +1,21 @@
 require('dotenv');
 
-import { performance } from 'perf_hooks';
 import fs from 'fs';
 import path from 'path';
 import yargs from 'yargs';
-import csv from 'csv-parse';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, Output, composeMigrationRunner, createQueue, perfObserver2 } from './parse:utils';
+import { MigrationsDirection, OperationMarker, Output, composeMigrationRunner, createQueue, Performance, createCSVParser } from './parse:utils';
 import type { IncidentType } from './models/incident';
+import type { MarkerType } from './models/marker';
 import { MarkerTypeEnum } from './models/marker';
+
+import type Model from "sequelize/types/model";
+import type { ModelStatic } from 'sequelize';
 
 const executeMigrations = composeMigrationRunner(OperationMarker.incidents, orm);
 
 //@ts-ignore
-const { path: _path, sql: logging, dry: dryRun, limit, update } = yargs
+const { path: _path, sql, dry: dryRun, limit, update } = yargs
     .command('--path', 'absolute path to csvs to parse')
     .option('limit', {
         type: 'number',
@@ -35,10 +37,7 @@ const { path: _path, sql: logging, dry: dryRun, limit, update } = yargs
     .help()
     .argv;
 
-const output = new Output(`processing ${_path}`);
-perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
-
-console.log(`
+console.info(`
 --------------------------------------------------
 --------------------- CONFIG ---------------------
 
@@ -83,57 +82,34 @@ function scanDirectory(directoryPath: string): string[] {
     return result;
 }
 
-if (!_path) {
-    console.log(`>>> PATH NOT PROVIDED`);
-
-    process.exit(0);
-}
-
-if (!fs.existsSync(_path)) {
-    console.log(`>>> PATH / AREA DO NOT EXITS`);
+if (!_path || !fs.existsSync(_path)) {
+    console.error(`ERROR: NO PATH TO PARSE OR IT DO NOT EXISTS`);
+    console.error(`ensure that you pass file's absolute path using --path=%PATH%`);
+    console.error(`example: --path=/media/incidents`);
 
     process.exit(0);
 }
 
 const files = scanDirectory(_path).filter((str) => str.endsWith('.csv'));
 if (!files.length) {
-    console.log(`>>> NO FILES .CSV TO PARSE`);
+    console.error(`ERROR: NO FILES .CSV TO PARSE`);
 
     process.exit(0);    
 }
 
+const logging = !!sql && console.log;
+const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
+    async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
+
+const output = new Output(` processing ${_path}`);
+const performance = new Performance(output);
+const conditionIndexDrop = (!dryRun && !update);
+
 (async () => {
-    performance.mark('init');
+    performance.mark();
 
-    /**
-     * Create and insert multiple instances in bulk.
-     *
-     * The success handler is passed an array of instances, but please notice that these may not completely represent the state of the rows in the DB. This is because MySQL
-     * and SQLite do not make it easy to obtain back automatically generated IDs and other default values in a way that can be mapped to multiple records.
-     * To obtain Instances for the newly created values, you will need to query for them again.
-     *
-     * If validation fails, the promise is rejected with an array-like AggregateError
-     *
-     * @param  {Array}          records                          List of objects (key/value pairs) to create instances from
-     * @param  {object}         [options]                        Bulk create options
-     * @param  {Array}          [options.fields]                 Fields to insert (defaults to all fields)
-     * @param  {boolean}        [options.validate=false]         Should each row be subject to validation before it is inserted. The whole insert will fail if one row fails validation
-     * @param  {boolean}        [options.hooks=true]             Run before / after bulk create hooks?
-     * @param  {boolean}        [options.individualHooks=false]  Run before / after create hooks for each individual Instance? BulkCreate hooks will still be run if options.hooks is true.
-     * @param  {boolean}        [options.ignoreDuplicates=false] Ignore duplicate values for primary keys? (not supported by MSSQL or Postgres < 9.5)
-     * @param  {Array}          [options.updateOnDuplicate]      Fields to update if row key already exists (on duplicate key update)? (only supported by MySQL, MariaDB, SQLite >= 3.24.0 & Postgres >= 9.5). By default, all fields are updated.
-     * @param  {Transaction}    [options.transaction]            Transaction to run query under
-     * @param  {Function}       [options.logging=false]          A function that gets executed while running the query to log the sql.
-     * @param  {boolean}        [options.benchmark=false]        Pass query execution time in milliseconds as second argument to logging function (options.logging).
-     * @param  {boolean|Array}  [options.returning=false]        If true, append RETURNING <model columns> to get back all defined values; if an array of column names, append RETURNING <columns> to get back specific columns (Postgres only)
-     * @param  {string}         [options.searchPath=DEFAULT]     An optional parameter to specify the schema search_path (Postgres only)
-     *
-     * @returns {Promise<Array<Model>>}
-     */
-    const persist = (model, entities) => async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
-
-    output.messageIndexDrop(!dryRun && !update);
-    !dryRun && !update && await executeMigrations(MigrationsDirection.down);
+    output.messageIndexDrop(conditionIndexDrop);
+    conditionIndexDrop && await executeMigrations(MigrationsDirection.down);
 
     let processedInvalidRecords = 0;
     let processedRecords = 0;
@@ -141,7 +117,7 @@ if (!files.length) {
 
     const queue = createQueue();
 
-    performance.mark(`iter-${iter}`);
+    performance.mark();
 
     const outputProcessingInfo = (final?: boolean) => {
         output.sections[1] = output.processingInfo(processedRecords, processedInvalidRecords, incidents.length, queue, final);
@@ -150,7 +126,30 @@ if (!files.length) {
     const markersStore: Set<string> = new Set();
     const incidents = [];
     const markers = [];
-    let processingFile = 0;
+
+    output.sections[1] = [
+        Output.line,
+        ' ✅ fetch postcodes\' | marker\'s | transactions ...',
+    ];
+
+    performance.mark();
+
+    await Promise.all([
+        orm.Marker.findAll({
+            attributes: ['lat', 'lng'],
+            where: {
+                type: {
+                    //@ts-ignore
+                    [orm.Sequelize.Op.eq]: MarkerTypeEnum.police
+                }
+            },
+            raw: true,
+            logging
+        })
+            .then((data) => (data as Partial<MarkerType>[]).forEach((v) => markersStore.add(`${v.lat}|${v.lng}`))),
+    ]);
+
+    performance.mark();
 
     const resolveDate = (row: Record<string, string>) => {
         const dateString = row.Month || row.Date;
@@ -173,14 +172,11 @@ if (!files.length) {
         return row['Crime type'] || [row.Type, row["Object of search"]].filter(Boolean).join(' ');
     }
 
-    for await (const file of files) {
-        processingFile++;
-        const parser = fs
-            .createReadStream(file)
-            .pipe(csv({ columns: true }));
-
-        output.title = `processing: ${file} ${processingFile} of ${files.length}`; 
-
+    performance.mark();
+    for await (const [ index, file ] of files.entries() ) {
+        output.title = `processing: ${file} (${index + 1} of ${files.length})`; 
+        const parser = createCSVParser(file, { columns: true });
+ 
         for await (const row of parser) {
             const { 
                 Longitude: lng,
@@ -238,26 +234,20 @@ if (!files.length) {
                 queue.add(persist(orm.Incident, [...incidents]));
 
                 outputProcessingInfo();
+                performance.mark();
 
                 markers.length = 0;
                 incidents.length = 0;
 
-                performance.mark(`iter-${iter}`);
-                performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
-
                 if (queue.size > queue.concurrency) {
-                    output.sections.push([
-                        '',
-                        '⏱️ catching up with SQL queue ...',
-                    ]);
+                    output.messageCatchUpWithSQLQueue();
     
-                    // await queue.onSizeLessThan(concurrency);
                     await queue.onEmpty();
     
                     output.sections.length = 2;
                 }
             }
-        }        
+        }
     }
 
     queue.add(persist(orm.Marker, markers));
@@ -265,14 +255,15 @@ if (!files.length) {
 
     processedRecords += incidents.length;
     outputProcessingInfo(true);
+    performance.mark();
 
     output.messageAwaitQueuedSQL(!dryRun);
     await queue.onEmpty();
+    performance.mark();
 
-    output.messageIndexRestore(!dryRun && !update);
+    output.messageIndexRestore(conditionIndexDrop);
+    conditionIndexDrop && await executeMigrations(MigrationsDirection.up);
 
-    !dryRun && !update && await executeMigrations(MigrationsDirection.up);
-
-    performance.mark('end');
-    performance.measure('processedRecords', 'init', 'end');
+    performance.mark(0);
+    process.exit(0);
 })()
