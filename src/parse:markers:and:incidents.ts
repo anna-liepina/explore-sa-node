@@ -241,8 +241,7 @@ const conditionIndexDrop = (!dryRun && !update);
                     output.messageCatchUpWithSQLQueue();
     
                     await queue.onEmpty();
-    
-                    output.sections.length = 2;
+                    output.removeLastMessage();
                 }
             }
         }

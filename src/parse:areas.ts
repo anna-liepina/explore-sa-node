@@ -141,7 +141,7 @@ const performance = new Performance(output);
                 output.messageAwaitQueuedSQL(!dryRun);
 
                 await job;
-                output.sections.length = 2;
+                output.removeLastMessage();
             }
         }
     }
