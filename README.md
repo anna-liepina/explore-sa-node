@@ -98,33 +98,35 @@ if you're using `make` commands, __[docker](https://docs.docker.com/install/)__ 
 
 ### used environment variables
 
-| variable            | default value | used as   | purpose
+| Variable            | Default Value | Type      | Description
 | ---                 | ---           | ---       | ---
-| PORT                | 8081          | number    | port on which application will be made available
-| SSL_KEY             |               | string    | absolute path to the SSL key, example: `/home/ubuntu/private.key`
-| SSL_CERT            |               | string    | absolute path to the SSL certificate, example: `/home/ubuntu/certificate.crt`
-| ***                 | ***           | ***       | if replica's config specified then non-replica connections are used only writes
-| DB_HOSTNAME         | 127.0.0.1     | string    | host on which database can be reached
-| DB_USERNAME         | root          | string    | database user
-| DB_PASSWORD         | password      | string    | database user's password
-| DB_PORT             | 3306          | number    | port on which database can be reached
-| DB_NAME             | explore       | string    | database [schema] name
-| DB_DIALECT          | mysql         | string    | database's dialect: one of mysql / sqlite / postgres
-| DB_REPLICA_HOSTNAME | 127.0.0.1     | string    | database replica's host for read-only
-| DB_REPLICA_USERNAME | root          | string    | database replica's user for read-only
-| DB_REPLICA_PASSWORD | password      | string    | database replica's user's password for read-only
+| PORT                | 8081          | number    | The port on which the application will be available.
+| SSL_KEY             |               | string    | The absolute path to the SSL key (e.g., `/home/ubuntu/private.key`).
+| SSL_CERT            |               | string    | The absolute path to the SSL certificate (e.g., `/home/ubuntu/certificate.crt`).
+| ***                 | ***           | ***       | If a replica's config is specified, non-replica connections are used only for writes.
+| DB_HOSTNAME         | 127.0.0.1     | string    | The host on which the database can be reached.
+| DB_USERNAME         | root          | string    | The username for connecting to the database.
+| DB_PASSWORD         | password      | string    | The password for the database user.
+| DB_PORT             | 3306          | number    | The port on which the database can be reached.
+| DB_NAME             | explore       | string    | The name of the database schema.
+| DB_DIALECT          | mysql         | string    | The database dialect, one of mysql / sqlite / postgres.
+| DB_REPLICA_HOSTNAME | 127.0.0.1     | string    | The host of the database replica for read-only operations.
+| DB_REPLICA_USERNAME | root          | string    | The username for connecting to the database replica for read-only operations.
+| DB_REPLICA_PASSWORD | password      | string    | The password for the user connecting to the database replica for read-only operations.
 
 
 ### data processors
 
 | NPM command            | corresponding JS file
 | ---                    | ---
-| `parse`                | `src/parse:properties`
 | `parse:postcodes`      | `src/parse:postcodes`
-| `parse:area`           | `src/parse:area`
-| `parse:timeline`       | `src/parse:timeline`
+| `parse:postcodes:lsoa` | `src/parse:postcodes:lsoa`
+| `parse:incidents`      | `src/parse:markers:and:incidents`
+| `parse:properties`     | `src/parse:markers:and:properties`
+| `parse:areas`          | `src/parse:areas`
+| `parse:timelines`      | `src/parse:timelines`
 
-example: `npm run parse`
+example: `npm run parse:postcodes -- --file=/media/data/postcodes.csv`
 
 ### supported databases
 
