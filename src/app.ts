@@ -10,6 +10,17 @@ import { typeDefs, resolvers } from "./graphql/schema";
 import orm from "./orm";
 import compose from "./dataloader";
 
+const app = express();
+app.use(
+    cors({
+        origin: "*",
+        methods: "GET,PATCH",
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+        credentials: true,
+    })
+);
+
 const apollo = new ApolloServer({
     typeDefs,
     resolvers,
@@ -27,18 +38,6 @@ const apollo = new ApolloServer({
         return r;
     },
 });
-
-const app = express();
-app.use(
-    cors({
-        origin: "*",
-        methods: "GET,PATCH",
-        preflightContinue: false,
-        optionsSuccessStatus: 204,
-        credentials: true,
-    })
-);
-
 apollo.applyMiddleware({ app, path: '/' });
 
 const { SSL_KEY, SSL_CERT, PORT } = process.env;
