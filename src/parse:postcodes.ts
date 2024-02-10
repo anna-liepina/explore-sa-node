@@ -2,20 +2,17 @@ import fs from 'fs';
 import yargs from 'yargs';
 import orm from './orm';
 import {
-    MigrationsDirection,
     OperationMarker,
-    Output,
     createQueue,
     createCSVParser,
     composeMigrationRunner,
+    Output,
     Performance,
 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
-
-const executeMigrations = composeMigrationRunner(OperationMarker.postcodes, orm);
 
 //@ts-ignore
 const { file, sql, dry: dryRun, limit, update } = yargs
@@ -72,10 +69,13 @@ if (!file || !fs.existsSync(file)) {
 }
 
 const logging = !!sql && console.log;
+const migrate = composeMigrationRunner(OperationMarker.postcodes, orm);
 const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
     async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
+
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
+const conditionIndexDrop = (!dryRun && !update);
 
 (async () => {
     performance.mark();
@@ -83,8 +83,8 @@ const performance = new Performance(output);
     const queue = createQueue();
     const parser = createCSVParser(file);
 
-    output.messageIndexDrop(!dryRun && !update);
-    (!dryRun && !update) && await executeMigrations(MigrationsDirection.down);
+    output.messageIndexDrop(conditionIndexDrop);
+    conditionIndexDrop && await migrate.down();
 
     const postcodes: Partial<PostcodeType>[] = [];
     const postcoreStore: Set<string> = new Set();
@@ -137,10 +137,8 @@ const performance = new Performance(output);
             if (queue.size > queue.concurrency) {
                 output.messageCatchUpWithSQLQueue(!dryRun);
 
-                // await queue.onSizeLessThan(concurrency);
                 await job;
-
-                output.sections.length = 2;
+                output.removeLastMessage();
             }
         }
     }
@@ -153,8 +151,8 @@ const performance = new Performance(output);
     output.messageAwaitQueuedSQL(!dryRun);
     await queue.onEmpty();
 
-    output.messageIndexRestore(!dryRun && !update);
-    (!dryRun && !update) && await executeMigrations(MigrationsDirection.up);
+    output.messageIndexRestore(conditionIndexDrop);
+    conditionIndexDrop && await migrate.up();
 
     performance.mark(0);
     process.exit(0);

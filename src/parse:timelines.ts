@@ -1,13 +1,17 @@
 import yargs from 'yargs';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, composeMigrationRunner, createQueue, Performance, Output } from './parse:utils';
-import type { TransactionType } from './models/transaction';
+import {
+    OperationMarker,
+    createQueue,
+    composeMigrationRunner,
+    Output,
+    Performance,
+} from './parse:utils';
+import { TimelineType } from './models/timeline';
 
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
-import { TimelineType } from './models/timeline';
 
-const executeMigrations = composeMigrationRunner(OperationMarker.timeline, orm);
 
 //@ts-ignore
 const { sql, dry: dryRun, limit } = yargs
@@ -29,10 +33,12 @@ const { sql, dry: dryRun, limit } = yargs
     .argv;
 
 const logging = !!sql && console.log;
-const output = new Output(` 📊 processing timelines series`);
-const performance = new Performance(output);
+const migrate = composeMigrationRunner(OperationMarker.timeline, orm);
 const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
     async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
+
+const output = new Output(` 📊 processing timelines series`);
+const performance = new Performance(output);
 
 console.info(`
 --------------------------------------------------
@@ -56,7 +62,7 @@ dialect: \t${process.env.DB_DIALECT}
     performance.mark();
 
     output.messageIndexDrop(!dryRun);
-    !dryRun && await executeMigrations(MigrationsDirection.down);
+    !dryRun && await migrate.down();
     performance.mark();
 
     output.sections.push([
@@ -161,12 +167,12 @@ dialect: \t${process.env.DB_DIALECT}
     outputProcessingInfo(true);
     performance.mark();
 
-    output.messageAwaitQueuedSQL(true);
+    output.messageAwaitQueuedSQL(!dryRun);
     await queue.onEmpty();
     performance.mark();
 
     output.messageIndexRestore(!dryRun);
-    !dryRun && await executeMigrations(MigrationsDirection.up);
+    !dryRun && await migrate.up();
 
     performance.mark(0);
     process.exit(0);
