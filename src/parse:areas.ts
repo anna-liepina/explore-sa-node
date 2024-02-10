@@ -56,7 +56,7 @@ const performance = new Performance(output);
 
     output.sections.push([
         '',
-        Output.resolveMessage('⏱️ truncate areas table ...', !dryRun),
+        Output.resolveMessage('✅ truncate areas table ...', !dryRun),
     ]);
     !dryRun && await orm.Area.truncate();
 
