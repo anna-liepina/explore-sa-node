@@ -1,5 +1,3 @@
-require('dotenv');
-
 import { performance } from 'perf_hooks';
 import yargs from 'yargs';
 import orm from './orm';
@@ -38,27 +36,6 @@ const output = new Output(`processing NoSQL`);
 perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
 
 const queue = createQueue();
-    
-console.log(`
---------------------------------------------------
---------------------- CONFIG ---------------------
-
-name\t\tdescription
---limit\t\tamount of records in one bulk SQL qeuery
---sql\t\tprint out SQL queries
---dry\t\tdry run do not execute SQL
---update\tflush update [do not drop/restore indexes, useful with small csv files]
-
---------------------------------------------------
-database connection info:
-host: \t\t${process.env.DB_HOSTNAME}
-port: \t\t${process.env.DB_PORT}
-database: \t${process.env.DB_NAME}
-dialect: \t${process.env.DB_DIALECT}
-
---------------------------------------------------
-
-`);
 
 (async () => {
     performance.mark('init');
