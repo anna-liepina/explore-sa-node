@@ -6,7 +6,6 @@ describe('GraphQL: Transaction', () => {
                 query: `
                 {
                     transactionSearch(perPage: 3) {
-                        id
                         price
                         date
                     }
@@ -21,7 +20,6 @@ describe('GraphQL: Transaction', () => {
                 query: `
                 {
                     transactionSearch(dateFrom: "2010-01-01", dateTo: "2021-01-01", perPage: 3) {
-                        id
                         price
                         date
                     }
@@ -36,7 +34,6 @@ describe('GraphQL: Transaction', () => {
                 query: `
                 {
                     transactionSearch(dateFrom: "2010-01-01", dateTo: "2021-01-01", perPage: 3, page: 2) {
-                        id
                         price
                         date
                     }
@@ -52,7 +49,6 @@ describe('GraphQL: Transaction', () => {
                 query: `
                 {
                     transactionSearch(postcodePattern: "E20 1AB", perPage: 3) {
-                        id
                         price
                         date
                         property {
@@ -73,7 +69,6 @@ describe('GraphQL: Transaction', () => {
                 query: `
                 {
                     transactionSearch(postcodePattern: "E20 1AB", perPage: 3, page: 2) {
-                        id
                         price
                         date
                         property {

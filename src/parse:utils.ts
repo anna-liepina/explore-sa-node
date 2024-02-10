@@ -133,6 +133,10 @@ export class Output {
         ]
     }
 
+    removeLastMessage(): void {
+        this.sections.length -= 1;
+    }
+
     messageIndexDrop(executed?: boolean): void {
         this.sections.push([
             Output.resolveMessage('✅ dropping table\'s indexes ...', executed),
