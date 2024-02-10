@@ -48,7 +48,7 @@
     "parse:properties": "tsc && node -r dotenv/config ./build/parse:markers:and:properties.js",
     "parse:incidents": "tsc && node -r dotenv/config ./build/parse:markers:and:incidents",
     "parse:areas": "tsc && node -r dotenv/config ./build/parse:areas",
-    "parse:timeline": "tsc && node -r dotenv/config ./build/parse:timeline",
+    "parse:timelines": "tsc && node -r dotenv/config ./build/parse:timelines",
     "build": "tsc",
     "start:serve": "node -r dotenv/config ./build/app.js",
     "start": "tsc-watch --onSuccess \"node -r dotenv/config --inspect=0.0.0.0 ./build/app.js\"",
