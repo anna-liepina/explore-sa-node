@@ -15,7 +15,6 @@ export default {
         }
 
         type Transaction {
-            id: ID
             price: Int
             date: String
             property: Property
