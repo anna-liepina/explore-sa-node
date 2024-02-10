@@ -163,7 +163,7 @@ dialect: \t${process.env.DB_DIALECT}
     outputProcessingInfo(true);
     performance.mark();
 
-    output.messageAwaitQueuedSQL();
+    output.messageAwaitQueuedSQL(true);
     await queue.onEmpty();
     performance.mark();
 
