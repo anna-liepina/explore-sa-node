@@ -7,11 +7,12 @@ import type { TransactionType } from './models/transaction';
 
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
+import { TimelineType } from './models/timeline';
 
 const executeMigrations = composeMigrationRunner(OperationMarker.timeline, orm);
 
 //@ts-ignore
-const { sql: logging, dry: dryRun, limit } = yargs
+const { sql, dry: dryRun, limit } = yargs
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
@@ -29,7 +30,8 @@ const { sql: logging, dry: dryRun, limit } = yargs
     .help()
     .argv;
 
-const output = new Output(`processing timelines`);
+const logging = !!sql && console.log;
+const output = new Output(` 📊 processing timelines series`);
 const performance = new Performance(output);
 const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
     async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
@@ -55,44 +57,21 @@ dialect: \t${process.env.DB_DIALECT}
 (async () => {
     performance.mark();
 
-
     output.messageIndexDrop(!dryRun);
     !dryRun && await executeMigrations(MigrationsDirection.down);
     performance.mark();
 
     output.sections.push([
-        '',
-        Output.resolveMessage('⏱️ truncate areas table ...', !dryRun),
+        Output.line,
+        Output.resolveMessage('✅ truncate timelines table ...', !dryRun),
     ]);
     !dryRun && await orm.Timeline.truncate();
 
     performance.mark();
-    /** fast but INCLUDE empty cycles ~2,978 */
-    // SELECT
-    //     SUBSTRING_INDEX(postcode, ' ', 1) AS area,
-    //     COUNT(postcode) as `unique`
-    // FROM
-    //     postcodes
-    // GROUP BY
-    //     area
-    // const areas = await orm.Postcode.findAll({
-    //     attributes: [
-    //         [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('postcode'), ' ', 1), 'area'],
-    //         [orm.Sequelize.fn('COUNT', orm.Sequelize.col('postcode')), 'unique'],
-    //     ],
-    //     group: ['area'],
-    //     raw: true,
-    //     logging,
-    // });
-
-    /** slow but EXCLUDE empty cycles ~ 2,387 */
-    // SELECT
-    //     SUBSTRING_INDEX(postcode, ' ', 1) AS area,
-    //     COUNT(postcode) as `unique`
-    // FROM
-    //     properties
-    // GROUP BY
-    //     area
+    output.sections.push([
+        Output.line,
+        Output.resolveMessage('✅ fetch areas ...', true),
+    ]);
     const areas = await orm.Property.findAll({
         attributes: [
             [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('postcode'), ' ', 1), 'area'],
@@ -102,31 +81,24 @@ dialect: \t${process.env.DB_DIALECT}
         raw: true,
         logging,
     }) as Partial<{ area: string }>[];
-
-    let iter = 0;
-
-    const queue = createQueue();
     performance.mark();
-
+ 
+    const queue = createQueue();
+ 
     let processedRecords = 0;
-    let processedUniqueSeries = 0;
     let proccessedArea = '';
     let proccessedFile = 1;
+    const series: Partial<TimelineType>[] = [];
 
     const outputProcessingInfo = (final?: boolean) => {
-        output.sections[0] = [
-            `proccess area ${proccessedArea}`
-        ];
-        output.sections[1] = [
+        output.sections[3] = [
             Output.line,
-            `${final ? '✅' : '⏱️ '} data processing ...`,
+            ` ${final ? '✅' : '⏱️ '} data processing ...`,
             Output.line,
-            ` total transactions processed`,
-            `   valid: ${processedRecords.toLocaleString()}`,
+            ` proccessing area: ${proccessedArea} (${proccessedFile.toLocaleString()} of ${areas.length.toLocaleString()})`,
+            Output.line,
             ` total data series processed`,
-            `   ${processedUniqueSeries.toLocaleString()}`,
-            ` total areas processed`,
-            `   ${proccessedFile.toLocaleString()} of ${areas.length.toLocaleString()}`,
+            `   ${processedRecords.toLocaleString()}`,
             ``,
             ` SQL workers used ${queue.pending.toLocaleString()} of ${queue.concurrency.toLocaleString()} ( queue: ${queue.size.toLocaleString()} )`,
         ];
@@ -136,139 +108,57 @@ dialect: \t${process.env.DB_DIALECT}
         proccessedArea = row.area;
         proccessedFile = index + 1;
 
-        const cache = {};
-        /** slow. but should work without side function */
-        // const transactions = await orm.Transaction.findAll({
-        //     attributes: ['date', 'price'],
-        //     include: [
-        //         {
-        //             model: orm.Property,
-        //             attributes: ['postcode'],
-        //             required: true,
-        //             where: {
-        //                 postcode: {
-        //                     [orm.Sequelize.Op.like]: `${row.area}%`,
-        //                 }
-        //             },
-        //         },
-        //     ],
-        //     raw: true,
-        //     logging,
-        // });
-
-        /** fast. but relay on SUBSTRING_INDEX function */
-        const transactions = await orm.Transaction.findAll({
+        const cache = await orm.Transaction.findAll({
             attributes: [
-                'date',
-                'price',
-                [orm.Sequelize.fn('SUBSTRING_INDEX', orm.Sequelize.col('guid'), ',', 1), 'postcode'],
+                [orm.Sequelize.fn('DATE_FORMAT', orm.Sequelize.col('date'), '%Y-%m'), 'formattedDate'],
+                [orm.Sequelize.fn('SUM', orm.Sequelize.col('price')), 'totalPrice'],
+                [orm.Sequelize.fn('COUNT', '*'), 'totalTransactions'],
             ],
             where: {
                 guid: {
                     //@ts-ignore
-                    [orm.Sequelize.Op.like]: `${row.area}%`,
+                    [orm.Sequelize.Op.startsWith]: row.area,
                 },
             },
+            group: ['formattedDate'],
+            order: ['formattedDate'],
             raw: true,
             logging,
-        }) as Partial<TransactionType & { postcode: string }>[];
+        }) as Partial<{ formattedDate: string, totalPrice: number, totalTransactions: number }>[];
 
         outputProcessingInfo();
         performance.mark();
 
-        processedRecords += transactions.length;
-        for (const transaction of transactions) {
-            const { postcode, price } = transaction;
-            const [ year, month ] = transaction.date.split('-');
-            const date = `${year}-${month}`;
-
-            cache[date] ||= {};
-            cache[date][postcode] ||= {
-                count: 0,
-                price: 0,
-            };
-
-            cache[date][postcode].price += price;
-            cache[date][postcode].count++;
-        }
-
-        const series = [];
-        for (const date in cache) {
-            const cursor = cache[date];
-            let tCount = 0;
-            let tPrice = 0;
-
-            for (const postcode in cursor) {
-                const { count, price } = cursor[postcode];
-
-                tCount += count;
-                tPrice += price;
-
-                series.push({
-                    date,
-                    postcode,
-                    count,
-                    avg: Math.round(price / count)
-                });
-
-                if (series.length === limit) {
-                    processedUniqueSeries += series.length;
-
-                    const job = queue.add(persist(orm.Timeline, [...series]));
-
-                    series.length = 0;
-
-                    performance.mark();
-
-                    if (queue.size > queue.concurrency) {
-                        output.messageAwaitQueuedSQL(!dryRun);
-        
-                        await job;
-                        output.sections.length = 2;
-                    }
-                }
-
-                // if (areas.length === limit) {
-                //     const job = queue.add(persist(orm.Area, [...areas]));
-        
-                //     outputProcessingInfo();
-        
-                //     areas.length = 0;
-                //     iter++;
-        
-                //     performance.mark(`iter-${iter}`);
-                //     performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
-        
-                //     if (queue.size > queue.concurrency) {
-                //         output.messageAwaitQueuedSQL(!dryRun);
-        
-                //         await job;
-                //         output.sections.length = 2;
-                //     }
-                // }
-            }
+        for (const row of cache) {
+            const { formattedDate: date, totalPrice, totalTransactions: count } = row;
 
             series.push({
                 date,
                 postcode: proccessedArea,
-                count: tCount,
-                avg: Math.round(tPrice / tCount)
+                avg: Math.round(totalPrice / count),
+                count,
             });
+
+            if (series.length === limit) {
+                const job = queue.add(persist(orm.Timeline, [...series]));
+                performance.mark();
+
+                series.length = 0;
+
+                if (queue.size > queue.concurrency) {
+                    output.messageAwaitQueuedSQL(!dryRun);
+    
+                    await job;
+                    output.removeLastMessage();
+                }
+            }
+
+            performance.mark();
         }
-
-        processedUniqueSeries += series.length;
-
-        const job = queue.add(persist(orm.Timeline, series));
-
-        performance.mark();
-
-        if (queue.size > queue.concurrency) {
-            output.messageCatchUpWithSQLQueue();
-
-            await job;
-            output.sections.length = 2;
-        }
+        processedRecords += cache.length;
     }
+
+    queue.add(persist(orm.Timeline, series));
 
     outputProcessingInfo(true);
     performance.mark();
