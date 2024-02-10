@@ -59,8 +59,6 @@ const performance = new Performance(output);
 const conditionIndexDrop = (!dryRun && !update);
 
 (async () => {
-    performance.mark();
-
     output.messageIndexDrop(conditionIndexDrop);
     conditionIndexDrop && await migrate.down();
 
