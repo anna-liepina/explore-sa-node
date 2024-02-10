@@ -1,7 +1,12 @@
 import fs from 'fs';
 import yargs from 'yargs';
 import orm from './orm';
-import { createQueue, createCSVParser, Output, Performance } from './parse:utils';
+import {
+    createQueue,
+    createCSVParser,
+    Output,
+    Performance,
+} from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
 import type Model from "sequelize/types/model";

@@ -2,13 +2,12 @@ import fs from 'fs';
 import yargs from 'yargs';
 import orm from './orm';
 import {
-    MigrationsDirection,
-    OperationMarker, 
-    composeMigrationRunner,
+    OperationMarker,
     createQueue,
+    createCSVParser,
+    composeMigrationRunner,
     Output,
     Performance,
-    createCSVParser
 } from './parse:utils';
 import type { MarkerType } from './models/marker';
 import { MarkerTypeEnum } from './models/marker';
@@ -18,8 +17,6 @@ import type { TransactionType } from './models/transaction';
 
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
-
-const executeMigrations = composeMigrationRunner(OperationMarker.properties, orm);
 
 //@ts-ignore
 const { file, sql, dry: dryRun, limit, update } = yargs
@@ -76,8 +73,10 @@ if (!file || !fs.existsSync(file)) {
 }
 
 const logging = !!sql && console.log;
+const migrate = composeMigrationRunner(OperationMarker.properties, orm);
 const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
     async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
+
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
 const conditionIndexDrop = (!dryRun && !update);
@@ -86,7 +85,7 @@ const conditionIndexDrop = (!dryRun && !update);
     performance.mark();
 
     output.messageIndexDrop(conditionIndexDrop);
-    conditionIndexDrop && await executeMigrations(MigrationsDirection.down);
+    conditionIndexDrop && await migrate.down();
 
     performance.mark();
 
@@ -246,7 +245,7 @@ const conditionIndexDrop = (!dryRun && !update);
     performance.mark();
 
     output.messageIndexRestore(conditionIndexDrop);
-    conditionIndexDrop && await executeMigrations(MigrationsDirection.up);
+    conditionIndexDrop && await migrate.up();
 
     performance.mark(0);
     process.exit(0);

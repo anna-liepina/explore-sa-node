@@ -1,7 +1,11 @@
 import yargs from 'yargs';
 import orm from './orm';
+import {
+    createQueue,
+    Output,
+    Performance,
+} from './parse:utils';
 import type { AreaType } from './models/area';
-import { createQueue, Performance, Output } from './parse:utils';
 
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';

@@ -2,15 +2,20 @@ import fs from 'fs';
 import path from 'path';
 import yargs from 'yargs';
 import orm from './orm';
-import { MigrationsDirection, OperationMarker, Output, composeMigrationRunner, createQueue, Performance, createCSVParser } from './parse:utils';
+import {
+    OperationMarker,
+    createQueue,
+    createCSVParser,
+    composeMigrationRunner,
+    Output,
+    Performance,
+} from './parse:utils';
 import type { IncidentType } from './models/incident';
 import type { MarkerType } from './models/marker';
 import { MarkerTypeEnum } from './models/marker';
 
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
-
-const executeMigrations = composeMigrationRunner(OperationMarker.incidents, orm);
 
 //@ts-ignore
 const { path: _path, sql, dry: dryRun, limit, update } = yargs
@@ -96,6 +101,7 @@ if (!files.length) {
 }
 
 const logging = !!sql && console.log;
+const migrate = composeMigrationRunner(OperationMarker.incidents, orm);
 const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
     async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
 
@@ -107,7 +113,7 @@ const conditionIndexDrop = (!dryRun && !update);
     performance.mark();
 
     output.messageIndexDrop(conditionIndexDrop);
-    conditionIndexDrop && await executeMigrations(MigrationsDirection.down);
+    conditionIndexDrop && await migrate.down();
 
     let processedInvalidRecords = 0;
     let processedRecords = 0;
@@ -259,7 +265,7 @@ const conditionIndexDrop = (!dryRun && !update);
     performance.mark();
 
     output.messageIndexRestore(conditionIndexDrop);
-    conditionIndexDrop && await executeMigrations(MigrationsDirection.up);
+    conditionIndexDrop && await migrate.up();
 
     performance.mark(0);
     process.exit(0);
