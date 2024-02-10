@@ -1,5 +1,3 @@
-require('dotenv');
-
 import fs from 'fs';
 import yargs from 'yargs';
 import orm from './orm';

@@ -1,5 +1,3 @@
-require('dotenv');
-
 import yargs from 'yargs';
 import orm from './orm';
 import type { AreaType } from './models/area';
