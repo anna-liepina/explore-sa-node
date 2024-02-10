@@ -1,5 +1,3 @@
-require('dotenv');
-
 import fs from 'fs';
 import path from 'path';
 import yargs from 'yargs';
