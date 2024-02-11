@@ -211,6 +211,10 @@ const conditionIndexDrop = (!dryRun && !update);
     queue.add(persist(orm.Property, properties));
     queue.add(persist(orm.Transaction, transactions));
 
+    postcodes.clear();
+    markersStore.clear();
+    propertiesStore.clear();
+
     outputProcessingInfo(true);
     performance.mark();
 
