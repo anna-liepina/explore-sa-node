@@ -101,7 +101,7 @@ export class Output {
     }
 
     debugInformation() {
-        if (this.debugInfo.length === 0) {
+        if (!this.debugInfo.length) {
             return [];
         }
 
