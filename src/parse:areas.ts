@@ -2,13 +2,11 @@ import yargs from 'yargs';
 import orm from './orm';
 import {
     createQueue,
+    composePersist,
     Output,
     Performance,
 } from './parse:utils';
 import type { AreaType } from './models/area';
-
-import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
 
 //@ts-ignore
 const { sql, dry: dryRun, limit } = yargs
@@ -29,8 +27,7 @@ const { sql, dry: dryRun, limit } = yargs
     .argv;
 
 const logging = !!sql && console.log;
-const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
-    async () => !dryRun && model.bulkCreate(entities, { logging, ignoreDuplicates: true, hooks: false });
+const persist = composePersist(dryRun, { logging, ignoreDuplicates: true });
 const output = new Output(` processing postcode areas`);
 const performance = new Performance(output);
 
