@@ -21,13 +21,12 @@ export default {
         }
 
         type Property {
-            id: ID!
             address: String
             postcode: Postcode
             transactions: [Transaction]
         # Property Type. D = Detached, S = Semi-Detached, T = Terraced, F = Flats/Maisonettes, O = Other
             propertyType: String
-        # Duration	Relates to the tenure: F = Freehold, L= Leasehold etc.
+        # Duration	Relates to the tenure: F = Freehold, L = Leasehold etc.
         # Note that HM Land Registry does not record leases of 7 years or less in the Price Paid Dataset.
             propertyForm: String
         }

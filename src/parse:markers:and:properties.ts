@@ -75,7 +75,7 @@ const conditionIndexDrop = (!dryRun && !update);
 
     output.sections[1] = [
         Output.line,
-        ' ✅ fetch postcodes\' | marker\'s | transactions ...',
+        ' ✅ fetch postcodes | markers | transactions ...',
     ];
 
     performance.mark();
@@ -207,6 +207,10 @@ const conditionIndexDrop = (!dryRun && !update);
     queue.add(persist(orm.Marker, markers));
     queue.add(persist(orm.Property, properties));
     queue.add(persist(orm.Transaction, transactions));
+
+    postcodes.clear();
+    markersStore.clear();
+    propertiesStore.clear();
 
     outputProcessingInfo(true);
     performance.mark();
