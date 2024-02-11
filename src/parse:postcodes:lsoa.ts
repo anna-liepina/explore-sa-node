@@ -46,8 +46,6 @@ const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
 
 (async () => {
-    performance.mark();
-
     const queue = createQueue();
     const parser = createCSVParser(file, { columns: true });
 
