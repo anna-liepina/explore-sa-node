@@ -14,6 +14,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { createTestClient } from 'apollo-server-testing';
 import compose from './dataloader';
 import { typeDefs, resolvers } from './graphql/schema';
+import { IncidentType } from './models/incident';
 
 //@ts-ignore
 const { dry: dryRun, limit } = yargs
@@ -91,7 +92,7 @@ const queue = createQueue();
             performance.mark();
 
             if (marker.type === MarkerTypeEnum.property) {
-                let { data: { propertySearchInRange: properties } } = await query({
+                const { data: { propertySearchInRange: properties } } = await query({
                     query: `
                     {
                         propertySearchInRange(
@@ -103,11 +104,10 @@ const queue = createQueue();
                                 postcode
                                 lat
                                 lng
-                                # url
-                                # lsoa
+                                lsoa
                             }
-                            # propertyType
-                            # propertyForm
+                            propertyType
+                            propertyForm
                             city
                             street
                             paon
@@ -122,7 +122,7 @@ const queue = createQueue();
 
                 let recordsPerMarker = 0;
                 const items = properties
-                    .reduce((acc, p) => {
+                    .reduce((acc: Record<string, any>[], p: Record<string, any>) => {
                         if (!Array.isArray(p.transactions) || !p.transactions.length) {
                             processedInvalidRecords++;
 
@@ -133,7 +133,7 @@ const queue = createQueue();
 
                         acc.push({
                             coordinates: resolveKey(p.postcode),
-                            address: [ p.postcode.postcode, p.street, p.paon, p.saon ].filter(Boolean).join(', '),
+                            address: [ p.postcode.postcode, [p.street, p.paon].filter(Boolean).join(' '), p.saon ].filter(Boolean).join(', '),
                             city: p.city,
                             ...p.postcode,
                             transactions: p.transactions
@@ -149,7 +149,7 @@ const queue = createQueue();
             }
 
             if (marker.type === MarkerTypeEnum.police) {
-                let { data: { incidentSearchInRange: incidents } } = await query({
+                const { data: { incidentSearchInRange: incidents } } = await query({
                     query: `
                     {
                         incidentSearchInRange(
@@ -169,7 +169,7 @@ const queue = createQueue();
                 recordsInBatch += incidents.length;
                 processedRecords += incidents.length;
 
-                const cache = incidents.reduce((acc, incident) => {
+                const cache = incidents.reduce((acc: Record<string, any>, incident: IncidentType) => {
                     const { lat, lng, ...i } = incident;
 
                     const key = resolveKey(incident);
