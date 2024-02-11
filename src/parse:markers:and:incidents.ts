@@ -7,15 +7,13 @@ import {
     createQueue,
     createCSVParser,
     composeMigrationRunner,
+    composePersist,
     Output,
     Performance,
 } from './parse:utils';
 import type { IncidentType } from './models/incident';
 import type { MarkerType } from './models/marker';
 import { MarkerTypeEnum } from './models/marker';
-
-import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
 
 //@ts-ignore
 const { path: _path, sql, dry: dryRun, limit, update } = yargs
@@ -79,8 +77,7 @@ if (!files.length) {
 
 const logging = !!sql && console.log;
 const migrate = composeMigrationRunner(OperationMarker.incidents, orm);
-const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
-    async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
+const persist = composePersist(dryRun, { logging });
 
 const output = new Output(` processing ${_path}`);
 const performance = new Performance(output);

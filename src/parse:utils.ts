@@ -5,6 +5,10 @@ import { performance, PerformanceObserver } from "perf_hooks";
 import csv from "csv-parse";
 import PQueue from "p-queue";
 import type { ORM } from "./orm.types";
+import type { BulkCreateOptions } from "sequelize";
+
+import type Model from "sequelize/types/model";
+import type { ModelStatic } from 'sequelize';
 
 export enum MigrationsDirection {
     up = "up",
@@ -41,6 +45,10 @@ export const composeMigrationRunner = (operationMarker: OperationMarker, orm: OR
         down: async () => execute(MigrationsDirection.down)
     }
 }
+
+export const composePersist = (dryRun?: boolean, options?: BulkCreateOptions) => 
+    (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
+        async () => (!dryRun && model.bulkCreate(entities, { hooks: false, ...options }));
 
 export const createQueue = () => new PQueue({ concurrency: os.cpus().length });
 export const createCSVParser = (path: string, options: csv.Options = {}) =>

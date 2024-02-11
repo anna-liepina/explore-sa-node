@@ -4,13 +4,11 @@ import orm from './orm';
 import {
     createQueue,
     createCSVParser,
+    composePersist,
     Output,
     Performance,
 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
-
-import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
 
 //@ts-ignore
 const { file, sql, dry: dryRun, limit } = yargs
@@ -40,8 +38,7 @@ if (!file || !fs.existsSync(file)) {
 }
 
 const logging = !!sql && console.log;
-const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
-    async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lsoa'], hooks: false });
+const persist = composePersist(dryRun, { logging, updateOnDuplicate: ['lsoa'] });
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
 

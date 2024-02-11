@@ -6,6 +6,7 @@ import {
     createQueue,
     createCSVParser,
     composeMigrationRunner,
+    composePersist,
     Output,
     Performance,
 } from './parse:utils';
@@ -14,9 +15,6 @@ import { MarkerTypeEnum } from './models/marker';
 import type { PostcodeType } from './models/postcode';
 import type { PropertyType } from './models/property';
 import type { TransactionType } from './models/transaction';
-
-import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
 
 //@ts-ignore
 const { file, sql, dry: dryRun, limit, update } = yargs
@@ -51,8 +49,7 @@ if (!file || !fs.existsSync(file)) {
 
 const logging = !!sql && console.log;
 const migrate = composeMigrationRunner(OperationMarker.properties, orm);
-const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
-    async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
+const persist = composePersist(dryRun, { logging });
 
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
@@ -145,7 +142,7 @@ const conditionIndexDrop = (!dryRun && !update);
         const date = row[2].split(' ')[0];
         const price = parseInt(row[1], 10);
 
-        const guid = [postcode, street, paon, saon].filter(Boolean).join(',').toUpperCase();
+        const guid = [postcode, [street, paon].filter(Boolean).join(' '), saon].filter(Boolean).join(', ').toUpperCase();
 
         if (!propertiesStore.has(guid)) {
             propertiesStore.set(guid, new Set);
