@@ -9,6 +9,7 @@ import type { BulkCreateOptions } from "sequelize";
 
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
+import type { Collection } from 'mongodb';
 
 export enum MigrationsDirection {
     up = "up",
@@ -46,9 +47,13 @@ export const composeMigrationRunner = (operationMarker: OperationMarker, orm: OR
     }
 }
 
-export const composePersist = (dryRun?: boolean, options?: BulkCreateOptions) => 
+export const composeSQLPersist = (dryRun?: boolean, options?: BulkCreateOptions) => 
     (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
         async () => (!dryRun && model.bulkCreate(entities, { hooks: false, ...options }));
+
+export const composeNoSQLPersist = (dryRun?: boolean, options?: BulkCreateOptions) => 
+    (collection: Collection<any>, entities: Record<string, any>[]) =>
+        async () => (!dryRun && collection.insertMany(entities);
 
 export const createQueue = () => new PQueue({ concurrency: os.cpus().length });
 export const createCSVParser = (path: string, options: csv.Options = {}) =>

@@ -6,7 +6,7 @@ import {
     createQueue,
     createCSVParser,
     composeMigrationRunner,
-    composePersist,
+    composeSQLPersist,
     Output,
     Performance,
 } from './parse:utils';
@@ -45,7 +45,7 @@ if (!file || !fs.existsSync(file)) {
 
 const logging = !!sql && console.log;
 const migrate = composeMigrationRunner(OperationMarker.postcodes, orm);
-const persist = composePersist(dryRun, { logging, updateOnDuplicate: ['lat', 'lng'] });
+const persist = composeSQLPersist(dryRun, { logging, updateOnDuplicate: ['lat', 'lng'] });
 
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);

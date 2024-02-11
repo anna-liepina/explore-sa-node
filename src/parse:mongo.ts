@@ -1,7 +1,11 @@
-import { performance } from 'perf_hooks';
 import yargs from 'yargs';
 import orm from './orm';
-import { Output, createQueue, perfObserver2 } from './parse:utils';
+import {
+    createQueue,
+    composeNoSQLPersist,
+    Output,
+    Performance,
+} from './parse:utils';
 import type { MarkerType } from './models/marker';
 import { mongo } from './odm';
 import { MarkerTypeEnum } from './models/marker';
@@ -11,20 +15,18 @@ import { createTestClient } from 'apollo-server-testing';
 import compose from './dataloader';
 import { typeDefs, resolvers } from './graphql/schema';
 
-import { Collection } from 'mongodb';
-
 //@ts-ignore
-const { sql: logging, dry: dryRun, limit } = yargs
+const { dry: dryRun, limit } = yargs
     .option('limit', {
         type: 'number',
         description: 'amount of records in one bulk SQL qeuery',
         default: 10000,
     })
-    .option('sql', {
-        type: 'boolean',
-        description: 'print out SQL queries',
-        default: false,
-    })
+    // .option('sql', {
+    //     type: 'boolean',
+    //     description: 'print out SQL queries',
+    //     default: false,
+    // })
     .option('dry', {
         type: 'boolean',
         description: 'dry run - do not affect a database',
@@ -32,14 +34,14 @@ const { sql: logging, dry: dryRun, limit } = yargs
     .help()
     .argv;
 
-const output = new Output(`processing NoSQL`);
-perfObserver2(output).observe({ entryTypes: ['measure'], buffered: true });
+// const logging = !!sql && console.log;
+const persist = composeNoSQLPersist(dryRun);
+const output = new Output(` processing NoSQL`);
+const performance = new Performance(output);
 
 const queue = createQueue();
 
 (async () => {
-    performance.mark('init');
-
     const server = new ApolloServer({
         typeDefs,
         resolvers,
@@ -49,44 +51,45 @@ const queue = createQueue();
 
     const { query } = createTestClient(server);
 
-    const persistODM = (collection: Collection<any>, items: any[]) => async () => !dryRun && collection.insertMany(items);
-
-    let iter = 0;
+    let page = 0;
     let processedInvalidRecords = 0;
     let processedRecords = 0;
     let recordsInBatch = 0;
 
-    performance.mark(`iter-${iter}`);
-
-    let markers: MarkerType[];
+    let markers: Partial<MarkerType>[];
 
     const resolveKey = (obj: { lat: number, lng: number }) => `${obj.lat}|${obj.lng}`;
     const processingInfo = (final?: boolean) => {
         output.sections[1] = [
             Output.line,
-            `${final ? '✅' : '⏱️ '} data processing ...`,
+            ` ${final ? '✅' : '⏱️ '} data processing ...`,
             Output.line,
             ` total records processed`,
             `   valid: ${processedRecords.toLocaleString()}`,
             `   corrupred or invalid: ${processedInvalidRecords.toLocaleString()}`,
             ``,
             ` valid records in the last batch: ${recordsInBatch.toLocaleString()}`,
-            ` iteration ${iter}`,
+            ` page ${page}`,
             `  up to ${limit} Markers per iteration`,
             ` SQL workers used ${queue.pending.toLocaleString()} of ${queue.concurrency.toLocaleString()} ( queue: ${queue.size.toLocaleString()} )`,
         ];
     }
 
     while (!Array.isArray(markers) || markers.length) {
+        performance.mark();
         recordsInBatch = 0;
         markers = await orm.Marker.findAll({
             attributes: [`lat`, `lng`, `type`],
             raw: true,
             limit,
-            offset: limit * iter
-        }) as unknown as MarkerType[];
+            offset: limit * page
+        }) as Partial<MarkerType>[];
+        page++;
 
+        performance.mark();
         for await (const marker of markers) {
+            performance.mark();
+
             if (marker.type === MarkerTypeEnum.property) {
                 let { data: { propertySearchInRange: properties } } = await query({
                     query: `
@@ -96,7 +99,6 @@ const queue = createQueue();
                             range: 0
                             perPage: 10000000
                         ) {
-                            # id
                             postcode {
                                 postcode
                                 lat
@@ -111,7 +113,6 @@ const queue = createQueue();
                             paon
                             saon
                             transactions {
-                                # id
                                 price
                                 date
                             }
@@ -119,7 +120,7 @@ const queue = createQueue();
                     }`
                 });
 
-                let recordPerMarker = 0;
+                let recordsPerMarker = 0;
                 const items = properties
                     .reduce((acc, p) => {
                         if (!Array.isArray(p.transactions) || !p.transactions.length) {
@@ -128,7 +129,7 @@ const queue = createQueue();
                             return acc;
                         }
 
-                        recordPerMarker += p.transactions.length;
+                        recordsPerMarker += p.transactions.length;
 
                         acc.push({
                             coordinates: resolveKey(p.postcode),
@@ -141,10 +142,10 @@ const queue = createQueue();
                         return acc;
                     }, []);
 
-                recordsInBatch += recordPerMarker;
-                processedRecords += recordPerMarker;
+                recordsInBatch += recordsPerMarker;
+                processedRecords += recordsPerMarker;
 
-                queue.add(persistODM(mongo.collection('properties'), items));
+                queue.add(persist(mongo.collection('properties'), items));
             }
 
             if (marker.type === MarkerTypeEnum.police) {
@@ -161,27 +162,9 @@ const queue = createQueue();
                             date
                             type
                             outcome
-                            # creator
-                            # assignee
                         }
                     }`
                 });
-                // const incidents = await orm.Incident.findAll({
-                //     attributes: [
-                //         `lat`,
-                //         `lng`,
-                //         `date`,
-                //         `type`,
-                //         `outcome`
-                //     ],
-                //     where: {
-                //         lat: marker.lat,
-                //         lng: marker.lng,
-                //     },
-                //     limit,
-                //     offset: limit * iter
-                //     raw: true,
-                // }) as unknown as IncidentType[];
 
                 recordsInBatch += incidents.length;
                 processedRecords += incidents.length;
@@ -201,42 +184,28 @@ const queue = createQueue();
                     coordinates,
                     incidents: cache[coordinates]
                 }));
-                queue.add(persistODM(mongo.collection('incidents'), items));
+                queue.add(persist(mongo.collection('incidents'), items));
             }
         }
 
-        iter++;
-        performance.mark(`iter-${iter}`);
-        performance.measure(`diff-${iter - 1}->${iter}`, `iter-${iter - 1}`, `iter-${iter}`);
-
         processingInfo();
+        performance.mark();
 
         if (queue.size > queue.concurrency) {
-            output.sections.push([
-                '',
-                '⏱️ catching up with SQL queue ...',
-            ]);
+            output.messageCatchUpWithSQLQueue();
 
-            // await queue.onSizeLessThan(concurrency);
             await queue.onEmpty();
 
-            output.sections.length = 2;
+            output.removeLastMessage();
         }
     }
 
-    performance.mark(`iter-${iter}`);
-
     processingInfo(true);
+    performance.mark();
 
-    if (!dryRun) {
-        output.sections.push([
-            Output.line,
-            '✅ await queued SQL ...',
-        ]);
+    output.messageAwaitQueuedSQL(dryRun);
+    await queue.onEmpty();
 
-        await queue.onEmpty();
-    }
-
-    performance.mark('end');
-    performance.measure('total', 'init', 'end');
+    performance.mark(0);
+    process.exit(0);
 })()
