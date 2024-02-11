@@ -84,16 +84,13 @@ const performance = new Performance(output);
 const conditionIndexDrop = (!dryRun && !update);
 
 (async () => {
-    performance.mark();
+    const queue = createQueue();
 
     output.messageIndexDrop(conditionIndexDrop);
     conditionIndexDrop && await migrate.down();
 
     let processedInvalidRecords = 0;
     let processedRecords = 0;
-    let iter = 0;
-
-    const queue = createQueue();
 
     performance.mark();
 
@@ -205,7 +202,6 @@ const conditionIndexDrop = (!dryRun && !update);
             }
 
             if (incidents.length === limit) {
-                iter++;
                 processedRecords += incidents.length;
 
                 queue.add(persist(orm.Marker, [...markers]));

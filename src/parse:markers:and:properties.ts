@@ -56,14 +56,13 @@ const performance = new Performance(output);
 const conditionIndexDrop = (!dryRun && !update);
 
 (async () => {
-    performance.mark();
-
     output.messageIndexDrop(conditionIndexDrop);
     conditionIndexDrop && await migrate.down();
 
+    const queue = createQueue();
+
     performance.mark();
 
-    const queue = createQueue();
     const parser = createCSVParser(file);
 
     const markers: Partial<MarkerType>[] = [];
@@ -78,6 +77,8 @@ const conditionIndexDrop = (!dryRun && !update);
         Output.line,
         ' ✅ fetch postcodes\' | marker\'s | transactions ...',
     ];
+
+    performance.mark();
 
     await Promise.all([
         orm.Postcode.findAll({
@@ -131,7 +132,6 @@ const conditionIndexDrop = (!dryRun && !update);
         /** some records do not contain postcode */
         if (!postcodes.has(postcode)) {
             processedInvalidRecords++;
-
             continue;
         }
 

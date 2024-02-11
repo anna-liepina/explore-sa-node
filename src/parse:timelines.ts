@@ -20,7 +20,6 @@ const { sql, dry: dryRun, limit } = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
-        default: false,
     })
     .option('dry', {
         type: 'boolean',
@@ -37,7 +36,7 @@ const output = new Output(` 📊 processing timelines series`);
 const performance = new Performance(output);
 
 (async () => {
-    performance.mark();
+    const queue = createQueue();
 
     output.messageIndexDrop(!dryRun);
     !dryRun && await migrate.down();
@@ -64,8 +63,6 @@ const performance = new Performance(output);
         logging,
     }) as Partial<{ area: string }>[];
     performance.mark();
- 
-    const queue = createQueue();
  
     let processedRecords = 0;
     let proccessedArea = '';
@@ -128,7 +125,7 @@ const performance = new Performance(output);
                 series.length = 0;
 
                 if (queue.size > queue.concurrency) {
-                    output.messageAwaitQueuedSQL(!dryRun);
+                    output.messageCatchUpWithSQLQueue(!dryRun);
     
                     await job;
                     output.removeLastMessage();

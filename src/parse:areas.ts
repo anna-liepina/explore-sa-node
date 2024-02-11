@@ -32,25 +32,10 @@ const output = new Output(` processing postcode areas`);
 const performance = new Performance(output);
 
 (async () => {
-    performance.mark();
-
     output.sections.push([
-        '',
-        Output.resolveMessage('⏱️ truncate areas table ...', !dryRun),
+        Output.resolveMessage(' ⏱️ truncate areas table ...', !dryRun),
     ]);
     !dryRun && await orm.Area.truncate();
-
-    // await orm.sequelize.query(`
-    //     INSERT INTO areas SELECT
-    //         city,
-    //         SUBSTRING_INDEX(postcode, ' ', 1) AS area
-    //     FROM
-    //         properties
-    //     WHERE
-    //         postcode NOT IN ('', 'UNKNOWN')
-    //     GROUP BY
-    //         area, city;
-    // `,);
 
     performance.mark();
     const results = await orm.Property.findAll({

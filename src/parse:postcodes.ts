@@ -52,8 +52,6 @@ const performance = new Performance(output);
 const conditionIndexDrop = (!dryRun && !update);
 
 (async () => {
-    performance.mark();
-
     const queue = createQueue();
     const parser = createCSVParser(file);
 
@@ -124,6 +122,7 @@ const conditionIndexDrop = (!dryRun && !update);
 
     output.messageAwaitQueuedSQL(!dryRun);
     await queue.onEmpty();
+    performance.mark();
 
     output.messageIndexRestore(conditionIndexDrop);
     conditionIndexDrop && await migrate.up();
