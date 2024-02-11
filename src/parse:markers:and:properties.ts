@@ -75,7 +75,7 @@ const conditionIndexDrop = (!dryRun && !update);
 
     output.sections[1] = [
         Output.line,
-        ' ✅ fetch postcodes\' | marker\'s | transactions ...',
+        ' ✅ fetch postcodes | markers | transactions ...',
     ];
 
     performance.mark();
