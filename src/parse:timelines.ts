@@ -4,13 +4,11 @@ import {
     OperationMarker,
     createQueue,
     composeMigrationRunner,
+    composePersist,
     Output,
     Performance,
 } from './parse:utils';
 import { TimelineType } from './models/timeline';
-
-import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
 
 //@ts-ignore
 const { sql, dry: dryRun, limit } = yargs
@@ -32,8 +30,7 @@ const { sql, dry: dryRun, limit } = yargs
 
 const logging = !!sql && console.log;
 const migrate = composeMigrationRunner(OperationMarker.timeline, orm);
-const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
-    async () => !dryRun && model.bulkCreate(entities, { logging, hooks: false });
+const persist = composePersist(dryRun, { logging });
 
 const output = new Output(` 📊 processing timelines series`);
 const performance = new Performance(output);

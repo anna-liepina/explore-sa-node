@@ -6,13 +6,11 @@ import {
     createQueue,
     createCSVParser,
     composeMigrationRunner,
+    composePersist,
     Output,
     Performance,
 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
-
-import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
 
 //@ts-ignore
 const { file, sql, dry: dryRun, limit, update } = yargs
@@ -47,8 +45,7 @@ if (!file || !fs.existsSync(file)) {
 
 const logging = !!sql && console.log;
 const migrate = composeMigrationRunner(OperationMarker.postcodes, orm);
-const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
-    async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
+const persist = composePersist(dryRun, { logging, updateOnDuplicate: ['lat', 'lng'] });
 
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
