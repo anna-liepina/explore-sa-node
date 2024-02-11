@@ -1,12 +1,12 @@
-require('dotenv');
-
 import yargs from 'yargs';
 import orm from './orm';
+import {
+    createQueue,
+    composePersist,
+    Output,
+    Performance,
+} from './parse:utils';
 import type { AreaType } from './models/area';
-import { createQueue, Performance, Output } from './parse:utils';
-
-import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
 
 //@ts-ignore
 const { sql, dry: dryRun, limit } = yargs
@@ -26,51 +26,16 @@ const { sql, dry: dryRun, limit } = yargs
     .help()
     .argv;
 
-console.info(`
---------------------------------------------------
---------------------- CONFIG ---------------------
-
-name\t\tdescription
---file\t\tabsolute path to csv file to parse
---limit\t\tamount of records in one bulk SQL qeuery
---sql\t\tprint out SQL queries
---dry\t\tdry run do not execute SQL
-
---------------------------------------------------
-database connection info:
-host: \t\t${process.env.DB_HOSTNAME}
-port: \t\t${process.env.DB_PORT}
-database: \t${process.env.DB_NAME}
-dialect: \t${process.env.DB_DIALECT}
-
-`);
-
 const logging = !!sql && console.log;
-const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
-    async () => !dryRun && model.bulkCreate(entities, { logging, ignoreDuplicates: true, hooks: false });
+const persist = composePersist(dryRun, { logging, ignoreDuplicates: true });
 const output = new Output(` processing postcode areas`);
 const performance = new Performance(output);
 
 (async () => {
-    performance.mark();
-
     output.sections.push([
-        '',
-        Output.resolveMessage('⏱️ truncate areas table ...', !dryRun),
+        Output.resolveMessage(' ⏱️ truncate areas table ...', !dryRun),
     ]);
     !dryRun && await orm.Area.truncate();
-
-    // await orm.sequelize.query(`
-    //     INSERT INTO areas SELECT
-    //         city,
-    //         SUBSTRING_INDEX(postcode, ' ', 1) AS area
-    //     FROM
-    //         properties
-    //     WHERE
-    //         postcode NOT IN ('', 'UNKNOWN')
-    //     GROUP BY
-    //         area, city;
-    // `,);
 
     performance.mark();
     const results = await orm.Property.findAll({
@@ -143,7 +108,7 @@ const performance = new Performance(output);
                 output.messageAwaitQueuedSQL(!dryRun);
 
                 await job;
-                output.sections.length = 2;
+                output.removeLastMessage();
             }
         }
     }

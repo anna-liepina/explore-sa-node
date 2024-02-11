@@ -1,23 +1,16 @@
-require('dotenv');
-
 import fs from 'fs';
 import yargs from 'yargs';
 import orm from './orm';
 import {
-    MigrationsDirection,
     OperationMarker,
-    Output,
     createQueue,
     createCSVParser,
     composeMigrationRunner,
+    composePersist,
+    Output,
     Performance,
 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
-
-import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
-
-const executeMigrations = composeMigrationRunner(OperationMarker.postcodes, orm);
 
 //@ts-ignore
 const { file, sql, dry: dryRun, limit, update } = yargs
@@ -42,29 +35,6 @@ const { file, sql, dry: dryRun, limit, update } = yargs
     .help()
     .argv;
 
-console.info(`
---------------------------------------------------
---------------------- CONFIG ---------------------
-
-name\t\tdescription
---file\t\tabsolute path to csv file to parse
---limit\t\tamount of records in one bulk SQL qeuery
---sql\t\tprint out SQL queries
---dry\t\tdry run do not execute SQL
---update\tflush update [do not drop/restore indexes, useful with small csv files]
-
---------------------------------------------------
-database connection info:
-host: \t\t${process.env.DB_HOSTNAME}
-port: \t\t${process.env.DB_PORT}
-database: \t${process.env.DB_NAME}
-dialect: \t${process.env.DB_DIALECT}
-
---------------------------------------------------
-
-files to parse: ${file}
-`);
-
 if (!file || !fs.existsSync(file)) {
     console.error(`ERROR: NO FILE TO PARSE OR IT DO NOT EXISTS`);
     console.error(`ensure that you pass file's absolute path using --file=%PATH%`);
@@ -74,19 +44,19 @@ if (!file || !fs.existsSync(file)) {
 }
 
 const logging = !!sql && console.log;
-const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
-    async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
+const migrate = composeMigrationRunner(OperationMarker.postcodes, orm);
+const persist = composePersist(dryRun, { logging, updateOnDuplicate: ['lat', 'lng'] });
+
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
+const conditionIndexDrop = (!dryRun && !update);
 
 (async () => {
-    performance.mark();
-
     const queue = createQueue();
     const parser = createCSVParser(file);
 
-    output.messageIndexDrop(!dryRun && !update);
-    (!dryRun && !update) && await executeMigrations(MigrationsDirection.down);
+    output.messageIndexDrop(conditionIndexDrop);
+    conditionIndexDrop && await migrate.down();
 
     const postcodes: Partial<PostcodeType>[] = [];
     const postcoreStore: Set<string> = new Set();
@@ -102,14 +72,13 @@ const performance = new Performance(output);
             .then((data) => (data as Partial<PostcodeType>[]).forEach(({ postcode }) => postcoreStore.add(postcode))),
     ]);
 
-    performance.mark();
-
     let processedInvalidRecords = 0;
 
     const outputProcessingInfo = (final?: boolean) => {
         output.sections[1] = output.processingInfo(parser.info.records, processedInvalidRecords, postcodes.length, queue, final);
     }
 
+    performance.mark();
     for await (const row of parser) {
         const [postcode, _status, _2, _3, _4, _5, _6, lat, lng] = row;
 
@@ -140,10 +109,8 @@ const performance = new Performance(output);
             if (queue.size > queue.concurrency) {
                 output.messageCatchUpWithSQLQueue(!dryRun);
 
-                // await queue.onSizeLessThan(concurrency);
                 await job;
-
-                output.sections.length = 2;
+                output.removeLastMessage();
             }
         }
     }
@@ -155,9 +122,10 @@ const performance = new Performance(output);
 
     output.messageAwaitQueuedSQL(!dryRun);
     await queue.onEmpty();
+    performance.mark();
 
-    output.messageIndexRestore(!dryRun && !update);
-    (!dryRun && !update) && await executeMigrations(MigrationsDirection.up);
+    output.messageIndexRestore(conditionIndexDrop);
+    conditionIndexDrop && await migrate.up();
 
     performance.mark(0);
     process.exit(0);
