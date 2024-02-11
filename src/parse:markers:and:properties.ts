@@ -142,7 +142,7 @@ const conditionIndexDrop = (!dryRun && !update);
         const date = row[2].split(' ')[0];
         const price = parseInt(row[1], 10);
 
-        const guid = [postcode, [street, paon].filter(Boolean).join(' '), saon].filter(Boolean).join(', ').toUpperCase();
+        const guid = [postcode, street, paon, saon].filter(Boolean).join(',').toUpperCase();
 
         if (!propertiesStore.has(guid)) {
             propertiesStore.set(guid, new Set);
