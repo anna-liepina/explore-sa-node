@@ -24,7 +24,6 @@ app.use(
 const apollo = new ApolloServer({
     typeDefs,
     resolvers,
-    tracing: true,
     context: {
         orm,
         dataloader: compose(orm),
