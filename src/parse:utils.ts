@@ -53,7 +53,7 @@ export const composeSQLPersist = (dryRun?: boolean, options?: BulkCreateOptions)
 
 export const composeNoSQLPersist = (dryRun?: boolean, options?: BulkCreateOptions) => 
     (collection: Collection<any>, entities: Record<string, any>[]) =>
-        async () => (!dryRun && collection.insertMany(entities);
+        async () => (!dryRun && collection.insertMany(entities));
 
 export const createQueue = () => new PQueue({ concurrency: os.cpus().length });
 export const createCSVParser = (path: string, options: csv.Options = {}) =>
