@@ -49,7 +49,10 @@ export default (sequelize: Sequelize) => {
                 primaryKey: true,
                 autoIncrement: true,
             },
-            guid: DataTypes.STRING,
+            guid: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
             price: DataTypes.INTEGER,
             date: DataTypes.DATEONLY,
         },
