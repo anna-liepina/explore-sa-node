@@ -21,7 +21,6 @@ export default {
         }
 
         type Property {
-            id: ID!
             postcode: Postcode
         # Property Type. D = Detached, S = Semi-Detached, T = Terraced, F = Flats/Maisonettes, O = Other
             propertyType: String
@@ -47,7 +46,7 @@ export default {
                 return orm.Property.findAll({
                     where: {
                         postcode: {
-                            [orm.Sequelize.Op.like]: `${postcodePattern}%`,
+                            [orm.Sequelize.Op.startsWith]: postcodePattern,
                         },
                     },
                     offset,
