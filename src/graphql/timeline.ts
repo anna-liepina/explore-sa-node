@@ -33,7 +33,7 @@ export default {
 
                 if (postcodePattern) {
                     where.postcode[orm.Sequelize.Op.or].push({
-                        [orm.Sequelize.Op.like]: `${postcodePattern}%`
+                        [orm.Sequelize.Op.startsWith]: postcodePattern
                     });
                 }
 

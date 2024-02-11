@@ -26,12 +26,12 @@ export default {
                     where[orm.Sequelize.Op.or] = [
                         {
                             area: {
-                                [orm.Sequelize.Op.like]: `${postcodePattern}%`,
+                                [orm.Sequelize.Op.startsWith]: postcodePattern,
                             },
                         },
                         {
                             city: {
-                                [orm.Sequelize.Op.like]: `${postcodePattern}%`,
+                                [orm.Sequelize.Op.startsWith]: postcodePattern,
                             },
                         }
                     ];
