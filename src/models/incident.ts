@@ -24,8 +24,6 @@ export default (sequelize: Sequelize) => {
             ...coordinateFields(),
             type: DataTypes.STRING,
             outcome: DataTypes.STRING,
-            creator: DataTypes.STRING,
-            assignee: DataTypes.STRING,
         },
         {
             tableName: 'incidents',
