@@ -40,24 +40,6 @@ const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]
 const output = new Output(` 📊 processing timelines series`);
 const performance = new Performance(output);
 
-console.info(`
---------------------------------------------------
---------------------- CONFIG ---------------------
-
-name\t\tdescription
---file\t\tabsolute path to csv file to parse
---limit\t\tamount of records in one bulk SQL qeuery
---sql\t\tprint out SQL queries
---dry\t\tdry run do not execute SQL
-
---------------------------------------------------
-database connection info:
-host: \t\t${process.env.DB_HOSTNAME}
-port: \t\t${process.env.DB_PORT}
-database: \t${process.env.DB_NAME}
-dialect: \t${process.env.DB_DIALECT}
-`);
-
 (async () => {
     performance.mark();
 
