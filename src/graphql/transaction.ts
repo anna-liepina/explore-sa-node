@@ -28,7 +28,7 @@ export default {
 
                 if (postcodePattern) {
                     where.guid = {
-                        [orm.Sequelize.Op.like]: `${postcodePattern}%`,
+                        [orm.Sequelize.Op.startsWith]: postcodePattern,
                     }
                 }
 
