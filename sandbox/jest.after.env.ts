@@ -11,11 +11,14 @@ const server = new ApolloServer({
     context: () => ({ orm, dataloader: compose(orm) }),
 });
 
-const { query, mutate } = createTestClient(server);
-
+// const { query, mutate } = createTestClient(server);
+const query = (query: string, variables?: Record<string, any>) => server.executeOperation({
+    query,
+    variables,
+});
 global.server = server;
 global.query = query;
-global.mutate = mutate;
+// global.mutate = mutate;
 global.orm = orm;
 
 afterAll(() => {
