@@ -37,29 +37,6 @@ const { file, sql, dry: dryRun, limit, update } = yargs
     .help()
     .argv;
 
-console.info(`
---------------------------------------------------
---------------------- CONFIG ---------------------
-
-name\t\tdescription
---file\t\tabsolute path to csv file to parse
---limit\t\tamount of records in one bulk SQL qeuery
---sql\t\tprint out SQL queries
---dry\t\tdry run do not execute SQL
---update\tflush update [do not drop/restore indexes, useful with small csv files]
-
---------------------------------------------------
-database connection info:
-host: \t\t${process.env.DB_HOSTNAME}
-port: \t\t${process.env.DB_PORT}
-database: \t${process.env.DB_NAME}
-dialect: \t${process.env.DB_DIALECT}
-
---------------------------------------------------
-
-files to parse: ${file}
-`);
-
 if (!file || !fs.existsSync(file)) {
     console.error(`ERROR: NO FILE TO PARSE OR IT DO NOT EXISTS`);
     console.error(`ensure that you pass file's absolute path using --file=%PATH%`);
@@ -78,8 +55,6 @@ const performance = new Performance(output);
 const conditionIndexDrop = (!dryRun && !update);
 
 (async () => {
-    performance.mark();
-
     const queue = createQueue();
     const parser = createCSVParser(file);
 
@@ -150,6 +125,7 @@ const conditionIndexDrop = (!dryRun && !update);
 
     output.messageAwaitQueuedSQL(!dryRun);
     await queue.onEmpty();
+    performance.mark();
 
     output.messageIndexRestore(conditionIndexDrop);
     conditionIndexDrop && await migrate.up();

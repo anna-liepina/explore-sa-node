@@ -40,29 +40,6 @@ const { path: _path, sql, dry: dryRun, limit, update } = yargs
     .help()
     .argv;
 
-console.info(`
---------------------------------------------------
---------------------- CONFIG ---------------------
-
-name\t\tdescription
---path\t\tabsolute path to csv file to parse
---limit\t\tamount of records in one bulk SQL qeuery
---sql\t\tprint out SQL queries
---dry\t\tdry run do not execute SQL
---update\tflush update [do not drop/restore indexes, useful with small csv files]
-
---------------------------------------------------
-database connection info:
-host: \t\t${process.env.DB_HOSTNAME}
-port: \t\t${process.env.DB_PORT}
-database: \t${process.env.DB_NAME}
-dialect: \t${process.env.DB_DIALECT}
-
---------------------------------------------------
-
-files to parse: ${_path}
-`);
-
 function scanDirectory(directoryPath: string): string[] {
     const result: string[] = [];
   
@@ -110,16 +87,13 @@ const performance = new Performance(output);
 const conditionIndexDrop = (!dryRun && !update);
 
 (async () => {
-    performance.mark();
+    const queue = createQueue();
 
     output.messageIndexDrop(conditionIndexDrop);
     conditionIndexDrop && await migrate.down();
 
     let processedInvalidRecords = 0;
     let processedRecords = 0;
-    let iter = 0;
-
-    const queue = createQueue();
 
     performance.mark();
 
@@ -231,7 +205,6 @@ const conditionIndexDrop = (!dryRun && !update);
             }
 
             if (incidents.length === limit) {
-                iter++;
                 processedRecords += incidents.length;
 
                 queue.add(persist(orm.Marker, [...markers]));

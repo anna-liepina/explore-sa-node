@@ -12,7 +12,6 @@ import { TimelineType } from './models/timeline';
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
 
-
 //@ts-ignore
 const { sql, dry: dryRun, limit } = yargs
     .option('limit', {
@@ -23,7 +22,6 @@ const { sql, dry: dryRun, limit } = yargs
     .option('sql', {
         type: 'boolean',
         description: 'print out SQL queries',
-        default: false,
     })
     .option('dry', {
         type: 'boolean',
@@ -40,26 +38,8 @@ const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]
 const output = new Output(` 📊 processing timelines series`);
 const performance = new Performance(output);
 
-console.info(`
---------------------------------------------------
---------------------- CONFIG ---------------------
-
-name\t\tdescription
---file\t\tabsolute path to csv file to parse
---limit\t\tamount of records in one bulk SQL qeuery
---sql\t\tprint out SQL queries
---dry\t\tdry run do not execute SQL
-
---------------------------------------------------
-database connection info:
-host: \t\t${process.env.DB_HOSTNAME}
-port: \t\t${process.env.DB_PORT}
-database: \t${process.env.DB_NAME}
-dialect: \t${process.env.DB_DIALECT}
-`);
-
 (async () => {
-    performance.mark();
+    const queue = createQueue();
 
     output.messageIndexDrop(!dryRun);
     !dryRun && await migrate.down();
@@ -86,8 +66,6 @@ dialect: \t${process.env.DB_DIALECT}
         logging,
     }) as Partial<{ area: string }>[];
     performance.mark();
- 
-    const queue = createQueue();
  
     let processedRecords = 0;
     let proccessedArea = '';
@@ -150,7 +128,7 @@ dialect: \t${process.env.DB_DIALECT}
                 series.length = 0;
 
                 if (queue.size > queue.concurrency) {
-                    output.messageAwaitQueuedSQL(!dryRun);
+                    output.messageCatchUpWithSQLQueue(!dryRun);
     
                     await job;
                     output.removeLastMessage();
