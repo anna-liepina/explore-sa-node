@@ -21,7 +21,6 @@ export default {
         }
 
         type Property {
-            id: ID!
             postcode: Postcode
         # Property Type. D = Detached, S = Semi-Detached, T = Terraced, F = Flats/Maisonettes, O = Other
             propertyType: String
