@@ -2,7 +2,6 @@ import type SequelizeType from "sequelize/types/sequelize";
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
 
-// will be fixed later with dynamic import and typescript
 import type { AreaType } from './models/area';
 import type { PostcodeType } from './models/postcode';
 import type { PropertyType } from './models/property';
