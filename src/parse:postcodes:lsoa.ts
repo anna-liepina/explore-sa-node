@@ -4,7 +4,7 @@ import orm from './orm';
 import {
     createQueue,
     createCSVParser,
-    composePersist,
+    composeSQLPersist,
     Output,
     Performance,
 } from './parse:utils';
@@ -38,7 +38,7 @@ if (!file || !fs.existsSync(file)) {
 }
 
 const logging = !!sql && console.log;
-const persist = composePersist(dryRun, { logging, updateOnDuplicate: ['lsoa'] });
+const persist = composeSQLPersist(dryRun, { logging, updateOnDuplicate: ['lsoa'] });
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
 
