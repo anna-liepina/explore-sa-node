@@ -1,5 +1,6 @@
 import fs from "fs";
 import os from "os";
+import path from "path";
 import { performance, PerformanceObserver } from "perf_hooks";
 import csv from "csv-parse";
 import PQueue from "p-queue";
@@ -18,24 +19,28 @@ export enum OperationMarker {
     markers = "parse:markers",
 }
 
-export const composeMigrationRunner =
-    (operationMarker: OperationMarker, orm: ORM) =>
-        async (direction: MigrationsDirection) => {
-            const executeFiles = async (path: string) => {
-                const files = fs.readdirSync(path);
-                for (const file of files) {
-                    const obj = require(require.resolve(`${path}/${file}`));
+export const composeMigrationRunner = (operationMarker: OperationMarker, orm: ORM) => {
+    const execute = async (direction: MigrationsDirection) => {
+        const executeFiles = async (filePath: string) => {
+            for (const file of fs.readdirSync(filePath)) {
+                const obj = require(path.join(filePath, file));
 
-                    if (!obj[operationMarker]) {
-                        continue;
-                    }
-
-                    await obj[direction](orm.sequelize.getQueryInterface(), orm.Sequelize);
+                if (!obj[operationMarker]) {
+                    continue;
                 }
-            };
 
-            return executeFiles(`${__dirname}/../database/migrations`);
+                await obj[direction](orm.sequelize.getQueryInterface(), orm.Sequelize);
+            }
         };
+
+        return executeFiles(path.join(__dirname, '..', 'database', 'migrations'));
+    };
+
+    return {
+        up: async () => execute(MigrationsDirection.up),
+        down: async () => execute(MigrationsDirection.down)
+    }
+}
 
 export const createQueue = () => new PQueue({ concurrency: os.cpus().length });
 export const createCSVParser = (path: string, options: csv.Options = {}) =>
@@ -166,32 +171,3 @@ export class Output {
 
     static resolveMessage = (msg: string, executed?: boolean) => `${!executed ? ' [SKIPPED] ': ''} ${msg}`;
 }
-
-/** TO BE REMOVED */
-const updateConsoleLog = (lines: string[]) => {
-    process.stdout.write('\x1Bc');
-    process.stdout.write(lines.join('\n'));
-}
-export const perfObserver2 = (output: Output) =>
-    new PerformanceObserver((items) => {
-        items.getEntries().forEach((o) => {
-            const durationInSec = o.duration / 1000;
-            const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
-
-            updateConsoleLog(output.out(durationInSec, usedMemoryInMB));
-        });
-    });
-
-export const perfObserver = () =>
-    new PerformanceObserver((items) => {
-        items.getEntries().forEach((o) => {
-            const durationInSec = o.duration / 1000;
-            const usedMemoryInMB = process.memoryUsage().heapUsed / 1024 / 1024;
-
-            console.log(`
-PERFORMANCE OBSERVER METRICS
-duration: ${durationInSec.toFixed(2)}s      
-heapsize: ${usedMemoryInMB.toFixed(2)} MB`);
-        });
-    });
-export const composeOperation = composeMigrationRunner;

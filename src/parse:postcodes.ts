@@ -2,20 +2,17 @@ import fs from 'fs';
 import yargs from 'yargs';
 import orm from './orm';
 import {
-    MigrationsDirection,
     OperationMarker,
-    Output,
     createQueue,
     createCSVParser,
     composeMigrationRunner,
+    Output,
     Performance,
 } from './parse:utils';
 import type { PostcodeType } from './models/postcode';
 
 import type Model from "sequelize/types/model";
 import type { ModelStatic } from 'sequelize';
-
-const executeMigrations = composeMigrationRunner(OperationMarker.postcodes, orm);
 
 //@ts-ignore
 const { file, sql, dry: dryRun, limit, update } = yargs
@@ -72,8 +69,10 @@ if (!file || !fs.existsSync(file)) {
 }
 
 const logging = !!sql && console.log;
+const migrate = composeMigrationRunner(OperationMarker.postcodes, orm);
 const persist = (model: ModelStatic<Model<any>>, entities: Record<string, any>[]) =>
     async () => !dryRun && model.bulkCreate(entities, { logging, updateOnDuplicate: ['lat', 'lng'], hooks: false });
+
 const output = new Output(` processing ${file}`);
 const performance = new Performance(output);
 const conditionIndexDrop = (!dryRun && !update);
@@ -85,7 +84,7 @@ const conditionIndexDrop = (!dryRun && !update);
     const parser = createCSVParser(file);
 
     output.messageIndexDrop(conditionIndexDrop);
-    conditionIndexDrop && await executeMigrations(MigrationsDirection.down);
+    conditionIndexDrop && await migrate.down();
 
     const postcodes: Partial<PostcodeType>[] = [];
     const postcoreStore: Set<string> = new Set();
@@ -139,8 +138,7 @@ const conditionIndexDrop = (!dryRun && !update);
                 output.messageCatchUpWithSQLQueue(!dryRun);
 
                 await job;
-
-                output.sections.length = 2;
+                output.removeLastMessage();
             }
         }
     }
@@ -154,7 +152,7 @@ const conditionIndexDrop = (!dryRun && !update);
     await queue.onEmpty();
 
     output.messageIndexRestore(conditionIndexDrop);
-    conditionIndexDrop && await executeMigrations(MigrationsDirection.up);
+    conditionIndexDrop && await migrate.up();
 
     performance.mark(0);
     process.exit(0);
