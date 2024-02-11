@@ -25,7 +25,7 @@ export default {
                 return orm.Postcode.findAll({
                     where: {
                         postcode: {
-                            [orm.Sequelize.Op.like]: `${pattern}%`,
+                            [orm.Sequelize.Op.startsWith]: pattern,
                         },
                     },
                     offset,
