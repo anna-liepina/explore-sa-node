@@ -6,33 +6,37 @@ exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postco
     "date": "2019-03-25",
     "price": 341250,
     "property": {
-      "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
-      "saon": "fe78fa628e2a410375cb37144fbdff5a766fcee3",
-      "street": "PRIZE WALK",
+      "address": "45c7a465a6da7fc33b9d4577cacafa53e849dda6",
     },
   },
   {
     "date": "2019-04-25",
     "price": 375000,
     "property": {
-      "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
-      "saon": "cd435dfdc23e7d95665b678f176329c14ac2af4a",
-      "street": "PRIZE WALK",
+      "address": "dd3c8e0d34ac3fd9dadc294e96ccd1cfa00e599a",
     },
   },
   {
     "date": "2019-04-26",
     "price": 545000,
     "property": {
-      "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
-      "saon": "1b762366cdf7cc97e2764e932f60c0edc61b5e86",
-      "street": "PRIZE WALK",
+      "address": "dea9c5dd93a7c61fa0bcebb9ea9f2814846203d1",
     },
   },
 ]
 `;
 
-exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcodePattern range: 2nd page 1`] = `[]`;
+exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] with postcodePattern range: 2nd page 1`] = `
+[
+  {
+    "date": "2022-09-16",
+    "price": 357500,
+    "property": {
+      "address": "8b7de6d263024ec9713f5279e13aadee8d07f7c8",
+    },
+  },
+]
+`;
 
 exports[`GraphQL: Transaction transactionSearch [presets: perPage 3] within date range 1`] = `
 [

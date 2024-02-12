@@ -3,8 +3,8 @@
 exports[`GraphQL: Postcode postcodeSearch [presets: perPage 3] by exact postcode 1`] = `
 [
   {
-    "lat": 51.547915089,
-    "lng": -0.00743124,
+    "lat": 51.547896,
+    "lng": -0.007389,
     "postcode": "E20 1AA",
   },
 ]
@@ -13,8 +13,8 @@ exports[`GraphQL: Postcode postcodeSearch [presets: perPage 3] by exact postcode
 exports[`GraphQL: Postcode postcodeSearch [presets: perPage 3] by wildcard 1`] = `
 [
   {
-    "lat": 51.547915089,
-    "lng": -0.00743124,
+    "lat": 51.547896,
+    "lng": -0.007389,
     "postcode": "E20 1AA",
   },
   {
@@ -23,7 +23,7 @@ exports[`GraphQL: Postcode postcodeSearch [presets: perPage 3] by wildcard 1`] =
     "postcode": "E20 1AB",
   },
   {
-    "lat": 51.54796467,
+    "lat": 51.547981,
     "lng": -0.007587,
     "postcode": "E20 1AD",
   },
@@ -38,13 +38,13 @@ exports[`GraphQL: Postcode postcodeSearch [presets: perPage 3] by wildcard: 2nd 
     "postcode": "E20 1AE",
   },
   {
-    "lat": 51.547427816,
-    "lng": -0.006803491,
+    "lat": 51.547473,
+    "lng": -0.006801,
     "postcode": "E20 1AF",
   },
   {
-    "lat": 51.546690968,
-    "lng": -0.006835695,
+    "lat": 51.546673,
+    "lng": -0.006836,
     "postcode": "E20 1AG",
   },
 ]

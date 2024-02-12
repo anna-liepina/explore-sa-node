@@ -3,12 +3,10 @@
 exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildcard 1`] = `
 [
   {
-    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "address": "dd3c8e0d34ac3fd9dadc294e96ccd1cfa00e599a",
     "postcode": {
       "postcode": "E20 1AB",
     },
-    "saon": "cd435dfdc23e7d95665b678f176329c14ac2af4a",
-    "street": "PRIZE WALK",
     "transactions": [
       {
         "date": "2019-04-25",
@@ -16,12 +14,10 @@ exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildc
     ],
   },
   {
-    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "address": "dea9c5dd93a7c61fa0bcebb9ea9f2814846203d1",
     "postcode": {
       "postcode": "E20 1AB",
     },
-    "saon": "1b762366cdf7cc97e2764e932f60c0edc61b5e86",
-    "street": "PRIZE WALK",
     "transactions": [
       {
         "date": "2019-04-26",
@@ -29,12 +25,10 @@ exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildc
     ],
   },
   {
-    "paon": "cc551cd9b04a9cc3da0fd21025e8db42828d5299",
+    "address": "45c7a465a6da7fc33b9d4577cacafa53e849dda6",
     "postcode": {
       "postcode": "E20 1AB",
     },
-    "saon": "fe78fa628e2a410375cb37144fbdff5a766fcee3",
-    "street": "PRIZE WALK",
     "transactions": [
       {
         "date": "2019-03-25",
@@ -47,41 +41,35 @@ exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildc
 exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildcard: 2nd page 1`] = `
 [
   {
-    "paon": "50cd339e52b0e796c362d9937e272fd83223ba57",
+    "address": "8b7de6d263024ec9713f5279e13aadee8d07f7c8",
+    "postcode": {
+      "postcode": "E20 1AB",
+    },
+    "transactions": [
+      {
+        "date": "2022-09-16",
+      },
+    ],
+  },
+  {
+    "address": "77ef51b9253e7978202b37dc46113366bcddaa14",
+    "postcode": {
+      "postcode": "E20 1AB",
+    },
+    "transactions": [
+      {
+        "date": "2022-06-06",
+      },
+    ],
+  },
+  {
+    "address": "abceb3e60dc1a7d71b9756bf1ddb58de20cd5002",
     "postcode": {
       "postcode": "E20 1AE",
     },
-    "saon": "NULL",
-    "street": "DE COUBERTIN STREET",
     "transactions": [
       {
         "date": "2017-11-10",
-      },
-    ],
-  },
-  {
-    "paon": "1038a2b94796fb209031e42e5c58fb2ba3056c40",
-    "postcode": {
-      "postcode": "E20 1AQ",
-    },
-    "saon": "82638c43311980a3235cf87d59e533ecacff0567",
-    "street": "LIBERTY BRIDGE ROAD",
-    "transactions": [
-      {
-        "date": "2017-11-28",
-      },
-    ],
-  },
-  {
-    "paon": "1038a2b94796fb209031e42e5c58fb2ba3056c40",
-    "postcode": {
-      "postcode": "E20 1AQ",
-    },
-    "saon": "6f8392f9a202ccef161b4b8b2fd6148581b7739d",
-    "street": "LIBERTY BRIDGE ROAD",
-    "transactions": [
-      {
-        "date": "2018-05-09",
       },
     ],
   },
@@ -91,47 +79,41 @@ exports[`GraphQL: Property propertySearch [presets: perPage 3] by postcode wildc
 exports[`GraphQL: Property propertySearchInRange [presets: perPage 2] by coordinates, in kilometers 1`] = `
 [
   {
-    "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
+    "address": "dd3c8e0d34ac3fd9dadc294e96ccd1cfa00e599a",
     "postcode": {
-      "lat": 51.540931,
-      "lng": -0.007492,
-      "postcode": "E20 1HR",
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
     },
-    "saon": "a165fbd61c277745f187eaac7182d9c05d0d1171",
-    "street": "GLASSHOUSE GARDENS",
     "transactions": [
       {
-        "date": "2016-12-09",
+        "date": "2019-04-25",
       },
     ],
   },
   {
-    "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
+    "address": "dea9c5dd93a7c61fa0bcebb9ea9f2814846203d1",
     "postcode": {
-      "lat": 51.540931,
-      "lng": -0.007492,
-      "postcode": "E20 1HR",
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
     },
-    "saon": "7f03f3f2febc46f3fa832d98251b0c98f64bc19b",
-    "street": "GLASSHOUSE GARDENS",
     "transactions": [
       {
-        "date": "2016-12-06",
+        "date": "2019-04-26",
       },
     ],
   },
   {
-    "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
+    "address": "45c7a465a6da7fc33b9d4577cacafa53e849dda6",
     "postcode": {
-      "lat": 51.540931,
-      "lng": -0.007492,
-      "postcode": "E20 1HR",
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
     },
-    "saon": "a29e971b5176a9fadde4eb86c851c7d66de8004b",
-    "street": "GLASSHOUSE GARDENS",
     "transactions": [
       {
-        "date": "2016-12-02",
+        "date": "2019-03-25",
       },
     ],
   },
@@ -141,32 +123,28 @@ exports[`GraphQL: Property propertySearchInRange [presets: perPage 2] by coordin
 exports[`GraphQL: Property propertySearchInRange [presets: perPage 2] by coordinates, in miles 1`] = `
 [
   {
-    "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
+    "address": "dd3c8e0d34ac3fd9dadc294e96ccd1cfa00e599a",
     "postcode": {
-      "lat": 51.540931,
-      "lng": -0.007492,
-      "postcode": "E20 1HR",
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
     },
-    "saon": "a165fbd61c277745f187eaac7182d9c05d0d1171",
-    "street": "GLASSHOUSE GARDENS",
     "transactions": [
       {
-        "date": "2016-12-09",
+        "date": "2019-04-25",
       },
     ],
   },
   {
-    "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
+    "address": "dea9c5dd93a7c61fa0bcebb9ea9f2814846203d1",
     "postcode": {
-      "lat": 51.540931,
-      "lng": -0.007492,
-      "postcode": "E20 1HR",
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
     },
-    "saon": "7f03f3f2febc46f3fa832d98251b0c98f64bc19b",
-    "street": "GLASSHOUSE GARDENS",
     "transactions": [
       {
-        "date": "2016-12-06",
+        "date": "2019-04-26",
       },
     ],
   },
@@ -176,32 +154,28 @@ exports[`GraphQL: Property propertySearchInRange [presets: perPage 2] by coordin
 exports[`GraphQL: Property propertySearchInRange [presets: perPage 2] by coordinates, in miles: 2nd page 1`] = `
 [
   {
-    "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
+    "address": "45c7a465a6da7fc33b9d4577cacafa53e849dda6",
     "postcode": {
-      "lat": 51.540931,
-      "lng": -0.007492,
-      "postcode": "E20 1HR",
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
     },
-    "saon": "a29e971b5176a9fadde4eb86c851c7d66de8004b",
-    "street": "GLASSHOUSE GARDENS",
     "transactions": [
       {
-        "date": "2016-12-02",
+        "date": "2019-03-25",
       },
     ],
   },
   {
-    "paon": "56a4db1cf753ad6f5238d6aaa2ec7f60f4463768",
+    "address": "8b7de6d263024ec9713f5279e13aadee8d07f7c8",
     "postcode": {
-      "lat": 51.540931,
-      "lng": -0.007492,
-      "postcode": "E20 1HR",
+      "lat": 51.548136,
+      "lng": -0.007724,
+      "postcode": "E20 1AB",
     },
-    "saon": "7224f997fc148baa0b7f81c1eda6fcc3fd003db0",
-    "street": "GLASSHOUSE GARDENS",
     "transactions": [
       {
-        "date": "2016-11-18",
+        "date": "2022-09-16",
       },
     ],
   },

@@ -26,22 +26,22 @@ exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] by exact postcode
 exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] by postcode wildcard [::pattern] 1`] = `
 [
   {
-    "avg": 108175,
+    "avg": 229400,
     "count": 1,
-    "date": "2016-12-01",
-    "postcode": "E20 1AS",
+    "date": "2007-08-01",
+    "postcode": "E20",
   },
   {
-    "avg": 108175,
+    "avg": 100000,
     "count": 1,
-    "date": "2016-12-01",
-    "postcode": "E20 1AS",
+    "date": "2013-10-01",
+    "postcode": "E20",
   },
   {
-    "avg": 322240,
-    "count": 1,
-    "date": "2017-07-01",
-    "postcode": "E20 1AR",
+    "avg": 127500,
+    "count": 2,
+    "date": "2013-12-01",
+    "postcode": "E20",
   },
 ]
 `;
@@ -52,19 +52,19 @@ exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] in date range [::
     "avg": 100000,
     "count": 1,
     "date": "2013-10-01",
-    "postcode": "E20 1EN",
-  },
-  {
-    "avg": 100000,
-    "count": 1,
-    "date": "2013-10-01",
     "postcode": "E20",
   },
   {
-    "avg": 100000,
-    "count": 1,
-    "date": "2013-10-01",
-    "postcode": "E20 1EN",
+    "avg": 127500,
+    "count": 2,
+    "date": "2013-12-01",
+    "postcode": "E20",
+  },
+  {
+    "avg": 755685,
+    "count": 3,
+    "date": "2015-10-01",
+    "postcode": "E20",
   },
 ]
 `;
@@ -75,19 +75,19 @@ exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] without criteria 
     "avg": 229400,
     "count": 1,
     "date": "2007-08-01",
-    "postcode": "E20 1BU",
-  },
-  {
-    "avg": 229400,
-    "count": 1,
-    "date": "2007-08-01",
     "postcode": "E20",
   },
   {
-    "avg": 229400,
+    "avg": 100000,
     "count": 1,
-    "date": "2007-08-01",
-    "postcode": "E20 1BU",
+    "date": "2013-10-01",
+    "postcode": "E20",
+  },
+  {
+    "avg": 127500,
+    "count": 2,
+    "date": "2013-12-01",
+    "postcode": "E20",
   },
 ]
 `;
@@ -95,22 +95,22 @@ exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] without criteria 
 exports[`GraphQL: Timeline timelineSearch [presets: perPage 3] without criteria: 2nd page 1`] = `
 [
   {
-    "avg": 100000,
-    "count": 1,
-    "date": "2013-10-01",
-    "postcode": "E20 1EN",
-  },
-  {
-    "avg": 100000,
-    "count": 1,
-    "date": "2013-10-01",
+    "avg": 755685,
+    "count": 3,
+    "date": "2015-10-01",
     "postcode": "E20",
   },
   {
-    "avg": 100000,
+    "avg": 745000,
     "count": 1,
-    "date": "2013-10-01",
-    "postcode": "E20 1EN",
+    "date": "2015-11-01",
+    "postcode": "E20",
+  },
+  {
+    "avg": 715000,
+    "count": 2,
+    "date": "2015-12-01",
+    "postcode": "E20",
   },
 ]
 `;
