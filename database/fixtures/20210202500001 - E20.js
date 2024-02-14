@@ -19,7 +19,8 @@ const tables = [
         SELECT
             postcode,
             lat,
-            lng
+            lng,
+            lsoa
         FROM
             postcodes
         WHERE
@@ -30,19 +31,21 @@ const tables = [
         SELECT
             CONCAT(
                 postcode,
-                '-',
-                IF(street IS NULL OR street = '', '', street),
-                IF(paon IS NULL OR paon = '', '', CONCAT(' ', SHA1(paon))),
-                IF(saon IS NULL OR saon = '', '', CONCAT('-', SHA1(saon)))
+                ', ',
+                SHA1(
+                    CONCAT(
+                        IF(street IS NULL OR street = '', '', street),
+                        IF(paon IS NULL OR paon = '', '', paon),
+                        IF(saon IS NULL OR saon = '', '', saon)
+                    )
+                )
             ) AS guid,
-            postcode,
-            SHA1(paon) AS paon,
-            SHA1(saon) AS saon,
-            street
+            postcode
         FROM
-            properties AS a
+            properties
         WHERE
             postcode LIKE "E20%"
+		LIMIT 100000
     */
     'properties',
     /**
@@ -61,10 +64,14 @@ const tables = [
         SELECT
             CONCAT(
                 postcode,
-                '-',
-                IF(street IS NULL OR street = '', '', street),
-                IF(paon IS NULL OR paon = '', '', CONCAT(' ', SHA1(paon))),
-                IF(saon IS NULL OR saon = '', '', CONCAT('-', SHA1(saon)))
+                ', ',
+                SHA1(
+                    CONCAT(
+                        IF(street IS NULL OR street = '', '', street),
+                        IF(paon IS NULL OR paon = '', '', paon),
+                        IF(saon IS NULL OR saon = '', '', saon)
+                    )
+                )
             ) AS guid,
             price,
             date

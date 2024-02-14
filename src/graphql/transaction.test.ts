@@ -43,7 +43,7 @@ describe('GraphQL: Transaction', () => {
             expect(data).toMatchSnapshot();
         });
 
-        /** there are only 3 results with this postcode, which should fall on 1st page */
+        /** there are only 5 results with this postcode, 3 of which should fall on 1st page */
         it(`with postcodePattern range: 1st page`, async () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
@@ -52,9 +52,7 @@ describe('GraphQL: Transaction', () => {
                         price
                         date
                         property {
-                            street
-                            paon
-                            saon
+                            address
                         }
                     }
                 }`
@@ -63,18 +61,16 @@ describe('GraphQL: Transaction', () => {
             expect(data).toMatchSnapshot();
         });
 
-        /** there are only 3 results with this postcode, which should fall on 1st page */
+        /** there are only 4 results with this postcode, which should fall on 1st page */
         it(`with postcodePattern range: 2nd page`, async () => {
             const { data: { transactionSearch: data } } = await query({
                 query: `
                 {
-                    transactionSearch(postcodePattern: "E20 1AB", perPage: 3, page: 2) {
+                    transactionSearch(postcodePattern: "E20 1AB", perPage: 4, page: 2) {
                         price
                         date
                         property {
-                            street
-                            paon
-                            saon
+                            address
                         }
                     }
                 }`

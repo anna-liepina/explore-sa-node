@@ -6,9 +6,7 @@ describe('GraphQL: Property', () => {
                 query: `
                 {
                     propertySearch(postcodePattern: "E20", perPage: 3) {
-                        saon
-                        paon
-                        street
+                        address
                         postcode {
                             postcode
                         }
@@ -27,9 +25,7 @@ describe('GraphQL: Property', () => {
                 query: `
                 {
                     propertySearch(postcodePattern: "E20", perPage: 3, page: 2) {
-                        saon
-                        paon
-                        street
+                        address
                         postcode {
                             postcode
                         }
@@ -57,9 +53,7 @@ describe('GraphQL: Property', () => {
                         range: 10,
                         perPage: 3
                     ) {
-                        saon
-                        paon
-                        street
+                        address
                         postcode {
                             postcode
                             lat
@@ -88,9 +82,7 @@ describe('GraphQL: Property', () => {
                         range: 10,
                         perPage: 2
                     ) {
-                        saon
-                        paon
-                        street
+                        address
                         postcode {
                             postcode
                             lat
@@ -120,9 +112,7 @@ describe('GraphQL: Property', () => {
                         perPage: 2,
                         page: 2
                     ) {
-                        saon
-                        paon
-                        street
+                        address
                         postcode {
                             postcode
                             lat
