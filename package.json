@@ -15,16 +15,17 @@
     "dotenv": "^16.3.0",
     "graphql": "^15.5.0",
     "lodash": "^4.17.21",
+    "mongodb": "^6.3.0",
     "mysql2": "^2.2.5",
     "p-queue": "^6.6.2",
     "sequelize": "^6.5.0",
-    "tedious": "^16.4.1",
     "yargs": "^16.2.0"
   },
   "optionalDependencies": {
-    "sqlite3": "^5.0.0",
     "pg": "^8.5.0",
-    "pg-hstore": "^2.3.3"
+    "pg-hstore": "^2.3.3",
+    "sqlite3": "^5.0.0",
+    "tedious": "^16.4.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.0",
@@ -49,6 +50,7 @@
     "parse:incidents": "tsc && node -r dotenv/config ./build/parse:markers:and:incidents",
     "parse:areas": "tsc && node -r dotenv/config ./build/parse:areas",
     "parse:timelines": "tsc && node -r dotenv/config ./build/parse:timelines",
+    "parse:mongo": "tsc && node -r dotenv/config ./build/parse:mongo",
     "build": "tsc",
     "start:serve": "node -r dotenv/config ./build/app.js",
     "start": "tsc-watch --onSuccess \"node -r dotenv/config --inspect=0.0.0.0 ./build/app.js\"",

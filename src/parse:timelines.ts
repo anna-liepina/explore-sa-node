@@ -4,7 +4,7 @@ import {
     OperationMarker,
     createQueue,
     composeMigrationRunner,
-    composePersist,
+    composeSQLPersist,
     Output,
     Performance,
 } from './parse:utils';
@@ -30,7 +30,7 @@ const { sql, dry: dryRun, limit } = yargs
 
 const logging = !!sql && console.log;
 const migrate = composeMigrationRunner(OperationMarker.timeline, orm);
-const persist = composePersist(dryRun, { logging });
+const persist = composeSQLPersist(dryRun, { logging });
 
 const output = new Output(` 📊 processing timelines series`);
 const performance = new Performance(output);

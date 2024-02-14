@@ -7,7 +7,7 @@ import {
     createQueue,
     createCSVParser,
     composeMigrationRunner,
-    composePersist,
+    composeSQLPersist,
     Output,
     Performance,
 } from './parse:utils';
@@ -77,7 +77,7 @@ if (!files.length) {
 
 const logging = !!sql && console.log;
 const migrate = composeMigrationRunner(OperationMarker.incidents, orm);
-const persist = composePersist(dryRun, { logging });
+const persist = composeSQLPersist(dryRun, { logging });
 
 const output = new Output(` processing ${_path}`);
 const performance = new Performance(output);
