@@ -2,7 +2,7 @@ import yargs from 'yargs';
 import orm from './orm';
 import {
     createQueue,
-    composePersist,
+    composeSQLPersist,
     Output,
     Performance,
 } from './parse:utils';
@@ -27,7 +27,7 @@ const { sql, dry: dryRun, limit } = yargs
     .argv;
 
 const logging = !!sql && console.log;
-const persist = composePersist(dryRun, { logging, ignoreDuplicates: true });
+const persist = composeSQLPersist(dryRun, { logging, ignoreDuplicates: true });
 const output = new Output(` processing postcode areas`);
 const performance = new Performance(output);
 
