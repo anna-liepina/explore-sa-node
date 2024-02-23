@@ -4,12 +4,12 @@ import path from "path";
 import { performance, PerformanceObserver } from "perf_hooks";
 import csv from "csv-parse";
 import PQueue from "p-queue";
-import type { ORM } from "./orm.types";
-import type { BulkCreateOptions } from "sequelize";
 
 import type Model from "sequelize/types/model";
-import type { ModelStatic } from 'sequelize';
+import type { BulkCreateOptions, ModelStatic } from 'sequelize';
 import type { Collection } from 'mongodb';
+
+import type { ORM } from "./orm.types";
 
 export enum MigrationsDirection {
     up = "up",
