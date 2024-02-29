@@ -1,24 +1,17 @@
 import type { Sequelize } from 'sequelize';
 import { DataTypes } from 'sequelize';
 
-import type { IdentifiedModel } from "../orm.types";
-
 export type TimelineType = {
     postcode: string,
     date: string,
     avg: number,
     count: number,
-} & IdentifiedModel;
+};
 
 export default (sequelize: Sequelize) => {
     const model = sequelize.define(
         'Timeline',
         {
-            id: {
-                type: DataTypes.INTEGER,
-                primaryKey: true,
-                autoIncrement: true,
-            },
             postcode: {
                 type: DataTypes.STRING(9),
                 primaryKey: true,
@@ -35,6 +28,7 @@ export default (sequelize: Sequelize) => {
             timestamps: false,
         }
     );
+    model.removeAttribute('id');
 
     //@ts-ignore
     model.associate = ({ Postcode, Timeline }) => {

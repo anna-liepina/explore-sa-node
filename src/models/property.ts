@@ -1,9 +1,8 @@
 import type { Sequelize } from 'sequelize';
 import { DataTypes } from 'sequelize';
 
-import type { GloballyIdentifiedModel, IdentifiedModel } from "../orm.types";
-
 export type PropertyType = {
+    guid: string
     postcode: string,
     propertyType: string,
     propertyForm: string,
@@ -11,17 +10,12 @@ export type PropertyType = {
     saon: string,
     street: string,
     city: string,
-} & GloballyIdentifiedModel & IdentifiedModel;
+};
 
 export default (sequelize: Sequelize) => {
     const model = sequelize.define(
         'Property',
         {
-            id: {
-                type: DataTypes.INTEGER,
-                primaryKey: true,
-                autoIncrement: true,
-            },
             guid: {
                 type: DataTypes.STRING,
                 unique: true,
@@ -49,6 +43,7 @@ export default (sequelize: Sequelize) => {
             timestamps: false,
         }
     );
+    model.removeAttribute('id');
 
     return model;
 };

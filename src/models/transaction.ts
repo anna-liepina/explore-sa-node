@@ -1,11 +1,5 @@
 import type { Sequelize } from 'sequelize';
 import { DataTypes } from 'sequelize';
-import type { GloballyIdentifiedModel, IdentifiedModel } from "../orm.types";
-
-export type TransactionType = {
-    price: number,
-    date: string,
-} & GloballyIdentifiedModel & IdentifiedModel;
 
 // https://www.gov.uk/guidance/about-the-price-paid-data#download-options
 // [
@@ -40,15 +34,16 @@ export type TransactionType = {
                                                 // Note that where a transaction changes category type due to misallocation (as above) it will be deleted from the original category type and added to the correct category with a new transaction unique identifier.
 // ]
 
+export type TransactionType = {
+    guid: string
+    price: number,
+    date: string,
+};
+
 export default (sequelize: Sequelize) => {
     const model = sequelize.define(
         'Transaction',
         {
-            id: {
-                type: DataTypes.INTEGER,
-                primaryKey: true,
-                autoIncrement: true,
-            },
             guid: DataTypes.STRING,
             price: DataTypes.INTEGER,
             date: DataTypes.DATEONLY,
@@ -58,6 +53,7 @@ export default (sequelize: Sequelize) => {
             timestamps: false,
         }
     );
+    model.removeAttribute('id');
 
     //@ts-ignore
     model.associate = ({ Property, Transaction }) => {

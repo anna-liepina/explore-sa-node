@@ -22,11 +22,3 @@ export type ORM = {
     Incident: ModelStatic<Model<IncidentType>>,
     Marker: ModelStatic<Model<MarkerType>>,
 };
-
-export type IdentifiedModel = {
-    id: number
-}
-
-export type GloballyIdentifiedModel = {
-    guid: string
-}

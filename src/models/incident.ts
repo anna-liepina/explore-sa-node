@@ -3,7 +3,6 @@ import { DataTypes } from 'sequelize';
 import { coordinateFields } from './utils';
 
 export type IncidentType = {
-    id: number,
     date: string,
     lat: number,
     lng: number,
@@ -15,11 +14,6 @@ export default (sequelize: Sequelize) => {
     const model = sequelize.define(
         'Incident',
         {
-            id: {
-                type: DataTypes.INTEGER,
-                primaryKey: true,
-                autoIncrement: true,
-            },
             date: DataTypes.DATEONLY,
             ...coordinateFields(),
             type: DataTypes.STRING,
@@ -30,6 +24,7 @@ export default (sequelize: Sequelize) => {
             timestamps: false,
         }
     );
+    model.removeAttribute('id');
 
     return model;
 };
